@@ -1,0 +1,2096 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0d11">
+<title>محاكي الكمين المصري — مركز الرادار</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,0,0">
+<style>
+:root{--bg:#080a0d;--panel:rgba(14,18,23,.96);--panel2:rgba(20,26,33,.98);--line:#2a323c;--line2:#3d4855;--gold:#c9a04a;--gold2:#e0b95a;--green:#4a9a68;--red:#c94a4a;--blue:#4a86b8;--amber:#c99a3a;--txt:#dde4ea;--dim:#8a97a4;--r:8px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:"Segoe UI",Tahoma,"Noto Naskh Arabic",system-ui,sans-serif;user-select:none;-webkit-user-select:none;font-size:14px}
+canvas{display:block;touch-action:none}
+button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer;border:none;background:none}
+input,select{font-family:inherit}
+.hidden{display:none!important}
+.btn{background:linear-gradient(180deg,#232d38,#171f28);border:1px solid var(--line2);border-radius:6px;padding:8px 13px;color:var(--txt);font-weight:600;font-size:13px;transition:.12s;display:inline-flex;align-items:center;gap:5px;justify-content:center}
+.btn:hover{background:linear-gradient(180deg,#2c3a47,#1e2833);border-color:var(--gold)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,#a8842c,#7a5f1e);border-color:#c9a04a;color:#fff}
+.btn.danger{background:linear-gradient(180deg,#7a2828,#4e1818);border-color:#c94a4a}
+.btn.green{background:linear-gradient(180deg,#28603f,#1a3e29);border-color:#4a9a68}
+.btn.blue{background:linear-gradient(180deg,#264c72,#182f48);border-color:#4a86b8}
+.btn.warn{background:linear-gradient(180deg,#8a6320,#5e4214);border-color:#c9a04a}
+.btn.cam-active{background:linear-gradient(180deg,#353b3e,#1b2022);border-color:#d1d7d8;color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.7)}
+.btn.sm{padding:5px 9px;font-size:12px;border-radius:5px}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:11px}
+#loading{position:fixed;inset:0;background:#05080b;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9000;gap:16px}
+#loading h1{font-size:24px;margin:0;color:var(--gold);letter-spacing:1px}
+#loading .bar{width:260px;height:5px;background:#1a242e;border-radius:3px;overflow:hidden}
+#loading .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold2));transition:.25s}
+#loading small{color:var(--dim)}
+#menu{position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#111a26 0%,#05080b 70%);overflow:auto}
+.menu-box{width:min(540px,92vw);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 22px;box-shadow:0 24px 70px rgba(0,0,0,.8)}
+.menu-box h1{margin:0 0 4px;font-size:26px;color:var(--gold);text-align:center}
+.menu-box .sub{text-align:center;color:var(--dim);margin-bottom:20px;font-size:12px;letter-spacing:2px}
+.menu-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px}
+.mstat{background:#0d1419;border:1px solid var(--line);border-radius:7px;padding:7px 10px;display:flex;justify-content:space-between;font-size:12.5px}
+.mstat b{color:var(--gold2)}
+.menu-actions{display:flex;flex-direction:column;gap:8px}
+.menu-actions .btn{padding:12px;font-size:14px;justify-content:center}
+.menu-row{display:flex;gap:8px}
+.menu-row .btn{flex:1}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:100}
+#topbar{position:absolute;top:0;left:0;right:0;height:44px;display:flex;align-items:center;gap:6px;padding:0 10px;background:linear-gradient(180deg,rgba(5,8,12,.95),rgba(5,8,12,.4));z-index:6;pointer-events:auto;flex-wrap:nowrap;overflow-x:auto}
+.hud-chip{display:flex;align-items:center;gap:5px;background:rgba(15,20,26,.9);border:1px solid var(--line);border-radius:5px;padding:4px 9px;font-size:12px;white-space:nowrap;flex:0 0 auto}
+.hud-chip b{color:var(--gold2);font-weight:700;font-family:"Consolas",monospace}
+.hud-chip.good b{color:var(--green)}
+.hud-chip.bad b{color:var(--red)}
+#topbar .spacer{flex:1 1 auto}
+#shiftClock{font-variant-numeric:tabular-nums;color:#fff;font-weight:700;font-family:"Consolas",monospace}
+#radarFrame{position:absolute;top:44px;left:0;right:0;bottom:0;pointer-events:none;border:1px solid rgba(74,134,184,.15);margin:6px;border-radius:6px}
+#radarFrame::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0,transparent 2px,rgba(74,134,184,.04) 2px,rgba(74,134,184,.04) 3px);border-radius:6px}
+#radarGrid{position:absolute;inset:0;opacity:.35;background-image:linear-gradient(rgba(74,134,184,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(74,134,184,.10) 1px,transparent 1px);background-size:80px 80px}
+#radarScan{position:absolute;left:0;right:0;height:120px;background:linear-gradient(180deg,transparent,rgba(74,134,184,.08),transparent);animation:scan 6s linear infinite}
+@keyframes scan{0%{top:-120px}100%{top:100%}}
+#radarCorner{position:absolute;bottom:8px;left:12px;font-family:"Consolas",monospace;font-size:11px;color:rgba(74,134,184,.75);line-height:1.5;z-index:5}
+#radarTR{position:absolute;top:60px;right:14px;font-family:"Consolas",monospace;font-size:11px;color:rgba(74,134,184,.75);text-align:left;line-height:1.5}
+#radarBar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;pointer-events:auto;flex-wrap:wrap;justify-content:center;max-width:94vw;background:rgba(10,14,19,.9);border:1px solid var(--line);border-radius:8px;padding:8px;box-shadow:0 10px 30px rgba(0,0,0,.7);z-index:7}
+#radarBar .btn{padding:9px 13px;font-size:12.5px}
+#vehPanel{position:absolute;top:56px;left:10px;width:250px;max-height:56vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px;pointer-events:auto;font-size:12.5px;z-index:4}
+#vehPanel h4{margin:0 0 7px;font-size:11px;color:var(--dim);letter-spacing:1.5px;font-weight:600;display:flex;justify-content:space-between}
+#vehPanel h4 span{color:#7fbfe0;font-family:"Consolas",monospace;font-weight:400}
+.veh-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;padding:7px 8px;border-radius:5px;border:1px solid transparent;background:#0e141a;margin-bottom:5px;cursor:pointer;transition:.1s;align-items:center}
+.veh-item:hover{background:#16212a;border-color:var(--line2)}
+.veh-item.sel{border-color:var(--gold);background:#1f1a0d}
+.veh-item.fast{border-right:3px solid var(--red)}
+.veh-item .pl{font-family:"Consolas",monospace;font-weight:700;color:#fff;letter-spacing:.5px;direction:ltr;font-size:13px}
+.veh-item .ty{font-size:10.5px;color:var(--dim);margin-top:1px}
+.veh-item .spd{font-family:"Consolas",monospace;font-weight:700;font-size:15px;color:var(--green);text-align:left;min-width:52px}
+.veh-item.fast .spd{color:var(--red)}
+.veh-item .spd small{font-size:9px;color:var(--dim);display:block;font-weight:400}
+.veh-item .badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9.5px;background:var(--red);color:#fff;margin-top:3px}
+#inspect{position:absolute;top:56px;right:10px;bottom:72px;width:min(420px,44vw);background:var(--panel);border:1px solid var(--line);border-radius:10px;display:flex;flex-direction:column;pointer-events:auto;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.7)}
+#inspectHead{padding:10px 12px;border-bottom:1px solid var(--line);background:#0c1218}
+#inspectHead .t1{font-weight:700;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+#inspectHead .t2{font-size:11.5px;color:var(--dim);margin-top:3px;font-family:"Consolas",monospace;direction:ltr;text-align:right}
+#tabs{display:flex;border-bottom:1px solid var(--line);background:#0a1016;overflow-x:auto}
+.tab{flex:1 0 auto;padding:8px 9px;font-size:12px;text-align:center;color:var(--dim);border-bottom:2px solid transparent;white-space:nowrap;cursor:pointer}
+.tab:hover{color:var(--txt);background:#101920}
+.tab.on{color:var(--gold2);border-bottom-color:var(--gold);background:#121a22}
+#inspectBody{flex:1;overflow-y:auto;padding:11px}
+#inspectBody::-webkit-scrollbar{width:7px}
+#inspectBody::-webkit-scrollbar-thumb{background:#2b3a48;border-radius:3px}
+.doclist{display:flex;flex-direction:column;gap:6px;margin-bottom:11px}
+.docbtn{display:flex;justify-content:space-between;align-items:center;background:#101820;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:12.5px;text-align:right}
+.docbtn:hover{background:#17212b;border-color:var(--line2)}
+.docbtn.done{border-color:#2d4535;background:#0e1a14}
+.docbtn .st{font-size:10.5px;color:var(--dim);font-family:"Consolas",monospace}
+.doc-id{background:linear-gradient(160deg,#e8eef5,#cfdae6);color:#0a1420;border-radius:6px;margin-bottom:10px;border:1px solid #5a7090;overflow:hidden;font-size:12px;position:relative;max-width:340px}
+.doc-id .hdr{background:linear-gradient(180deg,#1c3a5c,#0f2740);color:#e8c96a;padding:6px 10px;font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.doc-id .body{padding:10px;display:grid;grid-template-columns:88px 1fr;gap:10px}
+.doc-id .photo{width:88px;height:106px;background:linear-gradient(180deg,#a0a8b0,#7a828c);border:1.5px solid #2c3a4a;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:36px;color:#3a4552}
+.doc-id .fields{display:flex;flex-direction:column;gap:4px;font-size:11.5px}
+.doc-id .fields .r{display:flex;justify-content:space-between;border-bottom:1px dotted #8fa0b0;padding:1px 0}
+.doc-id .fields .r span:first-child{color:#3a4a5a;font-size:10.5px}
+.doc-id .fields .r span:last-child{font-weight:700;color:#0a1420;direction:ltr;unicode-bidi:embed}
+.doc-id .fields .r .id-num{font-family:"Consolas",monospace;letter-spacing:1px;font-size:12px}
+.doc-id .foot{background:#0f2740;color:#e8c96a;padding:4px 10px;font-size:10.5px;display:flex;justify-content:space-between;font-family:"Consolas",monospace}
+.doc-id .stamp{position:absolute;left:12px;bottom:34px;font-size:18px;font-weight:900;color:rgba(170,30,30,.5);border:2.5px solid rgba(170,30,30,.4);padding:1px 7px;border-radius:4px;transform:rotate(-12deg)}
+.doc-lic{background:linear-gradient(135deg,#dfeede,#b8d4b6);color:#0d2512;border-radius:6px;margin-bottom:10px;border:1px solid #5a7a5a;overflow:hidden;font-size:12px;position:relative;max-width:400px}
+.doc-lic .hdr{background:linear-gradient(180deg,#1c4a28,#123018);color:#e0e8d0;padding:5px 10px;font-size:11px;font-weight:700;display:flex;justify-content:space-between}
+.doc-lic .hdr .ar{font-size:10.5px;font-weight:500;opacity:.9}
+.doc-lic .body{padding:8px 10px;display:grid;grid-template-columns:70px 1fr 80px;gap:10px;align-items:start}
+.doc-lic .photo{width:70px;height:88px;background:linear-gradient(180deg,#8f9a95,#6a7772);border:1.5px solid #2c4a30;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#2a3a32;grid-row:span 2}
+.doc-lic .fields{display:flex;flex-direction:column;gap:2px;font-size:11px}
+.doc-lic .fields .r{display:flex;justify-content:space-between;padding:1px 0}
+.doc-lic .fields .r span:first-child{color:#2a4a32;font-size:10px}
+.doc-lic .fields .r span:last-child{font-weight:700;color:#0d2512;direction:ltr;unicode-bidi:embed;font-family:"Consolas",monospace}
+.doc-lic .cats{grid-column:3;background:#fff;border:1px solid #5a7a5a;border-radius:3px;padding:4px;font-size:9px;display:flex;flex-direction:column;gap:2px}
+.doc-lic .cats div{display:flex;justify-content:space-between}
+.doc-lic .cats b{color:#1c4a28}
+.doc-lic .stamp{position:absolute;right:14px;bottom:8px;font-size:15px;font-weight:900;color:rgba(170,30,30,.5);border:2px solid rgba(170,30,30,.4);padding:0 6px;border-radius:3px;transform:rotate(-10deg)}
+.doc-reg{background:linear-gradient(135deg,#f5e0dc,#e8c9c4);color:#2a0d0a;border-radius:6px;margin-bottom:10px;border:1px solid #8a5a5a;overflow:hidden;font-size:12px;position:relative;max-width:400px}
+.doc-reg .hdr{background:linear-gradient(180deg,#6b2822,#4a1814);color:#f5e0c8;padding:6px 11px;font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.doc-reg .hdr .en{font-size:9.5px;opacity:.85;font-weight:500;font-family:"Consolas",monospace}
+.doc-reg .body{padding:9px 11px;display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:11px}
+.doc-reg .body .r{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #b89a95}
+.doc-reg .body .r.full{grid-column:span 2}
+.doc-reg .body .r span:first-child{color:#5a3a35;font-size:10px}
+.doc-reg .body .r span:last-child{font-weight:700;color:#2a0d0a;direction:ltr;unicode-bidi:embed}
+.doc-reg .stamp{position:absolute;right:14px;bottom:8px;font-weight:900;color:rgba(140,20,20,.55);border:2.5px solid rgba(140,20,20,.4);border-radius:50%;transform:rotate(-14deg);width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;line-height:1.05}
+.doc-ins{background:#fbfaf6;color:#1a1a1a;border-radius:4px;margin-bottom:10px;border:1px solid #b8b0a0;overflow:hidden;font-size:12px;position:relative;padding:12px 14px}
+.doc-ins .hdr{border-bottom:2px solid #1a3a5a;padding-bottom:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.doc-ins .hdr .co{font-weight:700;color:#1a3a5a;font-size:13px}
+.doc-ins .hdr .co small{display:block;font-size:9.5px;color:#5a5a5a;font-weight:400;margin-top:1px}
+.doc-ins .hdr .num{font-family:"Consolas",monospace;font-size:11px;color:#4a4a4a;text-align:left}
+.doc-ins .hdr .num b{display:block;color:#1a3a5a;font-size:13px;margin-top:2px}
+.doc-ins .title{text-align:center;font-weight:700;font-size:13px;color:#1a1a1a;padding:4px 0;border-bottom:1px solid #d0c8b8;border-top:1px solid #d0c8b8;margin-bottom:8px;letter-spacing:2px}
+.doc-ins .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:11.5px}
+.doc-ins .grid .r{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #c0b8a8}
+.doc-ins .grid .r span:first-child{color:#5a5a5a;font-size:10.5px}
+.doc-ins .grid .r span:last-child{font-weight:700;color:#1a1a1a;direction:ltr;unicode-bidi:embed}
+.doc-ins .seal{position:absolute;left:14px;bottom:8px;width:64px;height:64px;border:2.5px double rgba(30,60,100,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;text-align:center;color:rgba(30,60,100,.65);font-weight:700;line-height:1.05;transform:rotate(-8deg)}
+.doc-plate{background:#1c3a5c;border:3px solid #0a1420;border-radius:5px;margin-bottom:10px;padding:8px 14px;display:flex;justify-content:space-between;align-items:center;max-width:340px}
+.doc-plate .ar{color:#fff;font-size:11.5px;font-weight:700}
+.doc-plate .num{font-family:"Consolas",monospace;font-weight:900;font-size:26px;color:#fff;letter-spacing:3px}
+.doc-plate .region{color:#a8c8e0;font-size:10px}
+.doc-plate .letters{color:#e0c060;font-size:11px;font-weight:700;letter-spacing:2px}
+.doc.warn{border-color:#c9a04a!important}
+.doc.bad{border-color:#c94a4a!important}
+.checkres{background:#0e161e;border:1px solid var(--line);border-radius:6px;padding:9px;margin-bottom:7px;font-size:12.5px;line-height:1.55}
+.checkres .ok{color:var(--green);font-weight:700}
+.checkres .no{color:var(--red);font-weight:700}
+.checkres .wr{color:var(--amber);font-weight:700}
+.checkres .ttl{color:var(--dim);font-size:10.5px;letter-spacing:.5px;margin-bottom:3px;font-weight:600}
+.finding{display:flex;gap:7px;align-items:flex-start;background:#1a140d;border:1px solid #4a3820;border-radius:6px;padding:8px 9px;margin-bottom:6px;font-size:12px;line-height:1.5}
+.finding.good{background:#0e1a12;border-color:#284a35}
+.finding .ic{font-size:14px;flex:0 0 auto}
+.modal{position:fixed;inset:0;background:rgba(3,6,9,.82);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.modal .box{background:var(--panel);border:1px solid var(--line2);border-radius:11px;width:min(560px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 26px 70px rgba(0,0,0,.85)}
+.modal .box h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px;color:var(--gold);display:flex;justify-content:space-between;align-items:center}
+.modal .body{padding:14px 16px;overflow-y:auto;font-size:13.5px;line-height:1.6}
+.modal .foot{padding:11px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.closeX{font-size:19px;color:var(--dim);padding:0 5px;line-height:1}
+.closeX:hover{color:#fff}
+.opt{display:flex;align-items:center;gap:9px;padding:9px 11px;background:#0e161e;border:1px solid var(--line);border-radius:6px;margin-bottom:7px;cursor:pointer}
+.opt:hover{border-color:var(--line2);background:#141e28}
+.opt input{width:16px;height:16px;accent-color:var(--gold)}
+.opt label{flex:1;cursor:pointer}
+.opt .amt{color:var(--gold2);font-weight:700;font-family:"Consolas",monospace;font-size:13px}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:11px}
+.field label{font-size:11.5px;color:var(--dim)}
+.field input,.field select{background:#0a1219;border:1px solid var(--line2);border-radius:6px;padding:9px 11px;color:#fff;font-size:14px;width:100%}
+.rep-item{background:#0e161e;border:1px solid var(--line);border-radius:6px;padding:9px 11px;margin-bottom:7px;font-size:12.5px}
+.rep-item.act{border-right:3px solid var(--red)}
+.rep-item.res{border-right:3px solid var(--green);opacity:.6}
+.rep-item.exp{border-right:3px solid #4a5560;opacity:.5}
+.rep-item .h{display:flex;justify-content:space-between;font-weight:700;margin-bottom:3px}
+.rep-item .p{font-family:"Consolas",monospace;direction:ltr;color:var(--gold2);font-size:14px;letter-spacing:1px}
+#toasts{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:600;display:flex;flex-direction:column;gap:7px;align-items:center;pointer-events:none;width:min(440px,92vw)}
+.toast{background:rgba(12,18,24,.98);border:1px solid var(--line2);border-right:4px solid var(--blue);border-radius:7px;padding:9px 13px;font-size:12.5px;box-shadow:0 10px 30px rgba(0,0,0,.7);animation:tin .28s ease;width:100%;line-height:1.5}
+.toast.ok{border-right-color:var(--green)}
+.toast.err{border-right-color:var(--red)}
+.toast.warn{border-right-color:var(--amber)}
+.toast.radio{border-right-color:#7fbfe0;background:rgba(10,22,30,.98)}
+@keyframes tin{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+#fieldOfficerTag{position:absolute;top:56px;right:10px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 11px;pointer-events:auto;font-size:12px;max-width:230px;z-index:5}
+#fieldOfficerTag .name{font-weight:700;color:var(--gold2);font-size:13px}
+#fieldOfficerTag .role{font-size:10.5px;color:var(--dim);margin-top:2px}
+#fieldOfficerTag .status{font-size:11px;margin-top:5px;color:var(--amber)}
+#cameraViewFx{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+#inspect{z-index:8}
+#surveillanceTag,#radarCorner,#radarTR{z-index:5}
+body[data-view="officer"] #radarFrame,body[data-view="officer"] #radarCorner,body[data-view="officer"] #radarTR{display:none}
+body[data-view="officer"] #surveillanceTag{display:none}
+body[data-view="cctv"] .game-viewport{filter:grayscale(1) contrast(1.28) brightness(.83)}
+body[data-view="cctv"] #surveillanceTag{color:#e3e7e8;border-color:rgba(220,230,235,.5);background:rgba(0,0,0,.72);font-family:Consolas,monospace}
+#cameraViewFx.hidden{display:none}
+#cameraViewFx .cctvScan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0,rgba(0,0,0,.16) 1px,transparent 1px,transparent 4px);opacity:.55}
+#cameraViewFx .cctvVignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.18) 78%,rgba(0,0,0,.52) 115%)}
+#cameraViewFx .cctvReadout{position:absolute;display:flex;gap:14px;align-items:center;padding:7px 10px;background:rgba(0,0,0,.48);border:1px solid rgba(230,237,239,.28);color:#ecf0f1;font:11px Consolas,monospace;letter-spacing:.8px;text-shadow:0 1px 3px #000;direction:ltr}
+#cctvTop{top:58px;left:14px}
+#cctvBottom{bottom:15px;left:14px;right:14px;justify-content:space-between}
+#cctvRec{color:#ff5b5b;font-weight:700}
+#cctvRec i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#e93636;margin-right:5px;box-shadow:0 0 10px #e93636;animation:recBlink 1.15s steps(2,end) infinite}
+@keyframes recBlink{50%{opacity:.25}}
+#btnExitCctv{pointer-events:auto;background:rgba(12,16,19,.82);border:1px solid rgba(230,237,239,.55);color:#f3f4f5;border-radius:5px;padding:7px 11px;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer}
+#btnExitCctv:hover{background:#202a2d}
+#officerReticle{position:absolute;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);border:1px solid rgba(245,245,238,.58);border-radius:50%;pointer-events:none;z-index:3;box-shadow:0 1px 4px rgba(0,0,0,.8)}
+#officerReticle::before,#officerReticle::after{content:"";position:absolute;background:rgba(245,245,238,.78)}
+#officerReticle::before{width:1px;height:6px;left:8px;top:-4px;box-shadow:0 20px 0 rgba(245,245,238,.78)}
+#officerReticle::after{height:1px;width:6px;top:8px;left:-4px;box-shadow:20px 0 0 rgba(245,245,238,.78)}
+body[data-view="officer"] #officerReticle{display:block}
+body[data-view="cctv"] #radarFrame::before{border:0}
+body[data-view="overview"] #cameraViewFx{display:none}
+body[data-view="overview"] #officerReticle{display:none}
+#moveHint{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:rgba(10,14,19,.85);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font-size:11.5px;color:#c8e9f7;pointer-events:none;z-index:5;letter-spacing:.5px}
+#moveHint.hidden{display:none}
+@media (max-width:820px){#vehPanel{width:200px;font-size:11.5px;top:52px;max-height:38vh}#inspect{width:auto;left:6px;right:6px;top:auto;bottom:0;height:62vh;border-radius:12px 12px 0 0}#radarBar{bottom:6px;padding:6px}#radarBar .btn{padding:7px 10px;font-size:11.5px}#topbar{height:40px;padding:0 6px}.hud-chip{padding:3px 7px;font-size:11px}#toasts{top:46px}.menu-box{padding:20px 16px}.menu-box h1{font-size:22px}#fieldOfficerTag{max-width:180px;font-size:11px;padding:6px 9px}#cameraViewFx .cctvReadout{font-size:9px;gap:8px;padding:6px 7px}#cctvBottom{bottom:8px;left:8px;right:8px}#btnExitCctv{padding:6px 8px;font-size:10px}#moveHint{bottom:60px;font-size:10.5px;padding:5px 9px}}
+.material-symbol{font-family:'Material Symbols Rounded';font-weight:normal;font-style:normal;font-size:18px;line-height:1;display:inline-flex;vertical-align:middle;direction:ltr;white-space:nowrap;-webkit-font-feature-settings:'liga';font-feature-settings:'liga'}
+#surveillanceTag{position:absolute;top:50px;left:50%;transform:translateX(-50%);padding:5px 10px;border:1px solid rgba(127,191,224,.45);background:rgba(4,12,18,.72);border-radius:5px;color:#c8e9f7;font:11px Consolas,monospace;letter-spacing:1px;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <h1>محاكي الكمين المصري</h1>
+  <div class="bar"><i id="loadBar"></i></div>
+  <small id="loadTxt">جاري تحميل المحرك ثلاثي الأبعاد…</small>
+</div>
+
+<div id="menu" class="hidden">
+  <div class="menu-box">
+    <h1>محاكي الكمين المصري</h1>
+    <div class="sub">نقطة تفتيش مصرية · منظور ميداني وكاميرات مراقبة</div>
+    <div class="menu-stats" id="menuStats"></div>
+    <div class="menu-actions">
+      <button class="btn primary" id="btnContinue">متابعة الوردية</button>
+      <button class="btn" id="btnNewShift">بدء وردية جديدة</button>
+      <div class="menu-row">
+        <button class="btn" id="btnSettings">الإعدادات</button>
+        <button class="btn" id="btnHowTo">التعليمات</button>
+      </div>
+      <button class="btn danger" id="btnReset" style="margin-top:4px">حذف الحفظ</button>
+    </div>
+  </div>
+</div>
+
+<div id="hud" class="hidden">
+  <div id="cameraViewFx" class="hidden" aria-hidden="true">
+    <div class="cctvScan"></div><div class="cctvVignette"></div>
+    <div id="cctvTop" class="cctvReadout">
+      <span id="cctvRec"><i></i>REC</span><span>CAM-04 · نقطة التفتيش</span><span>LIVE</span>
+    </div>
+    <div id="cctvBottom" class="cctvReadout">
+      <span>MONO · 42MM · PTZ</span><span id="cctvClock">--:--:--</span>
+      <button id="btnExitCctv" type="button">↩ رجوع لمنظور الضابط</button>
+    </div>
+  </div>
+  <div id="officerReticle" class="hidden" aria-hidden="true"></div>
+  <div id="surveillanceTag">● CCTV-04 · بث حي من نقطة التفتيش</div>
+  <div id="radarFrame">
+    <div id="radarGrid"></div>
+    <div id="radarScan"></div>
+  </div>
+  <div id="radarCorner">
+    <div>CAM-01 :: APPROACH NORTH</div>
+    <div>LAT 30.04°N LON 31.23°E</div>
+  </div>
+  <div id="radarTR">
+    <div>RADAR ACTIVE</div>
+    <div id="radarTime">--:--:--</div>
+  </div>
+  <div id="topbar">
+    <button class="btn primary sm" id="btnViewMode">كاميرا العمود</button>
+    <button class="btn sm" id="btnOverview">منظور عام</button>
+    <div class="hud-chip">الرصيد <b id="hBal">0</b> ج.م</div>
+    <div class="hud-chip">السمعة <b id="hRep">100</b>%</div>
+    <div class="hud-chip">فُحص <b id="hInsp">0</b></div>
+    <div class="hud-chip good">صحيح <b id="hOk">0</b></div>
+    <div class="hud-chip bad">خطأ <b id="hBad">0</b></div>
+    <div class="hud-chip">مخالفات <b id="hFines">0</b></div>
+    <div class="hud-chip">بلاغات <b id="hRep2">0</b></div>
+    <div class="hud-chip">الوردية <b id="shiftClock">00:00</b></div>
+    <div class="spacer"></div>
+    <button class="btn sm" id="btnBlockRoad">إغلاق الطريق</button>
+    <button class="btn sm" id="btnReports">بلاغات</button>
+    <button class="btn sm" id="btnLog">سجل</button>
+    <button class="btn sm" id="btnZoom">تكبير</button>
+    <button class="btn sm" id="btnPause">إيقاف</button>
+  </div>
+  <div id="vehPanel">
+    <h4>الأهداف على الرادار <span id="radarCount">0</span></h4>
+    <div id="vehList"></div>
+  </div>
+  <div id="fieldOfficerTag" class="hidden">
+    <div class="name" id="foName">—</div>
+    <div class="role">ضابط ميداني — الكمين</div>
+    <div class="status" id="foStatus">في الانتظار</div>
+  </div>
+  <div id="inspect" class="hidden">
+    <div id="inspectHead">
+      <div class="t1"><span id="insTitle">—</span><button class="closeX" id="insClose"><span class="material-symbol">close</span></button></div>
+      <div class="t2" id="insSub">—</div>
+    </div>
+    <div id="tabs">
+      <div class="tab on" data-tab="docs">المستندات</div>
+      <div class="tab" data-tab="db">الفحوصات</div>
+      <div class="tab" data-tab="phys">التفتيش</div>
+      <div class="tab" data-tab="act">القرارات</div>
+    </div>
+    <div id="inspectBody"></div>
+  </div>
+  <div id="radarBar" class="hidden">
+    <button class="btn primary" id="actStop">أمر بالتوقف</button>
+    <button class="btn green" id="actRelease">إذن بالمرور</button>
+    <button class="btn danger" id="actFine">تحرير مخالفة</button>
+    <button class="btn blue" id="actInspect">بيانات المركبة</button>
+    <button class="btn" id="actCancel">إلغاء التحديد</button>
+  </div>
+  <div id="moveHint">اسحب بالماوس أو الإصبع للنظر في أي اتجاه — أنت ثابت في موقعك</div>
+</div>
+
+<audio id="stopAudio" preload="auto" src="stop-audio.mp3"></audio>
+<div id="modalRoot"></div>
+<div id="toasts"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>if(!window.THREE){document.write('<script src="https://unpkg.com/three@0.128.0/build/three.min.js"><\/script>');}</script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.7.4/umd/index.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const $$=s=>Array.prototype.slice.call(document.querySelectorAll(s));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const rndInt=(a,b)=>Math.floor(rnd(a,b+1));
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const chance=p=>Math.random()<p;
+const money=n=>Math.round(n).toLocaleString('en-US');
+const pad2=n=>(n<10?'0':'')+n;
+const smooth=(r,dt)=>1-Math.pow(r,dt);
+
+// ============================================================
+// ✅ إعدادات موديل الشرطة ثلاثي الأبعاد (FBX)
+// يمكن تعديل القيم هنا فقط إن احتاج الأمر ضبطًا يدويًا.
+// ============================================================
+const POLICE_MODEL_CFG = {
+  path: './models/swat.fbx',  // المسار النسبي من ملف HTML
+  targetLength: 5.05,          // الطول المستهدف بالأمتار (مطابق للعربية القديمة)
+  yawOffset: 0,                // أضف Math.PI أو Math.PI/2 لتصحيح اتجاه المقدمة يدويًا
+  castShadow: true,
+  receiveShadow: true
+};
+
+const SAVE_KEY='ecs_save_v5';
+const Save={data:null,
+  defaults(){return{version:5,balance:5000,reputation:100,shiftsCompleted:0,totalInspected:0,totalCorrect:0,totalWrong:0,totalFines:0,totalFinesValue:0,totalBribes:0,totalBribeValue:0,totalSpeeding:0,bestScore:0,transactions:[],log:[],started:false,settings:{quality:'auto',volume:0.5,muted:false,trafficDensity:1,dayNight:'day',showHints:true}}},
+  load(){try{const raw=localStorage.getItem(SAVE_KEY);if(!raw){this.data=this.defaults();return this.data}const p=JSON.parse(raw);const d=this.defaults();for(const k in d){if(!(k in p))continue;if(k==='settings'&&p.settings&&typeof p.settings==='object')d.settings=Object.assign({},d.settings,p.settings);else if(Array.isArray(d[k]))d[k]=Array.isArray(p[k])?p[k].slice(0,400):d[k];else if(typeof d[k]===typeof p[k])d[k]=p[k]}d.balance=Number(d.balance)||0;d.reputation=clamp(Number(d.reputation)||100,0,100);this.data=d}catch(e){this.data=this.defaults()}return this.data},
+  save(){try{if(this.data.transactions.length>300)this.data.transactions=this.data.transactions.slice(-300);if(this.data.log.length>300)this.data.log=this.data.log.slice(-300);localStorage.setItem(SAVE_KEY,JSON.stringify(this.data))}catch(e){}},
+  reset(){try{localStorage.removeItem(SAVE_KEY)}catch(e){}this.data=this.defaults()}
+};
+
+const Sfx={ctx:null,master:null,ready:false,
+  init(){if(this.ctx)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)return;try{this.ctx=new C();this.master=this.ctx.createGain();const s=Save.data.settings;this.master.gain.value=s.muted?0:s.volume;this.master.connect(this.ctx.destination);this.ready=true}catch(e){this.ready=false}},
+  resume(){if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume()},
+  setVolume(v){if(this.master)this.master.gain.value=Save.data.settings.muted?0:v},
+  tone(f,d,t,v,s){if(!this.ready)return;const ct=this.ctx.currentTime;const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f,ct);if(s)o.frequency.exponentialRampToValueAtTime(Math.max(30,s),ct+d);g.gain.setValueAtTime(0.0001,ct);g.gain.exponentialRampToValueAtTime(v||0.14,ct+0.012);g.gain.exponentialRampToValueAtTime(0.0001,ct+d);o.connect(g);g.connect(this.master);o.start(ct);o.stop(ct+d+0.03)},
+  noise(d,v,f){if(!this.ready)return;const ct=this.ctx.currentTime;const len=Math.floor(this.ctx.sampleRate*d);const buf=this.ctx.createBuffer(1,len,this.ctx.sampleRate);const dd=buf.getChannelData(0);for(let i=0;i<len;i++)dd[i]=(Math.random()*2-1)*(1-i/len);const src=this.ctx.createBufferSource();src.buffer=buf;const fl=this.ctx.createBiquadFilter();fl.type='lowpass';fl.frequency.value=f||1200;const g=this.ctx.createGain();g.gain.value=v||0.12;src.connect(fl);fl.connect(g);g.connect(this.master);src.start(ct)},
+  click(){this.tone(520,0.05,'square',0.04)},
+  ok(){this.tone(620,0.09,'sine',0.09);setTimeout(()=>this.tone(900,0.12,'sine',0.08),80)},
+  err(){this.tone(180,0.2,'sawtooth',0.08,110)},
+  cash(){this.tone(1100,0.07,'square',0.07);setTimeout(()=>this.tone(1500,0.12,'square',0.06),70)},
+  alarm(){this.tone(820,0.16,'square',0.09);setTimeout(()=>this.tone(620,0.16,'square',0.09),170)},
+  radio(){this.noise(0.14,0.05,900);this.tone(1300,0.05,'square',0.04)},
+  beep(){this.tone(1400,0.08,'square',0.06)},
+  beepLong(){this.tone(1000,0.32,'square',0.07)}
+};
+
+const TexCache={};
+function canvasTex(key,w,h,draw,rx,ry){if(TexCache[key])return TexCache[key];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx||1,ry||1);t.anisotropy=8;if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;TexCache[key]=t;return t}
+
+const TEX={
+  asphalt(){return canvasTex('asp_des_1',1024,1024,(ctx,w,h)=>{
+    ctx.fillStyle='#4a4744';ctx.fillRect(0,0,w,h);
+    const wash=ctx.createLinearGradient(0,0,w,0);
+    wash.addColorStop(0,'rgba(20,20,20,.18)');wash.addColorStop(.5,'rgba(130,124,110,.10)');wash.addColorStop(1,'rgba(20,20,20,.20)');
+    ctx.fillStyle=wash;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<45000;i++){const g=rndInt(50,145),a=Math.random()*.30+.04;ctx.fillStyle='rgba('+g+','+(g-2)+','+(g-6)+','+a+')';const r=Math.random()<.08?rnd(2,5):rnd(.7,2.1);ctx.fillRect(Math.random()*w,Math.random()*h,r,r*.7)}
+    ctx.strokeStyle='rgba(20,18,16,.55)';
+    for(let i=0;i<70;i++){ctx.lineWidth=rnd(.8,2.4);ctx.beginPath();let x=Math.random()*w,y=Math.random()*h;ctx.moveTo(x,y);for(let j=0;j<9;j++){x+=rnd(-45,45);y+=rnd(-45,45);ctx.lineTo(x,y)}ctx.stroke()}
+    for(let i=0;i<90;i++){const x=Math.random()*w,y=Math.random()*h,r=rnd(3,14);const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(15,14,12,.55)');g.addColorStop(.7,'rgba(30,28,25,.35)');g.addColorStop(1,'rgba(60,55,48,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,r*1.3,r*.9,rnd(0,Math.PI),0,Math.PI*2);ctx.fill()}
+    for(let i=0;i<55;i++){const x=Math.random()*w,y=Math.random()*h,r=rnd(8,32);const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'rgba(120,115,102,.22)');g.addColorStop(1,'rgba(120,115,102,0)');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(x,y,r,r*.6,rnd(0,Math.PI),0,Math.PI*2);ctx.fill()}
+    for(const x of[w*.18,w*.30,w*.70,w*.82]){const g=ctx.createLinearGradient(x-28,0,x+28,0);g.addColorStop(0,'rgba(15,16,17,0)');g.addColorStop(.5,'rgba(15,15,15,.22)');g.addColorStop(1,'rgba(15,16,17,0)');ctx.fillStyle=g;ctx.fillRect(x-28,0,56,h)}
+  },3,24)},
+  sand(){return canvasTex('sand_des_1',512,512,(ctx,w,h)=>{
+    ctx.fillStyle='#c1a97c';ctx.fillRect(0,0,w,h);
+    for(let i=0;i<12000;i++){const v=rndInt(-15,40),a=Math.random()*.42+.10;ctx.fillStyle='rgba('+(190+v)+','+(168+v)+','+(122+v)+','+a+')';ctx.fillRect(Math.random()*w,Math.random()*h,rnd(.7,2.4),rnd(.7,2.4))}
+    for(let i=0;i<45;i++){const x=Math.random()*w,y=Math.random()*h,len=rnd(28,120);ctx.strokeStyle='rgba(92,77,53,'+rnd(.035,.12)+')';ctx.lineWidth=rnd(1,3);ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.25,y+rnd(-6,6),x+len*.7,y+rnd(-6,6),x+len,y+rnd(-3,3));ctx.stroke()}
+  },60,60)},
+  roadSign(text){return canvasTex('rds_des_'+text,256,256,(ctx,w,h)=>{
+    ctx.fillStyle='#123e7a';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#fff';ctx.lineWidth=7;ctx.strokeRect(11,11,w-22,h-22);
+    ctx.fillStyle='#fff';ctx.font='bold 42px Tahoma, Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    text.split('|').forEach((l,i,a)=>ctx.fillText(l,w/2,h/2+(i-(a.length-1)/2)*50));
+  },1,1)},
+  stopSign(){return canvasTex('stopsign_des',256,256,(ctx,w,h)=>{
+    ctx.fillStyle='#b81818';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#fff';ctx.lineWidth=14;ctx.strokeRect(14,14,w-28,h-28);
+    ctx.fillStyle='#fff';ctx.font='bold 140px Tahoma, Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('قف',w/2,h/2+8);
+  },1,1)},
+  sky(){return canvasTex('sky_des_1',128,1024,(ctx,w,h)=>{
+    const g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0.00,'#3e6389');g.addColorStop(0.30,'#7a9cba');g.addColorStop(0.60,'#b8c6cb');g.addColorStop(0.82,'#ddd0b0');g.addColorStop(1.00,'#e8d8b4');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  },1,1)},
+  skyNight(){return canvasTex('skyN_des_1',128,1024,(ctx,w,h)=>{
+    const g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0.00,'#040710');g.addColorStop(0.50,'#0c141e');g.addColorStop(0.85,'#18222e');g.addColorStop(1.00,'#28323c');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+    for(let i=0;i<200;i++){ctx.fillStyle='rgba(255,255,255,'+(Math.random()*0.85)+')';ctx.fillRect(Math.random()*w,Math.random()*h*0.5,1,1)}
+  },1,1)},
+  skyDusk(){return canvasTex('skyD_des_1',128,1024,(ctx,w,h)=>{
+    const g=ctx.createLinearGradient(0,0,0,h);
+    g.addColorStop(0.00,'#25315a');g.addColorStop(0.35,'#75506c');g.addColorStop(0.60,'#c47456');g.addColorStop(0.82,'#dda478');g.addColorStop(1.00,'#e6c69c');
+    ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  },1,1)},
+  cloud(){return canvasTex('cld_des_1',256,128,(ctx,w,h)=>{
+    ctx.clearRect(0,0,w,h);
+    for(let i=0;i<24;i++){const cx=rnd(w*0.10,w*0.90),cy=rnd(h*0.30,h*0.80),r=rnd(18,50);const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,'rgba(255,255,255,0.85)');g.addColorStop(0.55,'rgba(240,240,240,0.42)');g.addColorStop(1,'rgba(255,255,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill()}
+  },1,1)},
+  barrierStripe(){return canvasTex('brr_des_1',128,128,(ctx,w,h)=>{
+    ctx.fillStyle='#c99a3a';ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#181818';
+    for(let x=-h;x<w;x+=36){ctx.beginPath();ctx.moveTo(x,h);ctx.lineTo(x+18,h);ctx.lineTo(x+18+h,0);ctx.lineTo(x+h,0);ctx.closePath();ctx.fill()}
+  },1,1)},
+  policeBadge(){return canvasTex('pbadge_des_2',256,256,(ctx,w,h)=>{
+    ctx.fillStyle='#e8e4d0';ctx.fillRect(0,0,w,h);
+    ctx.strokeStyle='#0a2848';ctx.lineWidth=10;ctx.strokeRect(8,8,w-16,h-16);
+    ctx.fillStyle='#0a2848';
+    ctx.beginPath();
+    ctx.moveTo(w/2,30);ctx.lineTo(w-40,h*0.4);ctx.lineTo(w*0.75,h-30);
+    ctx.lineTo(w*0.25,h-30);ctx.lineTo(40,h*0.4);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#c9a04a';ctx.font='bold 44px Tahoma, Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('شرطة',w/2,h/2-10);
+    ctx.font='bold 22px Tahoma, Arial';
+    ctx.fillText('مصر',w/2,h/2+34);
+  },1,1)},
+  policeSideText(){return canvasTex('pside_txt_1',512,192,(ctx,w,h)=>{
+    ctx.fillStyle='#f2f4f6';ctx.fillRect(0,0,w,h);
+    ctx.fillStyle='#0a2848';ctx.fillRect(0,0,w,h*0.22);
+    ctx.fillRect(0,h*0.78,w,h*0.22);
+    ctx.fillStyle='#0a2848';
+    ctx.font='bold 128px "Noto Naskh Arabic", Tahoma, Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('الشرطة',w/2,h*0.52);
+    ctx.fillStyle='#c9a04a';
+    ctx.font='bold 34px Arial';
+    ctx.fillText('POLICE',w/2,h*0.88);
+  },1,1)},
+  egyptPlate(plateKind,number,letters){return canvasTex('egplate_des_'+plateKind+'_'+number+'_'+letters,512,256,(ctx,w,h)=>{
+    const bgColor=plateKind==='private'?'#1a6a9a':plateKind==='taxi'?'#d97a1e':plateKind==='police'?'#0a2848':plateKind==='transport'?'#b22222':'#1a6a9a';
+    const topH=h*0.38,botH=h-topH;
+    ctx.fillStyle=bgColor;ctx.fillRect(0,0,w,topH);
+    ctx.fillStyle='#ffffff';ctx.font='bold 36px Tahoma, Arial';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText('EGYPT',12,topH/2);
+    ctx.textAlign='right';ctx.font='bold 38px Tahoma, Arial';
+    ctx.fillText('مصر',w-12,topH/2);
+    ctx.fillStyle='#c9a04a';ctx.beginPath();ctx.arc(w/2,topH/2,18,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#f0f0f0';ctx.fillRect(0,topH,w,botH);
+    ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,topH);ctx.lineTo(w,topH);ctx.stroke();
+    ctx.fillStyle='#111';ctx.font='bold 72px "Traditional Arabic", Tahoma, Arial';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(number,w*0.32,topH+botH/2);
+    ctx.font='bold 52px Consolas, monospace';
+    ctx.fillText(letters,w*0.72,topH+botH/2);
+    ctx.fillStyle='#888';
+    for(const bx of[15,w-15]){ctx.beginPath();ctx.arc(bx,h-12,6,0,Math.PI*2);ctx.fill()}
+  },1,1)}
+};
+
+// ============================================================
+// ✅ التكوين
+// ============================================================
+const CFG={
+  roadHalf:19,
+  approachLanes:[-13.5,-9.5,-5.5],
+  departLanes:[5.5,9.5,13.5],
+  spawnZ:-260,despawnZ:260,
+  stopLineZ:-12,
+  speedSensorZ:-150,
+  bay:{x:-21.5,z:8.0},
+  officerPost:{x:-15.5,z:-3.0},
+  playerStart:{x:-15.5,z:-3.0},
+  speedLimit:100,
+  evadeBase:0.018,
+  blockLineZ:-38,
+  playerRadius:0.38,
+  playerEyeHeight:1.78,
+  walkSpeed:3.2,
+  runSpeed:6.5
+};
+
+const CAR_PAINTS=[{hex:0xe8e8e6,name:'أبيض'},{hex:0xdcdad4,name:'أبيض لؤلؤي'},{hex:0xf0eee8,name:'أبيض صدفي'},{hex:0x111214,name:'أسود'},{hex:0x1c1e20,name:'أسود ميتاليك'},{hex:0xa8adb2,name:'فضي'},{hex:0xb8bdc2,name:'فضي فاتح'},{hex:0x9aa0a6,name:'فضي رمادي'},{hex:0x5a6168,name:'رمادي'},{hex:0x42484e,name:'رمادي غامق'},{hex:0x1c2c48,name:'كحلي'},{hex:0x2c4a6b,name:'أزرق داكن'},{hex:0x284a48,name:'أزرق مخضر'},{hex:0x2c4a30,name:'أخضر داكن'},{hex:0x3a5a3e,name:'أخضر'},{hex:0x6b2020,name:'أحمر داكن'},{hex:0x7a2828,name:'أحمر عنابي'},{hex:0x6b3a28,name:'بني داكن'},{hex:0x8b6b3a,name:'بني فاتح'},{hex:0xc9b898,name:'بيج'},{hex:0xd8c8a8,name:'بيج فاتح'},{hex:0xa89878,name:'ذهبي فاتح'}];
+const TAXI_PAINTS=[{hex:0xe8b800,name:'أصفر تاكسي'},{hex:0xd8a800,name:'أصفر'},{hex:0xf0f0ec,name:'أبيض'},{hex:0xf2efe6,name:'أبيض عاجي'}];
+const TRANSPORT_PAINTS=[{hex:0xe8e8e6,name:'أبيض'},{hex:0xd0d0cc,name:'أبيض رمادي'},{hex:0xc4b898,name:'بيج'},{hex:0x3a5a6b,name:'أزرق داكن'},{hex:0x8b2828,name:'أحمر داكن'},{hex:0x2c4a30,name:'أخضر داكن'},{hex:0xa8adb2,name:'فضي'},{hex:0x5a6168,name:'رمادي'}];
+
+const VEHICLE_TYPES={
+  car:{w:1.84,h:0.72,l:4.52,cabinH:0.70,wheelR:0.33,wheels:'4',weight:23,spd:[22,28],label:'ملاكي',paint:'car'},
+  suv:{w:2.08,h:0.88,l:4.72,cabinH:0.86,wheelR:0.37,wheels:'4',weight:9,spd:[21,27],label:'SUV',paint:'car'},
+  taxi:{w:1.84,h:0.72,l:4.52,cabinH:0.70,wheelR:0.33,wheels:'4',weight:10,spd:[19,25],label:'أجرة',paint:'taxi'},
+  microbus:{w:2.04,h:1.12,l:5.48,cabinH:1.02,wheelR:0.36,wheels:'4',weight:15,spd:[20,25],label:'ميكروباص',paint:'transport'},
+  van:{w:2.04,h:1.22,l:5.32,cabinH:1.06,wheelR:0.36,wheels:'4',weight:8,spd:[19,24],label:'ربع نقل',paint:'transport'},
+  bus:{w:2.55,h:1.75,l:11.2,cabinH:1.52,wheelR:0.48,wheels:'6',weight:6,spd:[18,23],label:'أتوبيس',paint:'transport'},
+  pickup:{w:2.02,h:0.90,l:5.20,cabinH:0.76,wheelR:0.36,wheels:'4',weight:9,spd:[18,25],label:'نصف نقل',paint:'transport'},
+  truck:{w:2.62,h:1.50,l:9.20,cabinH:1.28,wheelR:0.49,wheels:'6',weight:7,spd:[17,22],label:'شاحنة',paint:'transport'},
+  moto:{w:0.80,h:0.55,l:2.05,cabinH:0.45,wheelR:0.28,wheels:'2',weight:3,spd:[20,28],label:'موتوسيكل',paint:'car'},
+  bike:{w:0.60,h:0.45,l:1.75,cabinH:0.35,wheelR:0.32,wheels:'2',weight:1,spd:[7,13],label:'دراجة',paint:'car'}
+};
+const TYPE_KEYS=Object.keys(VEHICLE_TYPES);
+const EGYPT_FIRST=['أحمد','محمد','محمود','مصطفى','خالد','عمرو','حسن','إبراهيم','يوسف','كريم','طارق','سامح','وليد','شريف','هشام','عصام','رمضان','سيد','فتحي','جمال','علاء','نادر','رامي','عاطف','إسلام'];
+const EGYPT_FAMILY=['عبد الرحمن','السيد','الشريف','حسنين','مبارك','زكي','فؤاد','الجندي','عبد العزيز','الشافعي','البدري','منصور','الزيات','شلبي','رزق','عبد الله','سليمان','القاضي','النمر','عويس','غانم','الفقي'];
+const PLATE_LETTERS=['أ ب ج','د هـ و','ز ح ط','ي ك ل','م ن س','ع ف ص','ق ر ش','ت ث خ','ذ ض ظ','غ'];
+const GOVS=['القاهرة','الجيزة','الإسكندرية','الدقهلية','الشرقية','المنوفية','القليوبية','سوهاج','أسيوط','الفيوم','بني سويف','المنيا','قنا','أسوان','بورسعيد','السويس','دمياط','كفر الشيخ','البحيرة','الإسماعيلية'];
+const CAR_MAKES=[{make:'فيات',models:['128','131','شاهين','تيبو','سيينا']},{make:'هيونداي',models:['إلنترا','أكسنت','فيرنا','ماتريكس']},{make:'كيا',models:['سيراتو','ريو','بيكانتو','سبورتاج']},{make:'تويوتا',models:['كورولا','ياريس','هايلكس']},{make:'نيسان',models:['صني','قاشقاي','سنترا']},{make:'شيفروليه',models:['لانوس','أوبترا','أفيو','كروز']},{make:'ميتسوبيشي',models:['لانسر','باجيرو']},{make:'رينو',models:['لوجان','سانديرو','ميجان']},{make:'سكودا',models:['فابيا','أوكتافيا']},{make:'بيجو',models:['301','بارتنر']},{make:'فولكس فاجن',models:['جولف','بولو','باسات']},{make:'مرسيدس',models:['E200','C180']},{make:'بي إم دبليو',models:['318','520']}];
+const BUS_MAKES=[{make:'مرسيدس',models:['سبرينتر','أوكي 0305']},{make:'إم إيه إن',models:['SL 202','SL 222']},{make:'إيكاروس',models:['256','260']},{make:'تويوتا',models:['كوستر']},{make:'جولدن دراجون',models:['XML 6120']}];
+const TRUCK_MAKES=[{make:'إيسوزو',models:['NPR','NQR']},{make:'مرسيدس',models:['أكتوروس','أتيكو']},{make:'فولفو',models:['FH','FM']},{make:'مان',models:['TGM','TGS']},{make:'كيا',models:['K2700']}];
+const SUV_MAKES=[{make:'هيونداي',models:['توسان','سانتافي']},{make:'كيا',models:['سبورتاج','سورينتو']},{make:'نيسان',models:['قاشقاي','إكس تريل']},{make:'ميتسوبيشي',models:['إكليبس كروس','أوتلاندر']}];
+const MOTO_MAKES=[{make:'هوجان',models:['150','200']},{make:'دايون',models:['125']},{make:'سوزوكي',models:['GD110']},{make:'بيجو',models:['Trekker']}];
+
+let caseSerial=1;
+const USED_PLATES=new Set();
+function makePlate(kind){let n,letters,full;do{n=rndInt(1000,99999);letters=pick(PLATE_LETTERS);full=String(n)+'-'+letters}while(USED_PLATES.has(full));USED_PLATES.add(full);return{num:String(n),letters,gov:pick(GOVS),kind,full}}
+function makeNationalId(age){const c=age>25?'2':'3';return c+pad2(rndInt(60,99))+pad2(rndInt(1,12))+pad2(rndInt(1,28))+pad2(rndInt(1,35))+String(rndInt(1000,9999))+rndInt(0,9)}
+function makeDriver(){const name=pick(EGYPT_FIRST)+' '+pick(EGYPT_FAMILY)+' '+pick(EGYPT_FAMILY);const age=rndInt(21,66);return{name,age,id:makeNationalId(age),gender:chance(0.88)?'ذكر':'أنثى'}}
+function makeVehicleIdentity(type){
+  const paintKey=VEHICLE_TYPES[type].paint;let palette=CAR_PAINTS;
+  if(paintKey==='taxi')palette=TAXI_PAINTS;else if(paintKey==='transport')palette=TRANSPORT_PAINTS;
+  const p=pick(palette);let mk;
+  if(type==='bus'||type==='microbus')mk=pick(BUS_MAKES);
+  else if(type==='truck'||type==='pickup'||type==='van')mk=pick(TRUCK_MAKES);
+  else if(type==='suv')mk=pick(SUV_MAKES);
+  else if(type==='moto'||type==='bike')mk=pick(MOTO_MAKES);
+  else mk=pick(CAR_MAKES);
+  return{make:mk.make,model:pick(mk.models),color:p.hex,colorName:p.name,year:rndInt(1996,2023),engineNo:'EN'+rndInt(100000,999999),chassisNo:'CH'+rndInt(1000000,9999999)};
+}
+function dateStr(offset){const d=new Date();d.setDate(d.getDate()+(offset||0));return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+'/'+d.getFullYear()}
+function generateRecord(type,opts){
+  opts=opts||{};
+  const ident=makeVehicleIdentity(type),driver=makeDriver();
+  let kind=type==='taxi'?'taxi':(['bus','truck','pickup','van','microbus'].indexOf(type)>=0?'transport':'private');
+  if(type==='car'&&chance(0.035)){kind='government';ident.color=0xe6e7e5;ident.colorName='أبيض حكومي'}
+  const plate=makePlate(kind);
+  const caseId='C'+(caseSerial++)+'-'+rndInt(100,999);
+  const r={caseId,type,typeLabel:VEHICLE_TYPES[type].label,driver,vehicle:ident,plate,suspicion:0,hidden:{},revealed:{},findings:[],physDone:{},reportId:opts.reportId||null,willEvade:false,outcome:null,recordedSpeed:0,speedViolation:false,speedExcess:0};
+  let roll=Math.random(),kindCase;
+  if(roll<0.38)kindCase='clean';else if(roll<0.55)kindCase='minorDoc';else if(roll<0.67)kindCase='expiredReg';else if(roll<0.76)kindCase='unpaidFines';else if(roll<0.83)kindCase='discrepancy';else if(roll<0.90)kindCase='suspiciousCargo';else if(roll<0.955)kindCase='stolen';else if(roll<0.982)kindCase='wanted';else if(roll<0.996)kindCase='serious';else kindCase='clean';
+  if(opts.forceCase)kindCase=opts.forceCase;
+  r.caseKind=kindCase;
+  const licExp=rndInt(20,900),regExp=rndInt(20,700),insExp=rndInt(20,400);
+  r.docs={
+    nationalId:{title:'بطاقة الرقم القومي',state:'valid',data:{'الاسم':driver.name,'الرقم القومي':driver.id,'النوع':driver.gender,'السن':driver.age+' سنة','محل الإصدار':plate.gov,'محل الميلاد':pick(GOVS),'تاريخ الانتهاء':dateStr(rndInt(60,2000))}},
+    license:{title:'رخصة القيادة',state:'valid',data:{'الاسم':driver.name,'رقم الرخصة':String(rndInt(100000,999999)),'الفئة':kind==='transport'?'ثانية / ثالثة':'خاصة','تاريخ الإصدار':dateStr(-rndInt(400,2500)),'تاريخ الانتهاء':dateStr(licExp),'المرور المختص':'مرور '+plate.gov}},
+    registration:{title:'رخصة تسيير المركبة',state:'valid',data:{'المالك':driver.name,'الماركة':ident.make,'الموديل':ident.model,'سنة الصنع':ident.year,'اللون':ident.colorName,'رقم الشاسيه':ident.chassisNo,'رقم الموتور':ident.engineNo,'اللوحة':plate.full,'الوزن الصافي':(type==='truck'?5000:type==='bus'?8500:1200)+' كجم','تاريخ الانتهاء':dateStr(regExp)}},
+    insurance:{title:'وثيقة التأمين الإجباري',state:'valid',data:{'الشركة':pick(['مصر للتأمين','الدلتا للتأمين','المشرق للتأمين','أليانز مصر','GIG مصر']),'رقم الوثيقة':'INS-'+rndInt(100000,999999),'المركبة':ident.make+' '+ident.model,'اللوحة':plate.full,'تاريخ الإصدار':dateStr(-rndInt(60,300)),'تاريخ الانتهاء':dateStr(insExp),'التغطية':pick(['طرف ثالث','شامل','طرف ثالث + حريق']),'قيمة التأمين':rndInt(200,1500)+' ج.م'}},
+    plate:{title:'بيانات اللوحة المعدنية',state:'valid',data:{'الرقم':plate.num,'الحروف':plate.letters,'نوع اللوحة':kind==='government'?'حكومي':(kind==='private'?'ملاكي':(kind==='taxi'?'أجرة':'نقل')),'المحافظة':plate.gov,'حالة اللوحة':'سليمة','مطابقة للرخصة':'نعم'}}
+  };
+  switch(kindCase){
+    case'minorDoc':{const w=pick(['license','insurance','nationalId']);r.docs[w].state=chance(0.5)?'expired':'missing';if(r.docs[w].state==='expired'){r.docs[w].data['تاريخ الانتهاء']=dateStr(-rndInt(5,400));r.hidden[w+'_expired']=true}else r.hidden[w+'_missing']=true;r.suspicion+=12;break}
+    case'expiredReg':{r.docs.registration.state='expired';r.docs.registration.data['تاريخ الانتهاء']=dateStr(-rndInt(10,500));r.hidden.reg_expired=true;r.suspicion+=15;break}
+    case'unpaidFines':{const n=rndInt(1,4);r.fines=[];for(let i=0;i<n;i++){r.fines.push({code:pick(['تجاوز السرعة','وقوف خاطئ','عدم استخدام حزام','مخالفة إشارة','سير عكس الاتجاه']),amount:pick([100,150,200,300,500]),date:dateStr(-rndInt(10,700))})}r.hidden.unpaid_fines=true;r.suspicion+=10;break}
+    case'discrepancy':{r.docs.plate.state='suspicious';r.docs.plate.data['مطابقة للرخصة']='لا';r.docs.registration.data['اللون']=pick(CAR_PAINTS).name;r.docs.registration.state='suspicious';r.hidden.plate_mismatch=true;r.suspicion+=35;break}
+    case'suspiciousCargo':{r.hidden.suspicious_cargo=true;r.hidden.cargoDesc=pick(['أكياس غير مُعلَّمة بوزن غير متطابق مع بيان الحمولة','صناديق مُغلقة بإحكام بدون مستندات تثبت مصدرها','براميل بدون ملصقات وتُصدر رائحة كيميائية','طرود مُغلقة بشريط لاصق مكتوب عليه اسم مستعار']);r.suspicion+=30;break}
+    case'stolen':{r.hidden.stolen=true;r.docs.registration.state='suspicious';r.docs.registration.data['المالك']=pick(EGYPT_FIRST)+' '+pick(EGYPT_FAMILY);r.hidden.stolenReason=pick(['بلاغ مسروقات مُسجَّل بالقسم','مركبة مُبلَّغ عن سرقتها من صاحبها']);r.suspicion+=55;break}
+    case'wanted':{r.hidden.wanted=true;r.hidden.wantedReason=pick(['مطلوب في قضية نصب مالي','مطلوب في قضية تهرب ضريبي','مطلوب في قضية تزوير مستندات رسمية','مطلوب لعدم تنفيذ حكم قضائي']);r.suspicion+=45;break}
+    case'serious':{r.hidden.stolen=chance(0.5);r.hidden.wanted=true;r.hidden.wantedReason='مطلوب في قضية تهريب آثار';r.hidden.suspicious_cargo=true;r.hidden.cargoDesc='قطع أثرية مُغلَّفة داخل صناديق خشبية';r.docs.registration.state='suspicious';r.suspicion+=75;break}
+    default:r.suspicion+=rndInt(0,10);
+  }
+  r.nervous=chance(0.18+(r.suspicion/400));
+  r.willEvade=chance(Math.min(CFG.evadeBase*(1+r.suspicion/60),0.05));
+  return r;
+}
+
+const FINE_TABLE={
+  license_expired:{label:'رخصة قيادة منتهية',amount:300},
+  license_missing:{label:'عدم حمل رخصة القيادة',amount:250},
+  id_missing:{label:'عدم حمل بطاقة الرقم القومي',amount:150},
+  insurance_expired:{label:'تأمين إجباري منتهي',amount:400},
+  insurance_missing:{label:'عدم وجود وثيقة تأمين',amount:800},
+  reg_expired:{label:'رخصة تسيير منتهية',amount:500},
+  reg_missing:{label:'عدم حمل رخصة التسيير',amount:400},
+  plate_mismatch:{label:'عدم مطابقة اللوحة لبيانات الرخصة',amount:1000},
+  unpaid_fines:{label:'مخالفات مالية مستحقة',amount:0},
+  suspicious_cargo:{label:'حمولة مشتبه بها بدون مستندات',amount:1500},
+  stolen:{label:'مركبة مُبلغ عنها مسروقة',amount:0,arrest:true},
+  wanted:{label:'شخص مطلوب أمنياً',amount:0,arrest:true},
+  speeding:{label:'تجاوز السرعة المقررة',amount:0}
+};
+function violationsOf(rec){const v=[];if(rec.docs.license.state==='expired')v.push('license_expired');if(rec.docs.license.state==='missing')v.push('license_missing');if(rec.docs.nationalId.state==='missing')v.push('id_missing');if(rec.docs.insurance.state==='expired')v.push('insurance_expired');if(rec.docs.insurance.state==='missing')v.push('insurance_missing');if(rec.docs.registration.state==='expired')v.push('reg_expired');if(rec.docs.registration.state==='missing')v.push('reg_missing');if(rec.hidden.plate_mismatch)v.push('plate_mismatch');if(rec.hidden.unpaid_fines&&rec.fines&&rec.fines.length)v.push('unpaid_fines');if(rec.hidden.suspicious_cargo&&rec.physDone.cargo)v.push('suspicious_cargo');if(rec.hidden.stolen&&rec.revealed.registrationCheck)v.push('stolen');if(rec.hidden.wanted&&rec.revealed.wantedCheck)v.push('wanted');if(rec.speedViolation)v.push('speeding');return v}
+function hiddenTruthCodes(rec){const v=[];for(const k of['license_expired','license_missing','nationalId_missing','insurance_expired','insurance_missing','reg_expired','plate_mismatch','unpaid_fines','suspicious_cargo','stolen','wanted'])if(rec.hidden[k])v.push(k);if(rec.speedViolation)v.push('speeding');return v}
+function fineAmountFor(code,rec){if(code==='unpaid_fines')return(rec.fines||[]).reduce((s,f)=>s+f.amount,0);if(code==='speeding')return 100+Math.round(rec.speedExcess*15);const e=FINE_TABLE[code];return e?e.amount:0}
+
+const MatCache=new Map();
+function M(hex,opts){const key=hex+'|'+JSON.stringify(opts||{});if(MatCache.has(key))return MatCache.get(key);const m=new THREE.MeshStandardMaterial(Object.assign({color:hex,roughness:0.55,metalness:0.25},opts||{}));MatCache.set(key,m);return m}
+const GeoCache={
+  box:new Map(),
+  get(w,h,d){const k=w.toFixed(2)+'_'+h.toFixed(2)+'_'+d.toFixed(2);if(!this.box.has(k))this.box.set(k,new THREE.BoxGeometry(w,h,d));return this.box.get(k)},
+  wheel:new Map(),
+  wheelGeo(r){const k=Math.round(r*100);if(!this.wheel.has(k)){const g=new THREE.CylinderGeometry(r,r,r*0.62,28);g.rotateZ(Math.PI/2);this.wheel.set(k,g)}return this.wheel.get(k)},
+  rim:new Map(),
+  rimGeo(r){const k=Math.round(r*100);if(!this.rim.has(k)){const g=new THREE.CylinderGeometry(r*0.6,r*0.6,r*0.68,18);g.rotateZ(Math.PI/2);this.rim.set(k,g)}return this.rim.get(k)}
+};
+
+function buildVehicleMesh(type,colorHex){
+  const T=VEHICLE_TYPES[type];
+  const g=new THREE.Group();
+  const W=T.w,L=T.l,BH=T.h,wr=T.wheelR;
+  const bodyMat=M(colorHex,{roughness:0.29,metalness:0.34});
+  const glassMat=M(0x101b22,{roughness:0.18,metalness:0.36,transparent:true,opacity:0.94});
+  const darkMat=new THREE.MeshStandardMaterial({color:0x0e1114,roughness:0.9});
+  const tireMat=new THREE.MeshStandardMaterial({color:0x0a0a0c,roughness:1.0});
+  const chromeMat=new THREE.MeshStandardMaterial({color:0xc4ccd2,roughness:0.16,metalness:0.96});
+  const rimMat=new THREE.MeshStandardMaterial({color:0x8a8f95,roughness:0.22,metalness:0.9});
+  const plateMat=new THREE.MeshStandardMaterial({color:0xf0eee2,roughness:0.5});
+  const headMat=new THREE.MeshStandardMaterial({color:0xfff3d0,emissive:0xffe9b0,emissiveIntensity:0.4,roughness:0.2});
+  const add=(w,h,d,x,y,z,role,mat)=>{const m=new THREE.Mesh(GeoCache.get(w,h,d),mat||bodyMat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;m.userData.role=role||'body';g.add(m);return m};
+  const baseY=wr,roofZ=L*0.02;
+  if(type==='car'||type==='taxi'){
+    add(W,BH,L,0,baseY+BH/2,0);add(W*0.97,BH*0.30,L*0.28,0,baseY+BH+BH*0.15,L*0.32);add(W*0.97,BH*0.26,L*0.22,0,baseY+BH+BH*0.13,-L*0.36);
+    add(W*0.87,T.cabinH,L*0.46,0,baseY+BH+T.cabinH/2,roofZ,'glass',glassMat);add(W*0.89,T.cabinH*0.16,L*0.47,0,baseY+BH+T.cabinH*0.94,roofZ);
+    for(const sx of[-1,1]){add(0.06,T.cabinH*1.02,0.09,sx*W*0.44,baseY+BH+T.cabinH/2,L*0.20,'dark',darkMat);add(0.06,T.cabinH*1.02,0.09,sx*W*0.44,baseY+BH+T.cabinH/2,0,'dark',darkMat);add(0.06,T.cabinH*1.02,0.09,sx*W*0.44,baseY+BH+T.cabinH/2,-L*0.22,'dark',darkMat)}
+    const ws=new THREE.Mesh(GeoCache.get(W*0.82,T.cabinH*0.90,0.05),glassMat);ws.position.set(0,baseY+BH+T.cabinH*0.52,L*0.21);ws.rotation.x=-0.32;g.add(ws);
+    const rw=new THREE.Mesh(GeoCache.get(W*0.82,T.cabinH*0.82,0.05),glassMat);rw.position.set(0,baseY+BH+T.cabinH*0.52,-L*0.23);rw.rotation.x=0.34;g.add(rw);
+    add(W*1.01,BH*0.20,L*0.055,0,baseY+BH*0.22,L/2-0.02,'dark',darkMat);add(W*1.01,BH*0.20,L*0.055,0,baseY+BH*0.22,-L/2+0.02,'dark',darkMat);add(W*0.55,BH*0.28,0.05,0,baseY+BH*0.62,L/2-0.02,'dark',darkMat);
+    for(const sx of[-1,1]){add(0.02,BH*0.62,0.04,sx*(W/2+0.005),baseY+BH*0.5,0,'dark',darkMat);add(0.14,0.045,0.045,sx*(W/2+0.01),baseY+BH*0.72,L*0.05,'chrome',chromeMat);add(0.14,0.045,0.045,sx*(W/2+0.01),baseY+BH*0.72,-L*0.15,'chrome',chromeMat)}
+    for(const sx of[-1,1]){add(0.05,0.09,0.06,sx*(W/2+0.09),baseY+BH+T.cabinH*0.72,L*0.19);add(0.09,0.05,0.11,sx*(W/2+0.12),baseY+BH+T.cabinH*0.78,L*0.19,'glass',glassMat)}
+    add(0.07,0.07,0.14,-W*0.32,baseY+0.08,-L/2-0.05,'chrome',chromeMat);add(0.5,0.010,0.018,-W*0.16,baseY+BH+0.02,L*0.22,'dark',darkMat);add(0.5,0.010,0.018,W*0.16,baseY+BH+0.02,L*0.22,'dark',darkMat);
+    if(type==='taxi'){const signMat=M(0x141414,{emissive:0xffcc33,emissiveIntensity:0.9});add(0.62,0.20,0.24,0,baseY+BH+T.cabinH*1.08,roofZ,'light',signMat)}
+  } else if(type==='microbus'||type==='van'){
+    add(W,BH,L,0,baseY+BH/2,0);add(W*1.003,BH*0.36,L*0.90,0,baseY+BH*0.78,0,'glass',glassMat);add(W*0.96,0.09,L,0,baseY+BH+0.045,0);
+    const ws=new THREE.Mesh(GeoCache.get(W*0.92,BH*0.55,0.05),glassMat);ws.position.set(0,baseY+BH*0.72,L/2-0.02);ws.rotation.x=-0.18;g.add(ws);
+    add(W*1.01,BH*0.20,0.06,0,baseY+BH*0.18,L/2-0.02,'dark',darkMat);add(W*0.6,BH*0.28,0.04,0,baseY+BH*0.55,L/2-0.02,'dark',darkMat);
+    for(const sx of[-1,1])add(0.06,0.10,0.05,sx*(W/2+0.10),baseY+BH*0.85,L*0.40)
+  } else if(type==='bus'){
+    add(W,BH,L,0,baseY+BH/2,0);add(W*1.003,BH*0.30,L*0.94,0,baseY+BH*0.72,0,'glass',glassMat);add(W*1.003,BH*0.16,L*0.94,0,baseY+BH*0.40,0,'glass',glassMat);add(W*0.97,0.11,L,0,baseY+BH+0.055,0);
+    const ws=new THREE.Mesh(GeoCache.get(W*0.94,BH*0.55,0.06),glassMat);ws.position.set(0,baseY+BH*0.68,L/2-0.03);ws.rotation.x=-0.08;g.add(ws);
+    add(0.06,BH*0.72,0.85,W/2-0.01,baseY+BH*0.45,L*0.30,'dark',darkMat);add(W*1.01,BH*0.16,0.06,0,baseY+BH*0.14,L/2-0.02,'dark',darkMat);add(W*1.01,BH*0.16,0.06,0,baseY+BH*0.14,-L/2+0.02,'dark',darkMat);
+    add(W*0.5,0.18,0.035,0,baseY+BH*0.92,L/2+0.005,'light',M(0x0e0e0e,{emissive:0xffcc55,emissiveIntensity:0.6}))
+  } else if(type==='pickup'){
+    add(W,BH*0.9,L,0,baseY+BH*0.45,0);add(W*0.92,T.cabinH,L*0.34,0,baseY+BH*0.9+T.cabinH/2,L*0.24,'glass',glassMat);add(W*0.94,T.cabinH*0.18,L*0.36,0,baseY+BH*0.9+T.cabinH*0.94,L*0.24);
+    add(0.09,0.40,L*0.44,W/2-0.045,baseY+BH*0.9+0.20,-L*0.24);add(0.09,0.40,L*0.44,-W/2+0.045,baseY+BH*0.9+0.20,-L*0.24);add(W,0.40,0.09,0,baseY+BH*0.9+0.20,-L/2+0.045);add(W*0.97,0.05,L*0.44,0,baseY+BH*0.9+0.04,-L*0.24,'dark',darkMat);add(W*1.01,BH*0.18,0.06,0,baseY+BH*0.14,L/2-0.02,'dark',darkMat)
+  } else if(type==='truck'){
+    add(W*0.94,BH*0.5,L*0.94,0,baseY+BH*0.26,0,'dark',darkMat);add(W,BH,L*0.26,0,baseY+BH/2+BH*0.06,L*0.35);add(W*0.94,BH*0.40,0.06,0,baseY+BH*0.72,L*0.475,'glass',glassMat);add(W*1.01,BH*1.25,L*0.60,0,baseY+BH*0.62+BH*0.30,-L*0.17);add(W*1.02,BH*1.10,0.07,0,baseY+BH*0.62+BH*0.28,-L*0.47,'dark',darkMat);add(0.09,0.09,0.05,0,baseY+BH*0.62+BH*0.28,-L*0.49,'chrome',chromeMat);add(W*1.01,BH*0.12,0.09,0,baseY+BH*0.10,L/2-0.02,'dark',darkMat)
+  } else if(type==='moto'){
+    add(0.28,0.30,L*0.72,0,baseY+0.30,0);add(0.34,0.16,0.72,0,baseY+0.52,-0.18,'dark',darkMat);add(0.06,0.54,0.06,0,baseY+0.72,L*0.36,'dark',darkMat);add(0.58,0.06,0.06,0,baseY+1.00,L*0.36,'chrome',chromeMat);add(0.28,0.40,0.20,0,baseY+0.78,L*0.30,'glass',glassMat);add(0.05,0.05,0.35,0.13,baseY+0.20,-0.30,'chrome',chromeMat)
+  } else if(type==='bike'){
+    add(0.05,0.05,L*0.70,0,baseY+0.44,0,'chrome',chromeMat);add(0.05,0.52,0.05,0,baseY+0.62,-L*0.20,'chrome',chromeMat);add(0.28,0.09,0.40,0,baseY+0.80,-L*0.22,'dark',darkMat);add(0.48,0.045,0.045,0,baseY+0.94,L*0.28,'chrome',chromeMat)
+  }
+  if(type==='car'||type==='taxi'){
+    for(const sx of[-1,1]){
+      for(const z of[L*.105,-L*.105])add(0.018,T.cabinH*.42,L*.155,sx*W*.442,baseY+BH+T.cabinH*.55,z,'glass',glassMat);
+      for(const z of[L*.015,-L*.34])add(0.018,BH*.70,0.014,sx*(W/2+.009),baseY+BH*.49,z,'dark',darkMat);
+      add(0.035,0.035,0.13,sx*(W/2+.02),baseY+BH*.83,-L*.08,'chrome',chromeMat);
+      add(0.025,0.12,0.22,sx*(W/2+.015),baseY+BH*.12,0,'dark',darkMat);
+    }
+    add(W*.30,BH*.22,0.025,0,baseY+BH*.49,L/2+.018,'chrome',chromeMat);
+    for(let i=-2;i<=2;i++)add(0.018,BH*.13,0.028,i*W*.052,baseY+BH*.49,L/2+.035,'dark',darkMat);
+    add(W*.30,BH*.07,0.024,0,baseY+BH*.28,L/2+.02,'dark',darkMat)
+  }
+  if(type==='microbus'||type==='van'){
+    for(const sx of[-1,1]){for(const z of[L*.31,L*.09,-L*.13,-L*.35])add(0.018,BH*.24,L*.145,sx*(W/2+.009),baseY+BH*.78,z,'glass',glassMat);add(0.025,BH*.045,L*.91,sx*(W/2+.015),baseY+BH*.59,0,'chrome',chromeMat);add(0.02,BH*.60,0.018,sx*(W/2+.012),baseY+BH*.48,L*.01,'dark',darkMat)}
+  } else if(type==='bus'){
+    for(const sx of[-1,1]){for(let i=0;i<6;i++){const z=L*.36-i*L*.145;add(0.018,BH*.22,L*.105,sx*(W/2+.012),baseY+BH*.72,z,'glass',glassMat)}add(0.022,BH*.04,L*.88,sx*(W/2+.02),baseY+BH*.53,0,'chrome',chromeMat)}
+  } else if(type==='pickup'||type==='truck'){
+    for(const sx of[-1,1]){add(0.018,T.cabinH*.40,L*.17,sx*(W/2+.01),baseY+BH+T.cabinH*.54,L*.24,'glass',glassMat);add(0.035,0.035,0.13,sx*(W/2+.02),baseY+BH*.84,L*.12,'chrome',chromeMat)}
+    if(type==='truck'){for(const z of[-L*.34,-L*.18,-L*.02])add(W*.95,BH*1.12,0.025,0,baseY+BH*.62+BH*.30,z,'chrome',chromeMat)}
+  }
+  const wg=GeoCache.wheelGeo(wr),rg=GeoCache.rimGeo(wr),hg=GeoCache.rimGeo(wr*0.42);
+  const wheelPos=[];
+  if(T.wheels==='2')wheelPos.push([0,wr,L*0.36],[0,wr,-L*0.36]);
+  else if(T.wheels==='6'){for(const z of[L*0.34,-L*0.18,-L*0.40])wheelPos.push([W/2*0.93,wr,z],[-W/2*0.93,wr,z])}
+  else{wheelPos.push([W/2*0.93,wr,L*0.30],[-W/2*0.93,wr,L*0.30]);wheelPos.push([W/2*0.93,wr,-L*0.30],[-W/2*0.93,wr,-L*0.30])}
+  g.userData.wheels=[];
+  for(const p of wheelPos){const w=new THREE.Group();w.add(new THREE.Mesh(wg,tireMat));const rim=new THREE.Mesh(rg,rimMat);rim.position.x=p[0]>0?0.008:-0.008;w.add(rim);const hub=new THREE.Mesh(hg,chromeMat);hub.position.x=p[0]>0?0.025:-0.025;w.add(hub);w.position.set(p[0],p[1],p[2]);g.add(w);g.userData.wheels.push(w)}
+  const heads=[],brakes=[],blinkers=[],sideLights=[];
+  const lightY=baseY+BH*0.55,frontZ=L/2+0.02,rearZ=-L/2-0.02,lx=W*0.34;
+  if(type!=='moto'&&type!=='bike'){
+    for(const sx of[-1,1]){
+      const h=new THREE.Mesh(GeoCache.get(0.28,0.14,0.08),headMat);h.position.set(sx*lx,lightY,frontZ);g.add(h);heads.push(h);
+      const t=new THREE.Mesh(GeoCache.get(0.26,0.14,0.08),new THREE.MeshStandardMaterial({color:0x2a0a0a,emissive:0xcc2020,emissiveIntensity:0}));t.position.set(sx*lx,lightY,rearZ);g.add(t);brakes.push(t);
+      const b=new THREE.Mesh(GeoCache.get(0.10,0.10,0.08),new THREE.MeshStandardMaterial({color:0x3a2a00,emissive:0xff9000,emissiveIntensity:0}));b.position.set(sx*(W/2+0.02),lightY,frontZ);g.add(b);blinkers.push(b);
+      const sl=new THREE.Mesh(GeoCache.get(0.05,0.08,0.05),new THREE.MeshStandardMaterial({color:0x3a2a00,emissive:0xff9000,emissiveIntensity:0}));sl.position.set(sx*(W/2+0.02),baseY+BH+T.cabinH*0.55,L*0.15);g.add(sl);sideLights.push(sl);
+    }
+  } else {
+    const h=new THREE.Mesh(GeoCache.get(0.18,0.13,0.07),headMat);h.position.set(0,baseY+0.75,L/2+0.02);g.add(h);heads.push(h);
+    const t=new THREE.Mesh(GeoCache.get(0.16,0.12,0.07),new THREE.MeshStandardMaterial({color:0x2a0a0a,emissive:0xcc2020,emissiveIntensity:0}));t.position.set(0,baseY+0.68,-L/2-0.02);g.add(t);brakes.push(t);
+  }
+  g.userData.headlights=heads;g.userData.brakes=brakes;g.userData.blinkers=blinkers;g.userData.sideLights=sideLights;
+  const kind=type==='taxi'?'taxi':(['bus','truck','pickup','van','microbus'].indexOf(type)>=0?'transport':'private');
+  add(0.40,0.10,0.015,0,baseY+BH*0.30,rearZ-0.005,'plate',plateMat);
+  g.userData.plateKind=kind;g.userData.type=type;g.userData.dims=T;
+  return g;
+}
+
+// ============================================================
+// ✅ ملاحظة: تم حذف buildPoliceCar القديمة بالكامل.
+// يتم الآن تحميل موديل SWAT الحقيقي من ./models/swat.fbx
+// ============================================================
+
+class Vehicle{
+  constructor(record,laneIndex,dir,laneX,scene){
+    this.rec=record;this.type=record.type;this.T=VEHICLE_TYPES[this.type];this.len=this.T.l;
+    this.dir=dir;this.laneIndex=laneIndex;this.laneX=laneX;this.x=laneX;
+    this.z=dir>0?CFG.spawnZ+rnd(-30,5):CFG.despawnZ-rnd(-30,5);
+    this.baseSpeed=rnd(this.T.spd[0],this.T.spd[1]);this.speed=this.baseSpeed;
+    this.state='approach';this.marked=false;this.selected=false;this.evadeTriggered=false;
+    this.laneChangeCd=rnd(8,22);this.targetX=laneX;this.age=0;this.speedRecorded=false;
+    this.turnSignal='none';this.turnSignalUntil=0;this.usedTurnSignal=false;
+    this.sensorSpeedModifier=chance(0.18)?rnd(1.10,1.35):chance(0.28)?rnd(0.75,0.95):rnd(0.95,1.05);
+    this.mesh=buildVehicleMesh(this.type,record.vehicle.color);
+    this.mesh.position.set(this.x,0,this.z);
+    if(dir<0)this.mesh.rotation.y=Math.PI;
+    this.mesh.userData.vehicle=this;scene.add(this.mesh);
+    const ringGeo=new THREE.RingGeometry(this.T.w*0.85,this.T.w*0.85+0.24,28);
+    ringGeo.rotateX(-Math.PI/2);
+    this.ring=new THREE.Mesh(ringGeo,new THREE.MeshBasicMaterial({color:0xc9a04a,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));
+    this.ring.position.set(this.x,0.05,this.z);scene.add(this.ring);
+  }
+  dispose(scene){scene.remove(this.mesh);scene.remove(this.ring);this.ring.geometry.dispose();this.ring.material.dispose()}
+  setSelected(v){this.selected=v;this.ring.material.opacity=v?0.9:0}
+  setBrake(on){for(const b of this.mesh.userData.brakes)b.material.emissiveIntensity=on?1.3:0.02}
+  setBlink(on,side){for(const b of this.mesh.userData.blinkers)b.material.emissiveIntensity=on?1.1:0;for(const b of this.mesh.userData.sideLights)b.material.emissiveIntensity=on?1.2:0}
+  setTurnSignal(side,durationMs){if(this.usedTurnSignal)return;this.turnSignal=side;this.turnSignalUntil=performance.now()+(durationMs||4000);this.usedTurnSignal=true;this.setBlink(true,side)}
+  update(dt,traffic,game){
+    this.age+=dt;if(this.state==='gone')return;
+
+    if(this.turnSignal!=='none'&&performance.now()>this.turnSignalUntil){this.turnSignal='none';this.setBlink(false)}
+    if(this.turnSignal!=='none'){const phase=Math.floor(performance.now()/350)%2;const on=phase===0;
+      for(const b of this.mesh.userData.blinkers)b.material.emissiveIntensity=on?1.2:0.1;
+      for(const b of this.mesh.userData.sideLights)b.material.emissiveIntensity=on?1.3:0.1}
+
+    if(this.state!=='stopped'&&this.speed>0.2&&this.mesh.userData.wheels){
+      const rot=(this.speed*dt)/this.T.wheelR;
+      for(const w of this.mesh.userData.wheels)w.rotation.x+=rot*this.dir}
+
+    if(!this.speedRecorded&&this.dir>0&&this.z>=CFG.speedSensorZ){
+      this.speedRecorded=true;const kmh=this.speed*this.sensorSpeedModifier*3.6;
+      this.rec.recordedSpeed=Math.round(kmh);
+      if(kmh>CFG.speedLimit){this.rec.speedViolation=true;this.rec.speedExcess=Math.round(kmh-CFG.speedLimit);
+        if(game)game.onSpeedDetected(this)}}
+
+    if(this.state==='approach'||this.state==='evading'){
+      let desired=this.baseSpeed*(this.state==='evading'?1.5:1);
+
+      const gap=traffic.gapAhead(this);
+      if(gap<20)desired=Math.min(desired,Math.max(0,(gap-4)*0.9));
+      if(gap<4.0)desired=0;
+
+      if(game&&game.roadBlock&&game.roadBlock.active&&!game.roadBlock.isOpen()&&this.dir>0){
+        const stopAt=game.roadBlock.z+5;const dist=stopAt-this.z;
+        if(dist>0&&dist<45)desired=Math.min(desired,Math.max(0,dist*0.32));
+        if(dist<=2.5)desired=0;
+      }
+
+      if(this.state==='evading'){this.targetX=this.dir>0?CFG.departLanes[0]:CFG.approachLanes[0]}
+      else{this.laneChangeCd-=dt;
+        if(this.laneChangeCd<=0&&this.dir>0&&this.z<-70&&gap<20){
+          const prev=this.laneIndex;const other=prev===0?1:0;
+          this.setTurnSignal(other>prev?'right':'left',2200);
+          this.laneIndex=other;this.targetX=CFG.approachLanes[other];this.laneChangeCd=rnd(14,30)}}
+
+      if(this.rec.willEvade&&!this.evadeTriggered&&this.dir>0&&this.z>-100&&this.z<-40){
+        if(chance(dt*0.5)){this.evadeTriggered=true;this.state='evading';this.setBlink(true);
+          if(game)game.onVehicleEvade(this)}}
+
+      const dv=desired-this.speed;const brakeRate=dv<0?12:4.0;
+      this.speed+=clamp(dv,-brakeRate*dt,brakeRate*dt);this.speed=Math.max(0,this.speed);
+      this.setBrake(dv<-0.5);
+      this.x=lerp(this.x,this.targetX,smooth(0.02,dt));
+    }
+    else if(this.state==='stopped'){this.speed=0;this.setBrake(true)}
+    else if(this.state==='released'){
+      this.speed=Math.min(this.baseSpeed,this.speed+5*dt);
+      this.targetX=this.dir>0?CFG.approachLanes[0]:CFG.departLanes[0];
+      this.x=lerp(this.x,this.targetX,smooth(0.05,dt));this.setBrake(false);
+      if(Math.abs(this.z)>CFG.despawnZ-30)this.state='gone';
+    }
+
+    const dz=this.speed*this.dir*dt;
+    if(Math.abs(dz)>0.0001){
+      const newZ=this.z+dz;
+      if(traffic.canMove(this,newZ,game))this.z=newZ;
+      else this.speed=0;
+    }
+
+    this.mesh.position.set(this.x,0,this.z);this.ring.position.set(this.x,0.05,this.z);
+    if(this.dir>0&&this.z>CFG.despawnZ)this.state='gone';
+    if(this.dir<0&&this.z<CFG.spawnZ)this.state='gone';
+  }
+  startPulling(){if(this.state==='pulling'||this.state==='stopped')return;this.state='pulling';if(chance(0.65))this.setTurnSignal('right',3500)}
+  release(){this.state='released';this.setBrake(false);this.rec.outcome=this.rec.outcome||'released'}
+}
+
+class Traffic{
+  constructor(scene,game){this.scene=scene;this.game=game;this.vehicles=[];this.spawnTimer=1.5;this.pendingRecords=[];this.__idCounter=1}
+  queueRecord(rec){this.pendingRecords.push(rec)}
+  maxCount(){const q=Save.data.settings.quality;const dens=Save.data.settings.trafficDensity||1;let base;if(q==='low')base=7;else if(q==='high')base=16;else base=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)?10:14;return Math.max(4,Math.round(base*dens))}
+  spawn(){let rec;if(this.pendingRecords.length)rec=this.pendingRecords.shift();else rec=generateRecord(pickWeightedType());const laneIdx=chance(0.5)?0:1;const v=new Vehicle(rec,laneIdx,1,CFG.approachLanes[laneIdx],this.scene);v.__id=this.__idCounter++;for(const o of this.vehicles){if(Math.abs(o.z-v.z)<15&&Math.abs(o.x-v.x)<3)v.z-=24}this.vehicles.push(v);return v}
+  spawnOpposite(){const rec=generateRecord(pick(TYPE_KEYS));const laneIdx=chance(0.5)?0:1;const v=new Vehicle(rec,laneIdx,-1,CFG.departLanes[laneIdx],this.scene);v.__id=this.__idCounter++;v.baseSpeed=rnd(14,26);this.vehicles.push(v);return v}
+  gapAhead(veh){let best=Infinity;for(const o of this.vehicles){if(o===veh||o.state==='gone')continue;if(o.dir!==veh.dir)continue;if(Math.abs(o.x-veh.x)>2.6)continue;const d=(o.z-veh.z)*veh.dir;if(d>0){const g=d-(o.len+veh.len)*0.5;if(g<best)best=g}}return best}
+
+  canMove(veh, newZ, game){
+    const myHalfW = veh.T.w * 0.5;
+    const myHalfL = veh.len * 0.5;
+
+    for(const o of this.vehicles){
+      if(o===veh||o.state==='gone')continue;
+      if(o.dir!==veh.dir)continue;
+      if(Math.abs(o.x-veh.x)>(veh.T.w+o.T.w)*0.5+0.6)continue;
+      const oHalf=o.len*0.5;
+      const dist=(o.z-newZ)*veh.dir;
+      const minDist=myHalfL+oHalf+0.8;
+      if(dist>0&&dist<minDist)return false;
+    }
+
+    if(game && game.world && game.world.obstacles){
+      for(const obs of game.world.obstacles){
+        const dx = Math.abs(veh.x - obs.x);
+        const dz = Math.abs(newZ - obs.z);
+        if(dx < myHalfW + obs.hw && dz < myHalfL + obs.hl) return false;
+      }
+    }
+
+    if(game&&game.roadBlock&&game.roadBlock.active&&!game.roadBlock.isOpen()&&veh.dir>0){
+      if(newZ+myHalfL>game.roadBlock.z-1.0)return false;
+    }
+
+    return true;
+  }
+
+  update(dt){
+    this.spawnTimer-=dt;
+    const approaching=this.vehicles.filter(v=>v.dir>0&&v.state!=='gone').length;
+    const opposite=this.vehicles.length-approaching;
+    if(this.spawnTimer<=0){const density=Save.data.settings.trafficDensity||1;this.spawnTimer=clamp(rnd(2.5,5.5)/density,1.0,8);if(approaching<this.maxCount())this.spawn();if(opposite<Math.max(3,Math.round(this.maxCount()*0.4)))this.spawnOpposite()}
+    for(const v of this.vehicles)v.update(dt,this,this.game);
+    for(let i=this.vehicles.length-1;i>=0;i--){const v=this.vehicles[i];if(v.state==='gone'){if(this.game.selected===v)this.game.clearSelection();v.dispose(this.scene);this.vehicles.splice(i,1)}}
+  }
+  approachingList(){return this.vehicles.filter(v=>v.dir>0&&v.state!=='gone'&&v.z<30).sort((a,b)=>(b.z-a.z))}
+  clear(){for(const v of this.vehicles)v.dispose(this.scene);this.vehicles.length=0}
+}
+function pickWeightedType(){const pool=[];for(const k of TYPE_KEYS){const w=VEHICLE_TYPES[k].weight;for(let i=0;i<w;i++)pool.push(k)}return pick(pool)}
+
+class FieldOfficer{
+  constructor(scene){
+    this.group=new THREE.Group();this.build();this.scene=scene;this.visible=false;this.group.visible=false;scene.add(this.group);
+    this.state='idle';this.target=null;this.walkPhase=0;this.arrivedCb=null;this.idleTime=0;
+  }
+  build(){
+    const navy=M(0x1c2834,{roughness:0.85}),skin=M(0xc49a72,{roughness:0.85}),black=M(0x101216,{roughness:0.8}),gold=M(0xc9a04a,{roughness:0.35,metalness:0.75});
+    this.legL=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.11,0.92,8),black);this.legL.position.set(-0.16,0.46,0);
+    this.legR=new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.11,0.92,8),black);this.legR.position.set(0.16,0.46,0);
+    this.legL.castShadow=this.legR.castShadow=true;this.group.add(this.legL,this.legR);
+    const torso=new THREE.Mesh(GeoCache.get(0.62,0.78,0.36),navy);torso.position.y=1.28;torso.castShadow=true;this.group.add(torso);
+    const strap=new THREE.Mesh(GeoCache.get(0.66,0.10,0.40),M(0xe8e8e8));strap.position.y=1.02;this.group.add(strap);
+    const sh=new THREE.Mesh(GeoCache.get(0.78,0.16,0.40),navy);sh.position.y=1.62;this.group.add(sh);
+    const badge=new THREE.Mesh(new THREE.CircleGeometry(0.07,10),gold);badge.position.set(0.20,1.44,0.19);this.group.add(badge);
+    this.armL=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.075,0.72,8),navy);this.armL.position.set(-0.44,1.26,0);
+    this.armR=new THREE.Mesh(new THREE.CylinderGeometry(0.085,0.075,0.72,8),navy);this.armR.position.set(0.44,1.26,0);
+    this.group.add(this.armL,this.armR);
+    const handGeo=new THREE.SphereGeometry(0.085,8,6);
+    const hL=new THREE.Mesh(handGeo,skin);hL.position.set(-0.44,0.88,0);
+    const hR=new THREE.Mesh(handGeo,skin);hR.position.set(0.44,0.88,0);
+    this.group.add(hL,hR);
+    const head=new THREE.Mesh(new THREE.SphereGeometry(0.20,14,12),skin);head.position.y=1.86;head.castShadow=true;this.group.add(head);
+    const cap=new THREE.Mesh(new THREE.CylinderGeometry(0.215,0.215,0.16,14),navy);cap.position.y=2.01;this.group.add(cap);
+    const brim=new THREE.Mesh(GeoCache.get(0.34,0.035,0.24),black);brim.position.set(0,1.94,0.20);this.group.add(brim);
+    const capBadge=new THREE.Mesh(new THREE.CircleGeometry(0.055,10),gold);capBadge.position.set(0,2.00,0.215);this.group.add(capBadge);
+  }
+  spawn(x,z){this.group.position.set(x,0,z);this.group.visible=true;this.visible=true;this.state='walking';this.walkPhase=0}
+  hide(){this.group.visible=false;this.visible=false;this.state='idle';this.target=null}
+  walkTo(x,z,cb){this.target={x,z};this.arrivedCb=cb;this.state='walking'}
+  update(dt){
+    if(!this.visible)return;
+    if(this.state==='walking'&&this.target){
+      const dx=this.target.x-this.group.position.x,dz=this.target.z-this.group.position.z,d=Math.hypot(dx,dz);
+      if(d<0.15){this.state='standing';if(this.arrivedCb){const cb=this.arrivedCb;this.arrivedCb=null;cb()}}
+      else{const speed=1.9,nx=dx/d,nz=dz/d;this.group.position.x+=nx*speed*dt;this.group.position.z+=nz*speed*dt;this.group.rotation.y=Math.atan2(nx,nz);this.walkPhase+=dt*8;const sw=Math.sin(this.walkPhase)*0.55;this.legL.rotation.x=sw;this.legR.rotation.x=-sw;this.armL.rotation.x=-sw*0.6;this.armR.rotation.x=sw*0.6}
+    } else if(this.state==='standing'){this.idleTime+=dt;const t=performance.now()*0.001;this.group.rotation.y+=Math.sin(t*0.5)*0.001}
+  }
+}
+
+class RoadBlock{
+  constructor(scene,game){this.scene=scene;this.game=game;this.active=false;this.z=CFG.blockLineZ;this.openingUntil=0;this.officers=[];this.barriers=[];this._build()}
+  _build(){
+    const roadW=CFG.roadHalf*2,segW=roadW/8;
+    for(let i=0;i<8;i++){const b=this._makeBarrier(segW*0.92);b.position.set(-CFG.roadHalf+segW*(i+0.5),0,this.z);b.visible=false;this.scene.add(b);this.barriers.push(b)}
+    for(let i=0;i<3;i++){const off=new FieldOfficer(this.scene);off.hide();this.officers.push(off)}
+  }
+  _makeBarrier(width){
+    const g=new THREE.Group();
+    const barMat=new THREE.MeshStandardMaterial({map:TEX.barrierStripe(),roughness:0.85});
+    const bar=new THREE.Mesh(GeoCache.get(width,0.20,0.10),barMat);bar.position.y=1.0;bar.castShadow=true;g.add(bar);
+    const legMat=new THREE.MeshStandardMaterial({color:0x505458,metalness:0.7,roughness:0.4});
+    for(const sx of[-1,1]){const leg=new THREE.Mesh(GeoCache.get(0.06,1.0,0.06),legMat);leg.position.set(sx*width*0.42,0.5,0);g.add(leg);const foot=new THREE.Mesh(GeoCache.get(0.28,0.05,0.42),legMat);foot.position.set(sx*width*0.42,0.025,0);g.add(foot)}
+    const lightMat=new THREE.MeshStandardMaterial({color:0x2a0000,emissive:0xff2020,emissiveIntensity:1.2});
+    for(const sx of[-1,1]){const l=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,6),lightMat);l.position.set(sx*width*0.42,1.18,0);g.add(l)}
+    return g;
+  }
+  toggle(){
+    this.active=!this.active;for(const b of this.barriers)b.visible=this.active;
+    if(this.active){const positions=[-6,-2,3];for(let i=0;i<this.officers.length;i++){const off=this.officers[i];off.spawn(positions[i],this.z+6);off.walkTo(positions[i],this.z+0.5)}Sfx.beepLong()}
+    else{for(const off of this.officers){off.walkTo(CFG.officerPost.x+rnd(-3,3),CFG.officerPost.z+rnd(-2,2),()=>off.hide())}Sfx.beep()}
+  }
+  openForPassage(ms){this.openingUntil=performance.now()+(ms||5000);for(let i=0;i<this.officers.length;i++){const off=this.officers[i];if(!off.visible)continue;off.walkTo(off.group.position.x+(off.group.position.x<0?-1.5:1.5),this.z+0.5)}}
+  isOpen(){return performance.now()<this.openingUntil}
+  update(dt){if(!this.active)return;const open=this.isOpen();const targetY=open?-1.5:0;for(const b of this.barriers){b.position.y=lerp(b.position.y,targetY,smooth(0.02,dt))}for(const off of this.officers)off.update(dt)}
+}
+
+// ============================================================
+// ✅ World: تحميل swat.fbx مرة واحدة + 3 نسخ فقط
+// ============================================================
+class World{
+  constructor(scene,renderer){
+    this.scene=scene;this.renderer=renderer;this.streetLamps=[];this.policeCars=[];this.cctvPose=null;
+    this.obstacles = [];
+    // متغيرات تحميل موديل الشرطة
+    this.policeModelTemplate = null;
+    this.policeLoading = false;
+    this.policeModelBox = null;   // {size, min} بالأبعاد الأصلية
+    this.policeScale = 1;         // معامل الضبط الأفقي/الطولي
+    this.policeYOffset = 0;       // لتصحيح جلوس القاع على الأرض
+    this.policeYawAlign = 0;      // لتصحيح اتجاه المقدمة (عندما يكون الطول على X)
+    // مواقع السيارات الثلاث (إحداثيات حقيقية من الخريطة)
+    this.policePlacements = [
+      { x:-20.0, z:-6.0, rotY: Math.PI*0.48 },  // أمام منطقة الكمين الرئيسية
+      { x:-21.5, z: 8.0, rotY: Math.PI*0.52 },  // قرب منطقة التفتيش
+      { x: 19.5, z:12.0, rotY:-Math.PI*0.50 }   // الجانب الآخر — عمق بصري
+    ];
+    this.build();
+  }
+  build(){
+    const S=this.scene;
+    const skyGeo=new THREE.SphereGeometry(900,32,20);
+    this.skyMat=new THREE.MeshBasicMaterial({map:TEX.sky(),side:THREE.BackSide,fog:false});
+    this.sky=new THREE.Mesh(skyGeo,this.skyMat);S.add(this.sky);
+    this.clouds=[];
+    const cloudMat=new THREE.MeshBasicMaterial({map:TEX.cloud(),transparent:true,opacity:0.55,depthWrite:false,fog:false});
+    for(let i=0;i<14;i++){const w=rnd(60,150),h=w*0.42;const c=new THREE.Mesh(new THREE.PlaneGeometry(w,h),cloudMat);const ang=rnd(0,Math.PI*2),rad=rnd(200,550);c.position.set(Math.cos(ang)*rad,rnd(120,190),Math.sin(ang)*rad);c.lookAt(0,0,0);S.add(c);this.clouds.push({mesh:c,ang,speed:rnd(0.2,0.7)})}
+    this.hemi=new THREE.HemisphereLight(0xbccbd8,0x8a7a58,0.68);S.add(this.hemi);
+    this.sun=new THREE.DirectionalLight(0xf8e8c8,0.95);this.sun.position.set(-85,100,-55);this.sun.castShadow=true;
+    this.sun.shadow.mapSize.width=2048;this.sun.shadow.mapSize.height=2048;
+    const sc=this.sun.shadow.camera;sc.left=-55;sc.right=55;sc.top=55;sc.bottom=-55;sc.near=10;sc.far=300;
+    this.sun.shadow.bias=-0.0016;S.add(this.sun);S.add(this.sun.target);
+    this.amb=new THREE.AmbientLight(0xffffff,0.22);S.add(this.amb);
+    S.fog=new THREE.Fog(0xd0c8b8,120,700);
+
+    const groundGeo=new THREE.PlaneGeometry(1800,1800,240,240);
+    const gpos=groundGeo.attributes.position;
+    for(let i=0;i<gpos.count;i++){
+      const lx=gpos.getX(i); const ly=gpos.getY(i);
+      const worldX=lx; const worldZ=-ly;
+      const distX=Math.abs(worldX);
+      let h=0;
+      if(distX>CFG.roadHalf+1.5){
+        const fade=Math.min(1,(distX-CFG.roadHalf-1.5)/10);
+        h=Math.sin(worldX*0.045)*0.55 + Math.cos(worldZ*0.06)*0.40
+          + Math.sin(worldX*0.13+worldZ*0.11)*0.35
+          + Math.cos(worldX*0.28-worldZ*0.21)*0.15;
+        h *= fade * 1.6;
+      }
+      gpos.setZ(i,h);
+    }
+    groundGeo.computeVertexNormals();
+    const groundMat=new THREE.MeshStandardMaterial({map:TEX.sand(),roughness:1.0});
+    const ground=new THREE.Mesh(groundGeo,groundMat);
+    ground.rotation.x=-Math.PI/2;ground.position.y=-0.06;
+    ground.receiveShadow=true;S.add(ground);
+
+    const roadW=CFG.roadHalf*2;
+    const roadMat=new THREE.MeshStandardMaterial({map:TEX.asphalt(),roughness:0.96,color:0xa8a8a5});
+    const road=new THREE.Mesh(new THREE.PlaneGeometry(roadW,620),roadMat);
+    road.rotation.x=-Math.PI/2;road.position.set(0,0.02,0);
+    road.receiveShadow=true;S.add(road);
+
+    const shoulderMat=new THREE.MeshStandardMaterial({map:TEX.asphalt(),roughness:0.98,color:0x808080});
+    for(const side of[-1,1]){
+      const sh=new THREE.Mesh(new THREE.PlaneGeometry(1.6,620),shoulderMat);
+      sh.rotation.x=-Math.PI/2;sh.position.set(side*(CFG.roadHalf-0.8),0.021,0);S.add(sh);
+    }
+
+    const white=new THREE.MeshStandardMaterial({color:0xe8e6dc,roughness:0.85});
+    const yellow=new THREE.MeshStandardMaterial({color:0xd4b844,roughness:0.85});
+    for(const lx of[-17.5,17.5]){
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(0.16,620),white);
+      m.rotation.x=-Math.PI/2;m.position.set(lx,0.03,0);S.add(m);
+    }
+    for(const lx of[-0.45,0.45]){
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(0.14,620),yellow);
+      m.rotation.x=-Math.PI/2;m.position.set(lx,0.03,0);S.add(m);
+    }
+    for(const lx of[-13.5,-9.5,5.5,9.5]){
+      for(let z=-300;z<300;z+=9){
+        const m=new THREE.Mesh(new THREE.PlaneGeometry(0.14,4.5),white);
+        m.rotation.x=-Math.PI/2;m.position.set(lx,0.03,z);S.add(m);
+      }
+    }
+    this.addCheckpointRoadWear();
+
+    const curbMat=new THREE.MeshStandardMaterial({color:0x7a7266,roughness:0.98});
+    for(const side of[-1,1]){
+      const curb=new THREE.Mesh(new THREE.BoxGeometry(0.4,0.30,620),curbMat);
+      curb.position.set(side*(CFG.roadHalf+0.1),0.14,0);
+      curb.receiveShadow=true;S.add(curb);
+    }
+
+    this.buildStopColumn(-17.5,-215);
+    this.buildStopColumn(17.5,-215);
+    this.buildBooth(-22.5,0,2);
+    this.buildCanopy(-18.5,0,-1);
+
+    const jerseyRows = [
+      {x:-16.5, z0:-32, count:10, spacing:3.2},
+      {x:-16.5, z0:-14, count:4, spacing:3.2},
+      {x:-16.5, z0:26, count:6, spacing:3.2},
+      {x:-16.5, z0:52, count:5, spacing:3.2},
+      {x: 16.5, z0:-42, count:7, spacing:3.2},
+      {x: 16.5, z0:18, count:5, spacing:3.2},
+      {x: 16.5, z0:48, count:4, spacing:3.2},
+      {x:-16.5, z0:15, count:3, spacing:3.2},
+      {x:-16.5, z0:24, count:3, spacing:3.2}
+    ];
+    for(const row of jerseyRows){
+      this.buildJerseyRow(row.x, row.z0, row.count, row.spacing);
+      for(let i=0;i<row.count;i++){
+        this.obstacles.push({
+          x: row.x,
+          z: row.z0 - i*row.spacing,
+          hw: 0.55,
+          hl: row.spacing/2 + 0.15
+        });
+      }
+    }
+
+    for(let i=0;i<4;i++)this.buildCrowdBarrier(-15.1,12+i*2.4);
+    this.buildSandbagWall(-19.5,3,2.6);
+    this.buildSandbagWall(-19.5,-2,2.6);
+    this.buildSandbagWall(-19.5,9,2.2);
+    this.buildWoodenGate(-14.2,0,-1);
+    this.buildWoodenGate(-14.2,0,4);
+
+    // 18 قمع في قوس
+    const coneCurve = [
+      {x: -4.0, z:  18.0},
+      {x: -3.5, z:  13.0},
+      {x: -3.0, z:   8.0},
+      {x: -2.5, z:   3.0},
+      {x: -2.0, z:  -2.0},
+      {x: -1.5, z:  -7.0},
+      {x: -1.0, z: -12.0},
+      {x: -0.5, z: -17.0},
+      {x:  0.0, z: -22.0},
+      {x:  0.5, z: -27.0},
+      {x:  1.0, z: -32.0},
+      {x:  1.5, z: -37.0},
+      {x:  2.0, z: -42.0},
+      {x:  2.5, z: -47.0},
+      {x:  3.0, z: -52.0},
+      {x:  3.5, z: -57.0},
+      {x:  4.0, z: -62.0},
+      {x:  4.5, z: -67.0}
+    ];
+    for(const c of coneCurve){
+      this.addCone(c.x, 0, c.z);
+      this.obstacles.push({ x: c.x, z: c.z, hw: 0.35, hl: 0.35 });
+    }
+
+    const bayMat=new THREE.MeshStandardMaterial({color:0xc9a04a,roughness:0.8,transparent:true,opacity:0.55});
+    const bayRect=new THREE.Mesh(new THREE.PlaneGeometry(3.0,7.6),bayMat);
+    bayRect.rotation.x=-Math.PI/2;bayRect.position.set(CFG.bay.x,0.04,CFG.bay.z);S.add(bayRect);
+    for(let i=0;i<4;i++){const c=new THREE.Mesh(new THREE.PlaneGeometry(0.10,7.6),white);c.rotation.x=-Math.PI/2;c.position.set(CFG.bay.x-1.5+i*1.0,0.045,CFG.bay.z);S.add(c)}
+
+    for(let z=-110;z<=110;z+=32){this.addStreetLamp(-18.5,z,1);this.addStreetLamp(18.5,z,-1)}
+
+    for(let i=0;i<4;i++){
+      const side=chance(0.5)?-1:1;
+      this.addPalm(side*rnd(50,95),rnd(-150,150));
+    }
+    for(let i=0;i<240;i++){
+      const side=chance(0.5)?-1:1;
+      const x=side*(rnd(21,110));
+      const z=rnd(-250,250);
+      this.addGrassTuft(x,z);
+    }
+
+    for(let z=-180;z<=180;z+=28)this.addPole(-22.5,z);
+
+    for(let i=0;i<6;i++){
+      const rec=generateRecord(pick(['car','car','taxi','van','pickup']));
+      const mesh=buildVehicleMesh(rec.type,rec.vehicle.color);
+      const side=chance(0.5)?-1:1;
+      mesh.position.set(side*rnd(21,23),0,rnd(-160,160));
+      mesh.rotation.y=(side>0?Math.PI:0)+rnd(-0.06,0.06);
+      S.add(mesh);
+    }
+
+    // ✅ استبدال عربيات الشرطة القديمة: تحميل موديل SWAT الحقيقي ثم إنشاء 3 نسخ
+    this.loadPoliceModel();
+
+    this.addRoadSign(-21.5,-35,'كمين شرطة|ممنوع التجاوز');
+    this.addRoadSign(21.5,-65,'تحذير|مطب صناعي');
+    this.addRoadSign(-21.5,42,'مرور|بطء');
+    this.buildOverheadSign();
+    this.buildCheckpointBoard();
+    this.buildDust();
+    this.addBillboard();
+  }
+
+  // ---------- تحميل swat.fbx مرة واحدة ----------
+  loadPoliceModel(){
+    if(this.policeLoading || this.policeModelTemplate) return;
+    if(!THREE.FBXLoader){
+      console.error('[ECM] FBXLoader غير متوفر. تعذر تحميل '+POLICE_MODEL_CFG.path+'. تأكد من تضمين FBXLoader.js قبل هذا السكربت.');
+      return;
+    }
+    this.policeLoading = true;
+    const loader = new THREE.FBXLoader();
+    const self = this;
+    loader.load(
+      POLICE_MODEL_CFG.path,
+      (obj)=>{
+        self.policeLoading = false;
+        self.policeModelTemplate = obj;
+        self._preparePoliceTemplate();
+        self._placePoliceClones();
+      },
+      undefined,
+      (err)=>{
+        self.policeLoading = false;
+        console.error('[ECM] فشل تحميل موديل الشرطة FBX من: '+POLICE_MODEL_CFG.path);
+        console.error('[ECM] تأكد من أن الملف موجود فعليًا داخل مجلد models بجوار ملف HTML.');
+        console.error('[ECM] تفاصيل الخطأ:', err);
+        // لا ننشئ أي موديل بديل — نترك الأماكن فارغة كما اشترطت.
+      }
+    );
+  }
+
+  _preparePoliceTemplate(){
+    const obj = this.policeModelTemplate;
+    // حساب الأبعاد الأصلية
+    const box = new THREE.Box3().setFromObject(obj);
+    const size = new THREE.Vector3(); box.getSize(size);
+    this.policeModelBox = { size: size.clone(), min: box.min.clone(), max: box.max.clone() };
+
+    // ضبط المقياس اعتمادًا على الطول المستهدف (أطول حافة أفقية)
+    const maxH = Math.max(size.x, size.z);
+    const targetLen = POLICE_MODEL_CFG.targetLength;
+    this.policeScale = maxH > 0.0001 ? (targetLen / maxH) : 1;
+
+    // إذا كان الطول على محور X، نحتاج تدويرًا 90° ليتوافق مع اتجاه +Z للعبة
+    this.policeYawAlign = (size.x > size.z) ? Math.PI/2 : 0;
+
+    // الارتفاع المطلوب لجلوس القاع على Y=0 بعد التحويل
+    this.policeYOffset = -box.min.y * this.policeScale;
+
+    // تفعيل الظلال وتحديث المواد (في حال FBX يفتقد side مناسب)
+    obj.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow = !!POLICE_MODEL_CFG.castShadow;
+        o.receiveShadow = !!POLICE_MODEL_CFG.receiveShadow;
+        if(o.material){
+          const mats = Array.isArray(o.material)?o.material:[o.material];
+          for(const m of mats){ if(m && m.map && THREE.sRGBEncoding) m.map.encoding = THREE.sRGBEncoding; }
+        }
+      }
+    });
+  }
+
+  _clonePoliceModel(){
+    const src = this.policeModelTemplate;
+    if(THREE.SkeletonUtils && typeof THREE.SkeletonUtils.clone === 'function'){
+      try { return THREE.SkeletonUtils.clone(src); } catch(e){ /* fallback */ }
+    }
+    return src.clone(true);
+  }
+
+  _placePoliceClones(){
+    const S = this.scene;
+    const yawExtra = this.policeYawAlign + (POLICE_MODEL_CFG.yawOffset||0);
+    for(const p of this.policePlacements){
+      const clone = this._clonePoliceModel();
+      clone.scale.setScalar(this.policeScale);
+      clone.position.set(p.x, this.policeYOffset, p.z);
+      clone.rotation.y = p.rotY + yawExtra;
+      clone.traverse(o=>{
+        if(o.isMesh){
+          o.castShadow = !!POLICE_MODEL_CFG.castShadow;
+          o.receiveShadow = !!POLICE_MODEL_CFG.receiveShadow;
+        }
+      });
+      S.add(clone);
+      this.policeCars.push(clone);
+    }
+    console.log('[ECM] تم وضع '+this.policePlacements.length+' نسخ ثابتة من موديل الشرطة (swat.fbx).');
+  }
+
+  addGrassTuft(x,z){
+    const g=new THREE.Group();
+    const n=rndInt(3,7);
+    const mat=new THREE.MeshStandardMaterial({
+      color:new THREE.Color().setHSL(rnd(0.13,0.20),0.35,rnd(0.28,0.42)),
+      roughness:1.0,side:THREE.DoubleSide
+    });
+    for(let i=0;i<n;i++){
+      const blade=new THREE.Mesh(new THREE.PlaneGeometry(0.06,rnd(0.18,0.42)),mat);
+      blade.position.set(rnd(-0.12,0.12),rnd(0.09,0.21),rnd(-0.12,0.12));
+      blade.rotation.y=rnd(0,Math.PI*2);
+      blade.rotation.x=rnd(-0.15,0.15);
+      g.add(blade);
+    }
+    g.position.set(x,0,z);
+    this.scene.add(g);
+  }
+
+  addCheckpointRoadWear(){
+    const fadedWhite=new THREE.MeshStandardMaterial({color:0xd8d3c4,roughness:0.92,transparent:true,opacity:0.72});
+    const repairMat=new THREE.MeshStandardMaterial({color:0x454442,roughness:0.98});
+    const iron=new THREE.MeshStandardMaterial({color:0x34383a,roughness:0.72,metalness:0.35});
+    for(let i=0;i<9;i++){const stripe=new THREE.Mesh(new THREE.PlaneGeometry(1.18,4.6),fadedWhite);stripe.rotation.x=-Math.PI/2;stripe.position.set(-16+i*4,0.032,-23.5);stripe.receiveShadow=true;this.scene.add(stripe)}
+    for(let row=0;row<3;row++){const z=-30.6+row*0.72;for(let lane=-2;lane<=2;lane++){const strip=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.12),fadedWhite);strip.rotation.x=-Math.PI/2;strip.position.set(lane*5.6,0.031,z);this.scene.add(strip)}}
+    for(const patch of[[-3.7,-43,2.4,5.1],[4.8,-7,2.0,3.8],[2.5,31,2.8,5.2],[-4.2,58,2.1,4.4]]){const m=new THREE.Mesh(new THREE.PlaneGeometry(patch[2],patch[3]),repairMat);m.rotation.x=-Math.PI/2;m.position.set(patch[0],0.025,patch[1]);m.rotation.z=rnd(-0.08,0.08);this.scene.add(m)}
+    for(const p of[[-17.9,-11],[17.8,34],[-17.9,77]]){const cover=new THREE.Mesh(new THREE.CircleGeometry(0.36,20),iron);cover.rotation.x=-Math.PI/2;cover.position.set(p[0],0.033,p[1]);this.scene.add(cover);const ring=new THREE.Mesh(new THREE.TorusGeometry(0.37,0.025,6,24),iron);ring.rotation.x=-Math.PI/2;ring.position.set(p[0],0.037,p[1]);this.scene.add(ring);for(let i=-2;i<=2;i++){const slit=new THREE.Mesh(new THREE.BoxGeometry(0.035,0.012,0.42),repairMat);slit.position.set(p[0]+i*0.11,0.041,p[1]);this.scene.add(slit)}}
+  }
+
+  _buildBillboard(px, py, pz, rotY, imageUrl){
+    const billboardGroup=new THREE.Group();
+    const frameMat=new THREE.MeshStandardMaterial({color:0x2a2a2a,roughness:0.6,metalness:0.55});
+    const panelW=5.0,panelH=3.2;
+    const frame=new THREE.Mesh(new THREE.BoxGeometry(panelW+0.3,panelH+0.3,0.20),frameMat);
+    frame.position.y=panelH/2+2.5;billboardGroup.add(frame);
+
+    const buildPanels=(panelMat)=>{
+      const front=new THREE.Mesh(new THREE.PlaneGeometry(panelW,panelH),panelMat);
+      front.position.set(0,panelH/2+2.5,0.115);billboardGroup.add(front);
+      const back=new THREE.Mesh(new THREE.PlaneGeometry(panelW,panelH),panelMat);
+      back.position.set(0,panelH/2+2.5,-0.115);
+      back.rotation.y=Math.PI;
+      billboardGroup.add(back);
+    };
+
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{
+      const tex=new THREE.Texture(img);tex.needsUpdate=true;
+      if(THREE.sRGBEncoding)tex.encoding=THREE.sRGBEncoding;
+      const panelMat=new THREE.MeshStandardMaterial({map:tex,roughness:0.55,metalness:0.08,side:THREE.FrontSide});
+      buildPanels(panelMat);
+    };
+    img.onerror=()=>{
+      const c=document.createElement('canvas');c.width=512;c.height=320;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#c9a04a';ctx.fillRect(0,0,512,320);
+      ctx.fillStyle='#1a1a1a';ctx.font='bold 60px Tahoma, Arial';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('إعلان',256,160);
+      const tex=new THREE.CanvasTexture(c);
+      if(THREE.sRGBEncoding)tex.encoding=THREE.sRGBEncoding;
+      buildPanels(new THREE.MeshStandardMaterial({map:tex,roughness:0.55,metalness:0.08,side:THREE.FrontSide}));
+    };
+    img.src=imageUrl;
+
+    for(const sx of[-1,1]){
+      const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.15,4.2,8),frameMat);
+      pole.position.set(sx*panelW*0.35,2.1,0);
+      pole.castShadow=true;billboardGroup.add(pole);
+    }
+    const lightBarMat=new THREE.MeshStandardMaterial({color:0xd0d0c0,emissive:0xfff5e0,emissiveIntensity:0.2});
+    for(const yy of[2.0,3.5]){
+      const bar=new THREE.Mesh(new THREE.BoxGeometry(panelW*0.9,0.08,0.08),lightBarMat);
+      bar.position.set(0,yy,-0.20);billboardGroup.add(bar);
+    }
+    billboardGroup.position.set(px, py, pz);
+    billboardGroup.rotation.y = rotY;
+    this.scene.add(billboardGroup);
+  }
+
+  addBillboard(){
+    this._buildBillboard(-20, 0, -30, 0.165, 'https://i.ytimg.com/vi/eIQ3G531uNQ/maxresdefault.jpg');
+    this._buildBillboard( 14, 0, -30, -0.83, 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRf-5LU3djJH-Xa3uFUT7A2E9KwEoZRfDWfY4-xyoXrDppuBMj6k_xWQpg&s=10');
+  }
+
+  buildStopColumn(x,z){
+    const g=new THREE.Group();
+    const poleMat=new THREE.MeshStandardMaterial({color:0xb02020,roughness:0.6,metalness:0.3});
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.15,3.6,10),poleMat);pole.position.y=1.8;pole.castShadow=true;g.add(pole);
+    const signMat=new THREE.MeshStandardMaterial({map:TEX.stopSign(),roughness:0.7,side:THREE.DoubleSide});
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6),signMat);sign.position.set(0,3.4,0);sign.rotation.y=x<0?Math.PI/2:-Math.PI/2;g.add(sign);
+    const base=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.4,0.18,10),new THREE.MeshStandardMaterial({color:0x303034,roughness:0.8}));base.position.y=0.09;g.add(base);
+    const fl=new THREE.Mesh(new THREE.SphereGeometry(0.14,10,8),new THREE.MeshStandardMaterial({color:0x3a2a00,emissive:0xffaa00,emissiveIntensity:0.9}));fl.position.set(0,4.3,0);g.add(fl);
+    g.position.set(x,0,z);this.scene.add(g);
+    if(!this.stopFlashers)this.stopFlashers=[];
+    this.stopFlashers.push(fl);
+  }
+
+  buildBooth(x,y,z){
+    const g=new THREE.Group();
+    const bodyMat=new THREE.MeshStandardMaterial({color:0xdedac9,roughness:0.88});
+    const base=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.0,3.4),bodyMat);base.position.y=1.5;base.castShadow=true;base.receiveShadow=true;g.add(base);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(4.8,0.22,4.0),new THREE.MeshStandardMaterial({color:0x2a333e,roughness:0.8}));roof.position.y=3.1;roof.castShadow=true;g.add(roof);
+    const glass=new THREE.Mesh(new THREE.BoxGeometry(0.06,1.3,2.6),new THREE.MeshStandardMaterial({color:0x0f1a22,roughness:0.08,metalness:0.6,transparent:true,opacity:0.8}));glass.position.set(2.1,1.9,0);g.add(glass);
+    const fr=new THREE.Mesh(new THREE.BoxGeometry(0.10,1.5,2.9),new THREE.MeshStandardMaterial({color:0xd4d0c2}));fr.position.set(2.07,1.9,0);g.add(fr);
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(4.24,0.35,3.44),new THREE.MeshStandardMaterial({color:0x183c66}));stripe.position.y=0.65;g.add(stripe);
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,3.2,6),new THREE.MeshStandardMaterial({color:0x9aa0a6,metalness:0.7,roughness:0.4}));pole.position.set(1.8,4.6,-1.4);g.add(pole);
+    const flagGroup=new THREE.Group();
+    const flagStripe=[0xc3372f,0xe9e2cc,0x222426];
+    for(let i=0;i<3;i++){const band=new THREE.Mesh(new THREE.PlaneGeometry(1.05,0.24),new THREE.MeshStandardMaterial({color:flagStripe[i],side:THREE.DoubleSide,roughness:0.86}));band.position.y=0.24-i*0.24;flagGroup.add(band)}
+    const emblem=new THREE.Mesh(new THREE.CircleGeometry(0.075,12),new THREE.MeshStandardMaterial({color:0xc59b42,metalness:0.38,roughness:0.58,side:THREE.DoubleSide}));emblem.position.set(0,0,0.012);flagGroup.add(emblem);
+    flagGroup.position.set(1.25,5.8,-1.4);flagGroup.rotation.y=Math.PI/2;g.add(flagGroup);
+    this.addPoleCCTV(g,x,y,z);
+    g.position.set(x,y,z);this.scene.add(g);
+  }
+  addPoleCCTV(parent,x,y,z){
+    const bodyMat=new THREE.MeshStandardMaterial({color:0x24292b,roughness:0.52,metalness:0.56});
+    const glassMat=new THREE.MeshStandardMaterial({color:0x162b38,roughness:0.12,metalness:0.32,emissive:0x081722,emissiveIntensity:0.35});
+    const bracket=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.50,10),bodyMat);bracket.rotation.z=Math.PI/2;bracket.position.set(1.94,6.02,-1.4);parent.add(bracket);
+    const housing=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.32,0.38),bodyMat);housing.rotation.y=Math.PI/2;housing.position.set(2.08,6.13,-1.4);housing.castShadow=true;parent.add(housing);
+    const lens=new THREE.Mesh(new THREE.CylinderGeometry(0.105,0.12,0.20,18),glassMat);lens.rotation.z=-Math.PI/2;lens.position.set(2.47,6.13,-1.4);parent.add(lens);
+    const hood=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,0.08,18),bodyMat);hood.rotation.z=-Math.PI/2;hood.position.set(2.60,6.13,-1.4);parent.add(hood);
+    const led=new THREE.Mesh(new THREE.SphereGeometry(0.035,8,6),new THREE.MeshBasicMaterial({color:0xd73b31}));led.position.set(2.28,6.29,-1.4);parent.add(led);
+    const cable=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,1.15,6),new THREE.MeshStandardMaterial({color:0x17191a,roughness:0.9}));cable.position.set(1.82,5.52,-1.4);parent.add(cable);
+    this.cctvPose={position:new THREE.Vector3(x+2.67,y+6.13,z-1.4),target:new THREE.Vector3(0,0.45,-32)};
+  }
+  buildCanopy(x,y,z){
+    const g=new THREE.Group();
+    const postMat=new THREE.MeshStandardMaterial({color:0x5a6168,metalness:0.5,roughness:0.5});
+    const roofMat=new THREE.MeshStandardMaterial({color:0x2a333e,roughness:0.8});
+    for(const sx of[-1.5,1.5])for(const sz of[-1,1]){const p=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.10,3.5,8),postMat);p.position.set(sx,1.75,sz*1.2);p.castShadow=true;g.add(p)}
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(4.2,0.15,3.4),roofMat);roof.position.set(0,3.55,0);roof.castShadow=true;g.add(roof);
+    const signMat=new THREE.MeshStandardMaterial({map:TEX.roadSign('بوابة تفتيش'),side:THREE.DoubleSide,roughness:0.85});
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.6),signMat);sign.position.set(-1.0,2.4,1.25);g.add(sign);
+    g.position.set(x,y,z);this.scene.add(g);
+  }
+  buildJerseyRow(x,z0,count,spacing){
+    const mat=new THREE.MeshStandardMaterial({color:0xccc8b8,roughness:0.94});
+    const stripeMat=new THREE.MeshStandardMaterial({map:TEX.barrierStripe(),roughness:0.8});
+    for(let i=0;i<count;i++){const g=new THREE.Group();const base=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.35,spacing),mat);base.position.y=0.175;base.castShadow=true;base.receiveShadow=true;g.add(base);const mid=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.45,spacing),mat);mid.position.y=0.575;mid.castShadow=true;g.add(mid);const top=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.30,spacing),stripeMat);top.position.y=0.95;top.castShadow=true;g.add(top);g.position.set(x,0,z0-i*spacing);this.scene.add(g)}
+  }
+  buildCrowdBarrier(x,z){
+    const g=new THREE.Group();
+    const mat=new THREE.MeshStandardMaterial({color:0x8a929a,metalness:0.5,roughness:0.55});
+    const p1=new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,1.15,6),mat);p1.position.set(0,0.575,0);g.add(p1);
+    const p2=p1.clone();p2.position.set(0,0.575,2.2);g.add(p2);
+    const top=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,2.4,6),mat);top.rotation.x=Math.PI/2;top.position.set(0,1.10,1.1);g.add(top);
+    const mid=top.clone();mid.position.y=0.75;g.add(mid);
+    const bot=top.clone();bot.position.y=0.30;g.add(bot);
+    for(let i=0;i<8;i++){const v=new THREE.Mesh(new THREE.CylinderGeometry(0.018,0.018,0.85,4),mat);v.position.set(0,0.72,0.30+i*0.24);g.add(v)}
+    g.position.set(x,0,z);this.scene.add(g);
+  }
+  buildSandbagWall(x,z,len){
+    const mat=new THREE.MeshStandardMaterial({color:0x94835a,roughness:1});
+    for(let r=0;r<3;r++){const cnt=Math.floor(len/0.55);for(let i=0;i<cnt;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(0.58,0.22,0.36),mat);b.position.set(x+(r%2)*0.05,0.11+r*0.22,z-i*0.55);b.rotation.y=rnd(-0.10,0.10);b.castShadow=true;b.receiveShadow=true;this.scene.add(b)}}
+  }
+  buildWoodenGate(x,y,z){
+    const g=new THREE.Group();
+    const woodMat=new THREE.MeshStandardMaterial({color:0xa8865a,roughness:0.92});
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.10,1.2,8),woodMat);post.position.set(0,0.60,0);g.add(post);
+    const post2=post.clone();post2.position.z=3.6;g.add(post2);
+    const barMat=new THREE.MeshStandardMaterial({map:TEX.barrierStripe(),roughness:0.85});
+    const bar=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,3.7),barMat);bar.position.set(0,1.15,1.8);bar.castShadow=true;g.add(bar);
+    g.position.set(x,y,z);this.scene.add(g);
+  }
+  addCone(x,y,z){
+    const g=new THREE.Group();
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.28,0.72,10),new THREE.MeshStandardMaterial({color:0xd84a20,roughness:0.78}));cone.position.y=0.36;cone.castShadow=true;g.add(cone);
+    const stripe=new THREE.Mesh(new THREE.CylinderGeometry(0.20,0.24,0.14,10),new THREE.MeshStandardMaterial({color:0xe8e8e2,roughness:0.8}));stripe.position.y=0.42;g.add(stripe);
+    const base=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.05,0.55),new THREE.MeshStandardMaterial({color:0xb83a10,roughness:0.9}));base.position.y=0.03;g.add(base);
+    g.position.set(x,y,z);this.scene.add(g);
+  }
+  addStreetLamp(x,z,side){
+    const g=new THREE.Group();
+    const mat=new THREE.MeshStandardMaterial({color:0x5a6168,metalness:0.5,roughness:0.55});
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.14,8.4,8),mat);pole.position.y=4.2;pole.castShadow=true;g.add(pole);
+    const arm=new THREE.Mesh(new THREE.BoxGeometry(2.4,0.12,0.12),mat);arm.position.set(side*1.2,8.35,0);g.add(arm);
+    const head=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.20,0.40),new THREE.MeshStandardMaterial({color:0x252a30}));head.position.set(side*2.35,8.24,0);g.add(head);
+    const bulb=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.06,0.28),new THREE.MeshStandardMaterial({color:0xf0e8c8,emissive:0xffe0a0,emissiveIntensity:0}));bulb.position.set(side*2.35,8.12,0);g.add(bulb);
+    g.position.set(x,0,z);this.scene.add(g);
+    this.streetLamps.push(bulb);
+    if(Math.abs(z%16)<0.1){const glow=new THREE.PointLight(0xffdca0,0,18,2);glow.position.set(x+side*2.25,7.95,z);g.add(glow);if(!this.lampLights)this.lampLights=[];this.lampLights.push(glow)}
+  }
+  addPalm(x,z){
+    const g=new THREE.Group();
+    const trunkMat=new THREE.MeshStandardMaterial({color:0x6a5540,roughness:1});
+    for(let i=0;i<7;i++){const r=0.24-i*0.022;const seg=new THREE.Mesh(new THREE.CylinderGeometry(r,r+0.03,1.0,8),trunkMat);seg.position.set(Math.sin(i*0.35)*0.12,0.5+i*0.98,Math.cos(i*0.3)*0.08);seg.rotation.z=Math.sin(i*0.35)*0.04;seg.castShadow=true;g.add(seg)}
+    const leafMat=new THREE.MeshStandardMaterial({color:0x395a2c,roughness:0.92,side:THREE.DoubleSide});
+    for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2;const leaf=new THREE.Mesh(new THREE.PlaneGeometry(3.2,0.62),leafMat);leaf.position.set(Math.cos(a)*1.5+Math.sin(5*0.35)*0.12,6.5,Math.sin(a)*1.5);leaf.rotation.set(-0.55,a,0);leaf.castShadow=true;g.add(leaf)}
+    g.position.set(x,0,z);g.scale.setScalar(rnd(0.85,1.2));
+    this.scene.add(g);
+  }
+  addPole(x,z){
+    const mat=new THREE.MeshStandardMaterial({color:0x605648,roughness:1});
+    const p=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.18,8.5,7),mat);p.position.set(x,4.25,z);p.castShadow=true;this.scene.add(p);
+    const cross=new THREE.Mesh(new THREE.BoxGeometry(0.10,0.10,2.0),mat);cross.position.set(x,7.6,z);this.scene.add(cross);
+  }
+  addRoadSign(x,z,text){
+    const g=new THREE.Group();
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,3.2,7),new THREE.MeshStandardMaterial({color:0x8a9298,metalness:0.6,roughness:0.4}));pole.position.y=1.6;g.add(pole);
+    const mat=new THREE.MeshStandardMaterial({map:TEX.roadSign(text),roughness:0.8,side:THREE.DoubleSide});
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6),mat);sign.position.y=3.3;sign.rotation.y=x<0?Math.PI/2:-Math.PI/2;g.add(sign);
+    g.position.set(x,0,z);this.scene.add(g);
+  }
+
+  buildOverheadSign(){
+    const g=new THREE.Group();
+    const mat=new THREE.MeshStandardMaterial({color:0x535a62,metalness:0.6,roughness:0.5});
+    const p1=new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.20,9,8),mat);p1.position.set(-13.5,4.5,0);g.add(p1);
+    const p2=p1.clone();p2.position.set(13.5,4.5,0);g.add(p2);
+    const beam=new THREE.Mesh(new THREE.BoxGeometry(27.6,0.36,0.36),mat);beam.position.set(0,8.9,0);g.add(beam);
+    const signMat=new THREE.MeshStandardMaterial({map:TEX.roadSign('طريق مصر - الصحراوي'),roughness:0.2,side:THREE.DoubleSide});
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(9.5,3.0),signMat);sign.position.set(0,7.0,0);g.add(sign);
+    this.beacons=[];
+    for(const sx of[-8,0,8]){const b=new THREE.Mesh(new THREE.SphereGeometry(0.20,10,8),new THREE.MeshStandardMaterial({color:0x4a2020,emissive:0xcc2020,emissiveIntensity:0.4}));b.position.set(sx,9.35,0);g.add(b);this.beacons.push(b)}
+    this.scene.add(g);
+  }
+
+  buildCheckpointBoard(){
+    const signMat=new THREE.MeshStandardMaterial({map:TEX.roadSign('نقطة تفتيش|مرور'),roughness:0.85,side:THREE.DoubleSide});
+    const frame=new THREE.Mesh(new THREE.BoxGeometry(4.6,2.6,0.16),new THREE.MeshStandardMaterial({color:0x252b32,roughness:0.8}));
+    frame.position.set(-17.5,4.6,-1.75);this.scene.add(frame);
+    const sign=new THREE.Mesh(new THREE.PlaneGeometry(4.2,2.2),signMat);sign.position.set(-17.5,4.6,-1.85);sign.rotation.y=Math.PI;this.scene.add(sign);
+  }
+  buildDust(){
+    const count=300;
+    const geo=new THREE.BufferGeometry();
+    const pos=new Float32Array(count*3);
+    for(let i=0;i<count;i++){pos[i*3]=rnd(-180,180);pos[i*3+1]=rnd(0.3,25);pos[i*3+2]=rnd(-220,220)}
+    geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
+    const mat=new THREE.PointsMaterial({color:0xc9b898,size:0.22,transparent:true,opacity:0.32,depthWrite:false});
+    this.dust=new THREE.Points(geo,mat);this.scene.add(this.dust);
+  }
+  setTimeOfDay(mode){
+    const night=mode==='night';const dusk=mode==='dusk';
+    const lampIntensity=night?1.6:(dusk?0.7:0);
+    for(const b of this.streetLamps)b.material.emissiveIntensity=lampIntensity;
+    if(this.lampLights)for(const l of this.lampLights)l.intensity=night?1.05:(dusk?0.28:0);
+    if(this.stopFlashers){for(const f of this.stopFlashers)f.material.emissiveIntensity=night?1.4:(dusk?0.9:0)}
+    if(night){this.skyMat.map=TEX.skyNight();this.skyMat.needsUpdate=true;this.sun.intensity=0.15;this.sun.color.set(0x8aa0c0);this.hemi.intensity=0.22;this.hemi.color.set(0x2a3848);this.amb.intensity=0.09;this.scene.fog.color.set(0x101822);this.scene.fog.near=70;this.scene.fog.far=340;for(const c of this.clouds)c.mesh.material.opacity=0.15}
+    else if(dusk){this.skyMat.map=TEX.skyDusk();this.skyMat.needsUpdate=true;this.sun.intensity=0.72;this.sun.color.set(0xf0b878);this.sun.position.set(-110,42,-30);this.hemi.intensity=0.44;this.amb.intensity=0.18;this.scene.fog.color.set(0xd0a888);this.scene.fog.near=110;this.scene.fog.far=520;for(const c of this.clouds)c.mesh.material.opacity=0.55}
+    else{this.skyMat.map=TEX.sky();this.skyMat.needsUpdate=true;this.sun.intensity=0.95;this.sun.color.set(0xf8e8c8);this.sun.position.set(-85,100,-55);this.hemi.intensity=0.68;this.hemi.color.set(0xbccbd8);this.amb.intensity=0.22;this.scene.fog.color.set(0xd0c8b8);this.scene.fog.near=120;this.scene.fog.far=700;for(const c of this.clouds)c.mesh.material.opacity=0.6}
+  }
+  update(dt,t){
+    if(this.dust)this.dust.rotation.y+=dt*0.003;
+    if(this.beacons){for(let i=0;i<this.beacons.length;i++)this.beacons[i].material.emissiveIntensity=(Math.floor(t*2)%2===i%2)?1.5:0.2}
+    if(this.stopFlashers){for(let i=0;i<this.stopFlashers.length;i++){const base=this.stopFlashers[i].material.emissiveIntensity;if(base>0.3){const phase=Math.sin(t*3+i)*0.3;this.stopFlashers[i].material.emissiveIntensity=base+phase}}}
+    // ملاحظة: عربيات الشرطة الجديدة (FBX) لا تحتوي على userData.lightBar، لذا هذه الحلقة لا تؤثر عليها.
+    for(const pc of this.policeCars){if(pc.userData.lightBar){const on=Math.floor(t*3.5)%2===0;pc.userData.lightBar.red.material.emissiveIntensity=on?2.2:0.15;pc.userData.lightBar.blue.material.emissiveIntensity=on?0.15:2.2}}
+    for(const c of this.clouds){c.ang+=dt*0.003*c.speed;const rad=Math.hypot(c.mesh.position.x,c.mesh.position.z);c.mesh.position.x=Math.cos(c.ang)*rad;c.mesh.position.z=Math.sin(c.ang)*rad;c.mesh.lookAt(0,c.mesh.position.y*0.4,0)}
+    this.sun.target.position.set(0,0,0);
+  }
+}
+
+class CameraCtl{
+  constructor(camera,world,viewport){
+    this.cam=camera;this.world=world;this.viewport=viewport;this.mode='officer';
+
+    this.officerPos=new THREE.Vector3(CFG.officerPost.x,1.78,CFG.officerPost.z);
+    this.officerYaw=0;this.officerPitch=-0.05;
+    this.officerFov=72;this.cctvFov=42;
+    this.viewZoom={officer:1,cctv:1};
+    this.basePos=new THREE.Vector3(-3.5,38,43);this.zoom=1.12;this.offsetX=0;
+    this.smoothTarget=new THREE.Vector3(0,0,-2);this.smoothPos=new THREE.Vector3(-6,24,36);
+
+    this.cctvPos = new THREE.Vector3(-19.83, 6.13, 0.6);
+    const cctvTarget = new THREE.Vector3(-2.0, 0.5, -55);
+    const dx = cctvTarget.x - this.cctvPos.x;
+    const dy = cctvTarget.y - this.cctvPos.y;
+    const dz = cctvTarget.z - this.cctvPos.z;
+    this.cctvYaw = -Math.atan2(dx, -dz);
+    this.cctvPitch = Math.atan2(dy, Math.hypot(dx, dz));
+    this.cctvBaseYaw = this.cctvYaw;
+    this.cctvBasePitch = this.cctvPitch;
+
+    this.cam.near=0.08;this.cam.far=1400;
+    this.setMode('officer');
+  }
+  setMode(mode){
+    if(!['officer','cctv','overview'].includes(mode))return;
+    this.mode=mode;document.body.dataset.view=mode;
+    if(this.viewport)this.viewport.classList.toggle('cctv-feed',mode==='cctv');
+    if(mode==='cctv'){this.cctvYaw=this.cctvBaseYaw;this.cctvPitch=this.cctvBasePitch;this.viewZoom.cctv=1}
+    if(mode==='officer')this.viewZoom.officer=1;
+    this.cam.fov=mode==='officer'?this.officerFov:(mode==='cctv'?this.cctvFov:48);
+    this.cam.updateProjectionMatrix();
+  }
+  setZoom(dir){
+    if(this.mode==='overview'){this.zoom=clamp(this.zoom+dir*0.12,0.55,1.9);return}
+    const key=this.mode,base=key==='cctv'?this.cctvFov:this.officerFov;
+    this.viewZoom[key]=clamp(this.viewZoom[key]+dir*0.14,0.72,1.72);
+    this.cam.fov=clamp(base/this.viewZoom[key],32,88);this.cam.updateProjectionMatrix();
+  }
+  pan(dx){this.offsetX=clamp(this.offsetX+dx,-12,12)}
+  rotateLook(dx,dy){
+    if(this.mode==='officer'){this.officerYaw=clamp(this.officerYaw-dx*0.0038,-1.20,1.20);this.officerPitch=clamp(this.officerPitch-dy*0.0032,-0.42,0.25)}
+    else if(this.mode==='cctv'){this.cctvYaw=clamp(this.cctvYaw-dx*0.0034,this.cctvBaseYaw-0.92,this.cctvBaseYaw+0.92);this.cctvPitch=clamp(this.cctvPitch-dy*0.0028,-0.66,0.12)}
+  }
+  resetOfficerLook(){this.officerYaw=0;this.officerPitch=-0.05;this.viewZoom.officer=1}
+  focusOnVehicle(v){if(!v){this.smoothTarget.set(0,0,-2);this.offsetX=0;return}this.smoothTarget.set(v.x*0.5,0,v.z*0.35-2)}
+  update(dt){
+    if(this.mode==='officer'){this.cam.position.copy(this.officerPos);this.cam.rotation.order='YXZ';this.cam.rotation.set(this.officerPitch,this.officerYaw,0);return}
+    if(this.mode==='cctv'){this.cam.position.copy(this.cctvPos);this.cam.rotation.order='YXZ';this.cam.rotation.set(this.cctvPitch,this.cctvYaw,0);return}
+    const zf=1/this.zoom;const px=this.basePos.x+this.offsetX;const py=5+this.basePos.y*zf;const pz=6+this.basePos.z*zf;
+    this.smoothPos.x=lerp(this.smoothPos.x,px,smooth(0.02,dt));
+    this.smoothPos.y=lerp(this.smoothPos.y,py,smooth(0.02,dt));
+    this.smoothPos.z=lerp(this.smoothPos.z,pz,smooth(0.02,dt));
+    this.cam.position.copy(this.smoothPos);this.cam.lookAt(this.smoothTarget.x,0,this.smoothTarget.z);
+  }
+}
+
+const UI={
+  toast(msg,kind,ms){
+    const t=document.createElement('div');t.className='toast '+(kind||'');t.innerHTML=msg;$('#toasts').appendChild(t);
+    setTimeout(()=>{t.style.transition='opacity .3s, transform .3s';t.style.opacity='0';t.style.transform='translateY(-8px)';setTimeout(()=>t.remove(),320)},ms||3200);
+  },
+  modal(title,bodyHTML,footButtons){
+    const root=$('#modalRoot');
+    const wrap=document.createElement('div');wrap.className='modal';
+    const box=document.createElement('div');box.className='box';
+    box.innerHTML='<h3><span>'+title+'</span><button class="closeX"><span class="material-symbol">close</span></button></h3><div class="body">'+bodyHTML+'</div><div class="foot"></div>';
+    box.querySelector('.closeX').onclick=()=>{Sfx.click();wrap.remove()};
+    const foot=box.querySelector('.foot');
+    (footButtons||[]).forEach(b=>{
+      const el=document.createElement('button');el.className='btn '+(b.cls||'');el.innerHTML=b.label;
+      el.onclick=()=>{Sfx.click();if(b.action)b.action(wrap,box);if(b.close!==false)wrap.remove()};
+      if(b.disabled)el.disabled=true;
+      foot.appendChild(el);
+    });
+    wrap.appendChild(box);
+    wrap.addEventListener('pointerdown',e=>{if(e.target===wrap)wrap.remove()});
+    root.appendChild(wrap);
+    return{wrap,box};
+  }
+};
+
+class Game{
+  constructor(){
+    this.selected=null;this.clock=new THREE.Clock();this.elapsed=0;this.shiftActive=false;this.shiftTime=0;this.shiftDuration=360;
+    this.shiftStats=null;this.reports=[];this.reportTimer=26;this.log=[];this.paused=false;this.frameCount=0;
+    this.fpsAccum=0;this.fpsTime=0;this.autoQualityChecked=false;this.officerBusy=false;this.officerVehicle=null;
+  }
+  init(){
+    if(!window.THREE){$('#loadTxt').textContent='تعذر تحميل Three.js. تحقق من اتصال الإنترنت.';$('#loadBar').style.background='#c94a4a';return false}
+    try{this.renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',failIfMajorPerformanceCaveat:false})}
+    catch(firstError){
+      try{this.renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'low-power',stencil:false,failIfMajorPerformanceCaveat:false})}
+      catch(secondError){
+        const loading=$('#loading');$('#loadTxt').textContent='تعذر بدء الرسوم ثلاثية الأبعاد — فعّل تسريع الرسومات (WebGL) في المتصفح.';
+        $('#loadBar').style.width='100%';$('#loadBar').style.background='#c94a4a';
+        const hint=loading.querySelector('small');if(hint)hint.textContent='تتطلب اللعبة متصفحًا يدعم WebGL.';
+        loading.setAttribute('role','alert');return false;
+      }
+    }
+    this.renderer.domElement.className='game-viewport';this.renderer.domElement.style.touchAction='none';
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    this.renderer.setSize(window.innerWidth,window.innerHeight);
+    this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+    if('outputEncoding' in this.renderer)this.renderer.outputEncoding=THREE.sRGBEncoding;
+    if('toneMapping' in this.renderer){this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=0.98}
+    document.body.insertBefore(this.renderer.domElement,document.body.firstChild);
+    this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xa8b8c4);
+    this.camera=new THREE.PerspectiveCamera(48,window.innerWidth/window.innerHeight,0.3,1400);
+    this.world=new World(this.scene,this.renderer);
+    this.traffic=new Traffic(this.scene,this);
+    this.fieldOfficer=new FieldOfficer(this.scene);
+    this.roadBlock=new RoadBlock(this.scene,this);
+    this.camCtl=new CameraCtl(this.camera,this.world,this.renderer.domElement);
+    this.applySettings();this.bindInput();this.bindUI();this.bindResize();
+    $('#loadBar').style.width='100%';$('#loadTxt').textContent='جاهز';
+    setTimeout(()=>{$('#loading').classList.add('hidden');this.showMenu()},260);
+    this.animate();
+    return true;
+  }
+  applySettings(){
+    const s=Save.data.settings;
+    this.world.setTimeOfDay(s.dayNight||'day');
+    const mobile=window.matchMedia('(max-width: 820px)').matches||(navigator.deviceMemory&&navigator.deviceMemory<=4);
+    let shadows=true,prCap=mobile?1.3:1.75,shadowSize=2048,aniso=4;
+    if(s.quality==='low'){shadows=false;prCap=1;shadowSize=512;aniso=2}
+    else if(s.quality==='medium'){prCap=mobile?1.15:1.5;shadowSize=1024;aniso=4}
+    else if(s.quality==='high'){prCap=mobile?1.45:2;shadowSize=2048;aniso=8}
+    else if(s.quality==='ultra'){prCap=mobile?1.6:2.25;shadowSize=mobile?2048:4096;aniso=12}
+    this.renderer.shadowMap.enabled=shadows;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,prCap));
+    this.world.sun.castShadow=shadows;
+    this.world.sun.shadow.mapSize.set(shadowSize,shadowSize);
+    if(this.world.sun.shadow.map){this.world.sun.shadow.map.dispose();this.world.sun.shadow.map=null}
+    this.renderer.shadowMap.needsUpdate=true;
+    const maxAniso=this.renderer.capabilities.getMaxAnisotropy();
+    Object.keys(TexCache).forEach(key=>{TexCache[key].anisotropy=Math.min(aniso,maxAniso);TexCache[key].needsUpdate=true});
+    Sfx.setVolume(s.volume);
+  }
+  bindInput(){
+    window.addEventListener('keydown',e=>{
+      if(!this.shiftActive)return;
+      const k=e.key.toLowerCase();
+      if(k==='e'){e.preventDefault();this.actionStop()}
+      else if(k==='f'){e.preventDefault();this.actionInspect()}
+      else if(k==='r'){e.preventDefault();this.actionRelease()}
+      else if(k==='b'){e.preventDefault();this.toggleRoadBlock()}
+      else if(k==='c'){e.preventDefault();this.setCameraView(this.camCtl.mode==='cctv'?'officer':'cctv')}
+      else if(k==='v'){e.preventDefault();this.setCameraView(this.camCtl.mode==='overview'?'officer':'overview')}
+      else if(k==='escape'){e.preventDefault();if(this.camCtl.mode==='cctv')this.setCameraView('officer');else this.togglePause()}
+      else if(k==='+'||k==='=')this.camCtl.setZoom(1);
+      else if(k==='-')this.camCtl.setZoom(-1);
+      else if(k==='arrowleft'){e.preventDefault();if(this.camCtl.mode==='overview')this.camCtl.pan(-1);else this.camCtl.rotateLook(-34,0)}
+      else if(k==='arrowright'){e.preventDefault();if(this.camCtl.mode==='overview')this.camCtl.pan(1);else this.camCtl.rotateLook(34,0)}
+      else if(k==='arrowup'&&this.camCtl.mode!=='overview'){e.preventDefault();this.camCtl.rotateLook(0,-28)}
+      else if(k==='arrowdown'&&this.camCtl.mode!=='overview'){e.preventDefault();this.camCtl.rotateLook(0,28)}
+    });
+    const dom=this.renderer.domElement;let dragging=false;
+    dom.addEventListener('pointerdown',e=>{if(e.button!==undefined&&e.button!==0)return;dragging=true;this.lastDown={x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false}});
+    dom.addEventListener('pointermove',e=>{
+      if(!dragging||!this.lastDown)return;
+      const dx=e.clientX-this.lastDown.x,dy=e.clientY-this.lastDown.y;
+      if(Math.hypot(e.clientX-this.lastDown.startX,e.clientY-this.lastDown.startY)>6)this.lastDown.moved=true;
+      if(this.camCtl.mode==='officer'||this.camCtl.mode==='cctv')this.camCtl.rotateLook(dx,dy);
+      this.lastDown.x=e.clientX;this.lastDown.y=e.clientY;
+    });
+    dom.addEventListener('pointerup',e=>{if(dragging&&this.lastDown&&!this.lastDown.moved&&this.shiftActive)this.trySelectAt(e.clientX,e.clientY);dragging=false;this.lastDown=null});
+    dom.addEventListener('pointercancel',()=>{dragging=false;this.lastDown=null});
+    dom.addEventListener('contextmenu',e=>e.preventDefault());
+    dom.addEventListener('wheel',e=>{e.preventDefault();this.camCtl.setZoom(e.deltaY>0?-1:1)},{passive:false});
+  }
+  bindResize(){
+    let t=null;
+    const rs=()=>{clearTimeout(t);t=setTimeout(()=>{const w=window.innerWidth,h=window.innerHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h)},120)};
+    window.addEventListener('resize',rs);window.addEventListener('orientationchange',rs);
+  }
+  bindUI(){
+    $('#btnContinue').onclick=()=>{Sfx.init();Sfx.click();this.startShift()};
+    $('#btnNewShift').onclick=()=>{Sfx.init();Sfx.click();this.startShift()};
+    $('#btnSettings').onclick=()=>{Sfx.click();this.openSettings()};
+    $('#btnHowTo').onclick=()=>{Sfx.click();this.openHelp()};
+    $('#btnReset').onclick=()=>{Sfx.click();UI.modal('حذف الحفظ','<p style="margin:0">سيتم حذف كل التقدم. هل أنت متأكد؟</p>',[{label:'إلغاء',cls:''},{label:'تأكيد الحذف',cls:'danger',action:()=>{Save.reset();Save.save();UI.toast('تم حذف الحفظ','warn');this.refreshMenu()}}])};
+    $('#btnPause').onclick=()=>{Sfx.click();this.togglePause()};
+    $('#btnViewMode').onclick=()=>{Sfx.click();this.setCameraView(this.camCtl.mode==='cctv'?'officer':'cctv')};
+    $('#btnOverview').onclick=()=>{Sfx.click();this.setCameraView(this.camCtl.mode==='overview'?'officer':'overview')};
+    $('#btnExitCctv').onclick=()=>{Sfx.click();this.setCameraView('officer')};
+    $('#btnReports').onclick=()=>{Sfx.click();this.openReports()};
+    $('#btnLog').onclick=()=>{Sfx.click();this.openLog()};
+    $('#btnZoom').onclick=()=>{Sfx.click();this.camCtl.setZoom(1)};
+    $('#btnBlockRoad').onclick=()=>{Sfx.click();this.toggleRoadBlock()};
+    $('#insClose').onclick=()=>{Sfx.click();$('#inspect').classList.add('hidden')};
+    $$('#tabs .tab').forEach(t=>{t.onclick=()=>{Sfx.click();$$('#tabs .tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');this.renderInspectTab(t.dataset.tab)}});
+    $('#actStop').onclick=()=>{Sfx.click();this.actionStop()};
+    $('#actRelease').onclick=()=>{Sfx.click();this.actionRelease()};
+    $('#actFine').onclick=()=>{Sfx.click();this.actionFine()};
+    $('#actInspect').onclick=()=>{Sfx.click();this.actionInspect()};
+    $('#actCancel').onclick=()=>{Sfx.click();this.clearSelection()};
+  }
+  setCameraView(mode){
+    this.camCtl.setMode(mode);const cctv=mode==='cctv';
+    $('#cameraViewFx').classList.toggle('hidden',!cctv);
+    $('#cameraViewFx').setAttribute('aria-hidden',String(!cctv));
+    $('#officerReticle').classList.toggle('hidden',mode!=='officer');
+    $('#btnViewMode').textContent=cctv?'رجوع لمنظور الضابط':'كاميرا العمود';
+    $('#btnViewMode').title=cctv?'الخروج من البث والعودة لمنظور الضابط':'الدخول إلى البث الحي من كاميرا العمود';
+    $('#btnViewMode').classList.toggle('cam-active',cctv);
+    $('#btnOverview').classList.toggle('cam-active',mode==='overview');
+    if(mode==='officer')this.camCtl.resetOfficerLook();
+  }
+  toggleRoadBlock(){
+    if(!this.shiftActive)return;
+    this.roadBlock.toggle();const btn=$('#btnBlockRoad');
+    if(this.roadBlock.active){btn.textContent='فتح الطريق';btn.classList.add('warn');UI.toast('<span class="material-symbol">construction</span> تم إغلاق الطريق — جميع المركبات ستتوقف عند الحواجز','warn',4500)}
+    else{btn.textContent='إغلاق الطريق';btn.classList.remove('warn');UI.toast('<span class="material-symbol">check_circle</span> تم فتح الطريق','ok',3000)}
+    this.logEvent(this.roadBlock.active?'إغلاق الطريق بالحواجز':'فتح الطريق');
+  }
+  showMenu(){this.shiftActive=false;$('#menu').classList.remove('hidden');$('#hud').classList.add('hidden');$('#inspect').classList.add('hidden');this.refreshMenu()}
+  refreshMenu(){
+    const d=Save.data;const acc=d.totalInspected?Math.round((d.totalCorrect/d.totalInspected)*100):0;
+    $('#menuStats').innerHTML='<div class="mstat"><span>الرصيد</span><b>'+money(d.balance)+' ج.م</b></div><div class="mstat"><span>السمعة</span><b>'+d.reputation+'%</b></div><div class="mstat"><span>الورديات</span><b>'+d.shiftsCompleted+'</b></div><div class="mstat"><span>مفحوصة</span><b>'+d.totalInspected+'</b></div><div class="mstat"><span>قرارات صحيحة</span><b>'+d.totalCorrect+'</b></div><div class="mstat"><span>الدقة</span><b>'+acc+'%</b></div>';
+    $('#btnContinue').textContent=d.started?'متابعة الوردية':'بدء أول وردية';
+  }
+  openSettings(){
+    const s=Save.data.settings;
+    const html='<div class="field"><label>جودة الرسومات</label><select id="setQ">'+['auto','low','medium','high','ultra'].map(v=>'<option value="'+v+'"'+(s.quality===v?' selected':'')+'>'+({auto:'تلقائي',low:'منخفضة',medium:'متوسطة',high:'عالية',ultra:'فائقة'})[v]+'</option>').join('')+'</select></div><div class="field"><label>كثافة المرور ('+s.trafficDensity.toFixed(1)+'x)</label><input type="range" id="setD" min="0.4" max="1.8" step="0.1" value="'+s.trafficDensity+'"></div><div class="field"><label>وقت اليوم</label><select id="setDN">'+[['day','نهار'],['dusk','غروب'],['night','ليل (الأنوار تشتغل)']].map(v=>'<option value="'+v[0]+'"'+(s.dayNight===v[0]?' selected':'')+'>'+v[1]+'</option>').join('')+'</select></div><div class="field"><label>مستوى الصوت ('+Math.round(s.volume*100)+'%)</label><input type="range" id="setV" min="0" max="1" step="0.05" value="'+s.volume+'"></div><div class="opt"><input type="checkbox" id="setMute" '+(s.muted?'checked':'')+'><label for="setMute">كتم الصوت</label></div>';
+    const m=UI.modal('الإعدادات',html,[{label:'إغلاق',cls:'primary'}]);
+    const q=m.box.querySelector('#setQ'),d=m.box.querySelector('#setD'),dn=m.box.querySelector('#setDN'),v=m.box.querySelector('#setV'),mute=m.box.querySelector('#setMute');
+    const commit=()=>{Save.data.settings.quality=q.value;Save.data.settings.trafficDensity=parseFloat(d.value);Save.data.settings.dayNight=dn.value;Save.data.settings.volume=parseFloat(v.value);Save.data.settings.muted=mute.checked;Save.save();this.applySettings()};
+    [q,dn,mute].forEach(el=>el.addEventListener('change',commit));
+    d.addEventListener('input',()=>{commit();d.previousElementSibling.textContent='كثافة المرور ('+parseFloat(d.value).toFixed(1)+'x)'});
+    v.addEventListener('input',()=>{commit();v.previousElementSibling.textContent='مستوى الصوت ('+Math.round(parseFloat(v.value)*100)+'%)'});
+  }
+  openHelp(){
+    UI.modal('تعليمات التشغيل','<div style="line-height:1.9;font-size:13px"><b style="color:#c9a04a">أنت ضابط نقطة تفتيش.</b> تتابع الطريق من مستوى عينك، وتدخل كاميرا المراقبة المثبتة على العمود عند الحاجة.<br><br><b style="color:#c9a04a">الأوامر الأساسية:</b><br>• اختر هدفاً من القائمة → <b>أمر بالتوقف</b> — السيارة تتوقف فورًا في مكانها، وكل السيارات خلفها تنتظر حتى تتحرك.<br>• لا يستطيع أي عنصر اختراق عنصر آخر: لا سيارة تخترق سيارة، ولا سيارة تخترق الأقماع أو الحواجز.<br>• افتح <b>بيانات المركبة</b> للفحص، ثم اتخذ قرارك.<br><br><b style="color:#c9a04a">إغلاق الطريق:</b> زر <b>«إغلاق الطريق»</b> (اختصار B) ينشر 3 ضباط + حواجز معدنية عبر الطريق كله.<br><br><b style="color:#c9a04a">الكاميرات والتحكم:</b><br>• اسحب المشهد بالماوس أو الإصبع لتوجيه نظرك في أي اتجاه.<br>• زر «كاميرا العمود» أو C: صورة مراقبة أبيض وأسود.<br>• زر «منظور عام» أو V: العودة للمشهد العلوي.<br>• اختصارات: E (توقف) — F (فحص) — R (إذن) — B (إغلاق الطريق).</div>',[{label:'فهمت',cls:'primary'}]);
+  }
+  startShift(){
+    Sfx.init();Sfx.resume();this.shiftDuration=360;this.shiftTime=this.shiftDuration;this.shiftActive=true;this.elapsed=0;
+    this.shiftStats={inspected:0,correct:0,wrong:0,fines:0,fineValue:0,released:0,arrests:0,escaped:0,reportsResolved:0,bribes:0,bribeValue:0,speeding:0};
+    this.traffic.clear();this.traffic.pendingRecords.length=0;this.reports.length=0;this.reportTimer=26;this.log=[];
+    this.clearSelection();this.fieldOfficer.hide();
+    if(this.roadBlock.active)this.roadBlock.toggle();
+    $('#btnBlockRoad').textContent='إغلاق الطريق';$('#btnBlockRoad').classList.remove('warn');
+    this.officerBusy=false;this.officerVehicle=null;
+    $('#menu').classList.add('hidden');$('#hud').classList.remove('hidden');$('#inspect').classList.add('hidden');$('#radarBar').classList.add('hidden');$('#fieldOfficerTag').classList.add('hidden');
+    this.setCameraView('officer');Save.data.started=true;Save.save();
+    this.camCtl.offsetX=0;this.camCtl.zoom=1.0;
+    this.updateHUD();this.refreshVehicleList();
+    UI.toast('أنت في موقع الكمين — على جانب الطريق مباشرة. اسحب المشهد للنظر حولك.','ok',5200);
+    if(Save.data.settings.showHints)setTimeout(()=>UI.toast('اختر هدفاً ثم «أمر بالتوقف» — أو استخدم «إغلاق الطريق» لإيقاف كل المرور','',5200),1500);
+  }
+  endShift(){
+    this.shiftActive=false;const st=this.shiftStats;const d=Save.data;
+    d.shiftsCompleted++;d.totalInspected+=st.inspected;d.totalCorrect+=st.correct;d.totalWrong+=st.wrong;
+    d.totalFines+=st.fines;d.totalFinesValue+=st.fineValue;d.totalSpeeding+=st.speeding;
+    let repDelta=(st.correct*2)-(st.wrong*5)-(st.bribes*6)-(st.escaped*3);
+    d.reputation=clamp(d.reputation+repDelta,0,100);
+    const score=st.correct*100+st.arrests*200+st.reportsResolved*140-st.wrong*120-st.escaped*60;
+    if(score>d.bestScore)d.bestScore=score;
+    const bonus=Math.max(0,Math.round(score*0.6));d.balance+=bonus;Save.save();
+    this.traffic.clear();this.clearSelection();this.fieldOfficer.hide();
+    if(this.roadBlock.active)this.roadBlock.toggle();
+    $('#hud').classList.add('hidden');$('#inspect').classList.add('hidden');$('#menu').classList.remove('hidden');this.refreshMenu();
+    const acc=st.inspected?Math.round((st.correct/st.inspected)*100):0;
+    UI.modal('تقرير نهاية الوردية','<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px"><div class="card"><div style="color:#8a97a4;font-size:11px">مفحوصة</div><div style="font-size:20px;font-weight:700">'+st.inspected+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">الدقة</div><div style="font-size:20px;font-weight:700;color:'+(acc>=70?'#4a9a68':'#c94a4a')+'">'+acc+'%</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">صحيحة</div><div style="font-size:20px;font-weight:700;color:#4a9a68">'+st.correct+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">خاطئة</div><div style="font-size:20px;font-weight:700;color:#c94a4a">'+st.wrong+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">مخالفات</div><div style="font-size:20px;font-weight:700">'+st.fines+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">قيمة المخالفات</div><div style="font-size:20px;font-weight:700;color:#c9a04a">'+money(st.fineValue)+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">مخالفات سرعة</div><div style="font-size:20px;font-weight:700;color:#c94a4a">'+st.speeding+'</div></div><div class="card"><div style="color:#8a97a4;font-size:11px">هربوا</div><div style="font-size:20px;font-weight:700;color:#c94a4a">'+st.escaped+'</div></div></div><div style="margin-top:12px;padding:11px;background:#0e161e;border-radius:7px;border:1px solid #2a323c"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>مكافأة الأداء</span><b style="color:#c9a04a">+'+money(bonus)+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span>تغير السمعة</span><b style="color:'+(repDelta>=0?'#4a9a68':'#c94a4a')+'">'+(repDelta>=0?'+':'')+repDelta+'</b></div><div style="display:flex;justify-content:space-between"><span>النقاط</span><b>'+score+'</b></div></div>',[{label:'الوردية التالية',cls:'primary',action:()=>this.startShift()}]);
+  }
+  trySelectAt(cx,cy){
+    const rect=this.renderer.domElement.getBoundingClientRect();
+    const ndc=new THREE.Vector2(((cx-rect.left)/rect.width)*2-1,-((cy-rect.top)/rect.height)*2+1);
+    const ray=new THREE.Raycaster();ray.setFromCamera(ndc,this.camera);
+    const meshes=this.traffic.vehicles.filter(v=>v.dir>0&&v.state!=='gone'&&v.z<40).map(v=>v.mesh);
+    const hits=ray.intersectObjects(meshes,true);
+    if(hits.length){let o=hits[0].object;while(o&&!o.userData.vehicle)o=o.parent;if(o&&o.userData.vehicle)this.selectVehicle(o.userData.vehicle)}
+  }
+  selectVehicle(v){
+    if(this.selected===v)return;
+    if(this.selected)this.selected.setSelected(false);
+    this.selected=v;v.setSelected(true);Sfx.click();this.updateActionBar();this.camCtl.focusOnVehicle(v);
+    if(v.state==='stopped'){$('#inspect').classList.remove('hidden');this.renderInspectTab('docs');this.updateInspectHeader()}
+  }
+  clearSelection(){
+    if(this.selected)this.selected.setSelected(false);
+    this.selected=null;$('#inspect').classList.add('hidden');this.updateActionBar();this.camCtl.focusOnVehicle(null);
+  }
+  updateActionBar(){
+    const bar=$('#radarBar');if(!this.selected){bar.classList.add('hidden');return}
+    bar.classList.remove('hidden');const v=this.selected;const stopped=v.state==='stopped';
+    $('#actStop').disabled=stopped;
+    $('#actRelease').disabled=!stopped;$('#actFine').disabled=!stopped;$('#actInspect').disabled=!stopped;
+    $('#actStop').textContent=stopped?'متوقفة':'أمر بالتوقف';
+  }
+  actionStop(){
+    if(!this.shiftActive)return;
+    if(!this.selected){
+      const list=this.traffic.approachingList();
+      if(!list.length){UI.toast('لا توجد أهداف على الرادار','warn');return}
+      this.selectVehicle(list[0]);return;
+    }
+    const v=this.selected;
+    if(v.state==='stopped'||v.state==='released')return;
+
+    if(v.rec.willEvade&&!v.evadeTriggered&&v.z>-100){
+      v.evadeTriggered=true;v.state='evading';v.setBlink(true);
+      this.onVehicleEvade(v);
+      UI.toast('<span class="material-symbol">warning</span> المركبة رفضت التوقف وهربت!','err',4000);
+      this.shiftStats.escaped++;this.updateHUD();return;
+    }
+
+    v.marked=true;
+    v.state='stopped';
+    v.speed=0;
+    v.setBrake(true);
+    v.targetX=v.x;
+
+    Sfx.beepLong();
+    this.playStopAudio();
+    this.logEvent('أمر توقف — '+v.rec.plate.full);
+    this.onVehicleStopped(v);
+    this.updateActionBar();
+    this.updateHUD();
+  }
+  playStopAudio(){
+    const audio=$('#stopAudio');if(!audio)return;
+    const r=Math.random();const duration=r<0.78?8:(r<0.96?40:60);
+    try{audio.pause();audio.currentTime=0;
+      const start=()=>{const playPromise=audio.play();if(playPromise&&playPromise.catch)playPromise.catch(()=>{});window.setTimeout(()=>{audio.pause();audio.currentTime=0},duration*1000)};
+      if(audio.readyState>=2)playPromiseSafe();
+      else{audio.addEventListener('canplay',playPromiseSafe,{once:true});audio.load()}
+      function playPromiseSafe(){start()}
+    }catch(e){}
+  }
+  onSpeedDetected(v){Sfx.beep();UI.toast('<span class="material-symbol">warning</span> رصد سرعة '+v.rec.recordedSpeed+' كم/س — تجاوز بـ '+v.rec.speedExcess+' كم/س | '+v.rec.plate.full,'warn',5500);this.logEvent('مخالفة سرعة مرصودة — '+v.rec.plate.full+' ('+v.rec.recordedSpeed+' كم/س)')}
+  onVehicleStopped(v){
+    if(this.selected===v){
+      this.updateActionBar();
+      $('#inspect').classList.remove('hidden');
+      this.renderInspectTab('docs');
+      this.updateInspectHeader();
+    }
+    Sfx.radio();
+    UI.toast('<span class="material-symbol">traffic</span> الهدف '+v.rec.plate.full+' متوقف في مكانه — يمكنك الفحص الآن','ok',3500);
+    this.logEvent('توقف مركبة '+v.rec.plate.full);
+  }
+  onVehicleEvade(v){
+    Sfx.alarm();this.logEvent('هروب مركبة '+v.rec.plate.full);$('#foStatus').textContent='الهدف هرب!';
+    setTimeout(()=>{this.officerBusy=false;this.fieldOfficer.hide();$('#fieldOfficerTag').classList.add('hidden');this.updateActionBar()},2000);
+  }
+  actionRelease(){
+    if(!this.selected)return;
+    const v=this.selected;if(v.state!=='stopped'){UI.toast('الهدف ليس متوقفاً','warn');return}
+    const st=this.shiftStats;const viol=violationsOf(v.rec);const truth=hiddenTruthCodes(v.rec);
+    const knownSerious=(v.rec.hidden.stolen&&v.rec.revealed.registrationCheck)||(v.rec.hidden.wanted&&v.rec.revealed.wantedCheck)||(v.rec.hidden.suspicious_cargo&&v.rec.physDone.cargo);
+    if(knownSerious){st.wrong++;Save.data.reputation=clamp(Save.data.reputation-4,0,100);UI.toast('<span class="material-symbol">cancel</span> خطأ: أطلقت هدفاً مطلوباً أمنياً','err',4000);this.logEvent('خطأ — إطلاق '+v.rec.plate.full)}
+    else if(truth.length>0&&viol.length===0){st.wrong++;Save.data.reputation=clamp(Save.data.reputation-2,0,100);UI.toast('<span class="material-symbol">warning</span> تم الإذن بالمرور — لكن كانت هناك مخالفات','warn',3600)}
+    else{st.correct++;UI.toast('<span class="material-symbol">check_circle</span> إذن بالمرور','ok');this.logEvent('إذن مرور — '+v.rec.plate.full)}
+    st.inspected++;st.released++;
+    if(v.rec.reportId)this.resolveReport(v.rec.reportId,viol.length>0);
+    v.rec.outcome='released';
+    if(this.roadBlock.active)this.roadBlock.openForPassage(5000);
+    v.release();Save.save();this.clearSelection();this.recallOfficer();this.updateHUD();
+  }
+  recallOfficer(){
+    if(this.fieldOfficer.visible){$('#foStatus').textContent='العودة إلى نقطة الانتظار';this.fieldOfficer.walkTo(CFG.officerPost.x,CFG.officerPost.z,()=>{this.fieldOfficer.hide();$('#fieldOfficerTag').classList.add('hidden');this.officerBusy=false;this.officerVehicle=null;this.updateActionBar()})}
+    else{this.officerBusy=false;this.officerVehicle=null}
+  }
+  actionInspect(){
+    if(!this.selected){UI.toast('اختر هدفاً','warn');return}
+    if(this.selected.state!=='stopped'){UI.toast('يجب إيقاف الهدف أولاً','warn');return}
+    $('#inspect').classList.remove('hidden');this.updateInspectHeader();
+    this.renderInspectTab($('#tabs .tab.on')?$('#tabs .tab.on').dataset.tab:'docs');
+  }
+  actionFine(){
+    if(!this.selected){UI.toast('اختر هدفاً','warn');return}
+    const v=this.selected;if(v.state!=='stopped'){UI.toast('يجب إيقاف الهدف أولاً','warn');return}
+    const known=violationsOf(v.rec).filter(c=>!FINE_TABLE[c]||!FINE_TABLE[c].arrest);
+    if(!known.length){
+      UI.modal('تحرير مخالفة','<p style="margin:0 0 10px">لا توجد مخالفات مُثبتة لهذا الهدف بعد.</p><p style="margin:0;color:#8a97a4;font-size:12.5px">يجب طلب المستندات وتنفيذ الفحوصات قبل تحرير أي مخالفة.</p>',[{label:'إلغاء',cls:''},{label:'مخالفة بدون دليل',cls:'danger',action:()=>{this.shiftStats.wrong++;Save.data.reputation=clamp(Save.data.reputation-6,0,100);UI.toast('<span class="material-symbol">warning</span> مخالفة بدون دليل — قرار خاطئ','err');this.logEvent('مخالفة بدون دليل — '+v.rec.plate.full);Save.save();this.updateHUD()}}]);
+      return;
+    }
+    let html='<p style="margin:0 0 10px;font-size:12.5px;color:#8a97a4">اختر المخالفات المُثبتة لتحريرها:</p><div id="fineOpts">';
+    known.forEach(c=>{const info=FINE_TABLE[c]||{label:c,amount:0};const amt=fineAmountFor(c,v.rec);let extra='';if(c==='speeding')extra=' <small style="color:#c94a4a">('+v.rec.recordedSpeed+' كم/س / تجاوز '+v.rec.speedExcess+')</small>';html+='<div class="opt"><input type="checkbox" id="f_'+c+'" data-code="'+c+'" checked><label for="f_'+c+'">'+info.label+extra+'</label><span class="amt">'+money(amt)+' ج.م</span></div>'});
+    html+='</div><div style="margin-top:10px;padding:10px;background:#0a1219;border-radius:6px;border:1px solid #2a323c;display:flex;justify-content:space-between"><span>إجمالي المخالفة</span><b id="fineTotal" style="color:#c9a04a;font-size:17px">0</b></div>';
+    const m=UI.modal('تحرير مخالفة — '+v.rec.plate.full,html,[{label:'إلغاء',cls:''},{label:'تأكيد التحرير',cls:'primary',action:()=>{const boxes=m.box.querySelectorAll('#fineOpts input[type=checkbox]');const chosen=[];boxes.forEach(b=>{if(b.checked)chosen.push(b.dataset.code)});if(!chosen.length){UI.toast('لم تختر أي مخالفة','warn');return}this.issueFine(v,chosen)}}]);
+    const total=m.box.querySelector('#fineTotal');
+    const recalc=()=>{let sum=0;m.box.querySelectorAll('#fineOpts input[type=checkbox]').forEach(b=>{if(b.checked)sum+=fineAmountFor(b.dataset.code,v.rec)});total.textContent=money(sum)+' ج.م'};
+    m.box.querySelectorAll('#fineOpts input').forEach(b=>b.addEventListener('change',recalc));
+    recalc();
+  }
+  issueFine(v,codes){
+    const st=this.shiftStats;let total=0;const items=[];
+    for(const c of codes){const amt=fineAmountFor(c,v.rec);total+=amt;items.push((FINE_TABLE[c]?FINE_TABLE[c].label:c)+' — '+money(amt)+' ج.م');if(c==='speeding')st.speeding++}
+    const revealedLegit=violationsOf(v.rec);const allLegit=codes.every(c=>revealedLegit.indexOf(c)>=0);
+    Save.data.balance+=total;Save.data.totalFinesValue+=total;st.fines++;st.fineValue+=total;st.inspected++;
+    if(allLegit){st.correct++;UI.toast('<span class="material-symbol">check_circle</span> مخالفة '+money(total)+' ج.م محررة','ok',3400)}
+    else{st.wrong++;Save.data.reputation=clamp(Save.data.reputation-5,0,100);UI.toast('<span class="material-symbol">warning</span> بعض المخالفات غير مُثبتة','err',3800)}
+    Save.data.transactions.push({t:Date.now(),type:'fine',plate:v.rec.plate.full,amount:total,items});
+    if(Save.data.transactions.length>250)Save.data.transactions=Save.data.transactions.slice(-250);
+    Sfx.cash();this.logEvent('مخالفة '+money(total)+' ج.م — '+v.rec.plate.full);
+    if(v.rec.reportId)this.resolveReport(v.rec.reportId,true);
+    v.rec.outcome='fined';Save.save();this.updateHUD();this.renderInspectTab('act');
+    if(this.roadBlock.active)this.roadBlock.openForPassage(5000);
+    setTimeout(()=>{if(v.state==='stopped'){v.release();if(this.selected===v)this.clearSelection();this.recallOfficer()}},1400);
+  }
+  actionArrest(){
+    if(!this.selected)return;
+    const v=this.selected;if(v.state!=='stopped')return;
+    const st=this.shiftStats;const h=v.rec.hidden;
+    const evidence=(h.stolen&&v.rec.revealed.registrationCheck)||(h.wanted&&v.rec.revealed.wantedCheck)||(h.suspicious_cargo&&v.rec.physDone.cargo);
+    if(!evidence){st.wrong++;Save.data.reputation=clamp(Save.data.reputation-8,0,100);UI.toast('<span class="material-symbol">cancel</span> احتجاز بدون دليل — قرار خاطئ','err',4000);this.logEvent('احتجاز بدون دليل — '+v.rec.plate.full);Save.save();this.updateHUD();return}
+    st.arrests++;st.correct++;st.inspected++;
+    const reward=h.stolen?900:700;Save.data.balance+=reward;
+    Save.data.transactions.push({t:Date.now(),type:'arrest',plate:v.rec.plate.full,amount:reward});
+    Save.data.reputation=clamp(Save.data.reputation+3,0,100);
+    Sfx.alarm();UI.toast('<span class="material-symbol">check_circle</span> احتجاز ناجح — مكافأة '+money(reward)+' ج.م','ok',4000);
+    this.logEvent('احتجاز — '+v.rec.plate.full+' (+'+reward+')');
+    if(v.rec.reportId)this.resolveReport(v.rec.reportId,true);
+    v.rec.outcome='arrested';Save.save();this.updateHUD();
+    setTimeout(()=>{if(v.state==='stopped'){v.release();if(this.selected===v)this.clearSelection();this.recallOfficer()}},1600);
+  }
+  actionBribe(){
+    if(!this.selected)return;
+    const v=this.selected;if(v.state!=='stopped'){UI.toast('يجب إيقاف الهدف أولاً','warn');return}
+    const html='<p style="margin:0 0 12px;line-height:1.75">ميكانيكا خيالية داخل اللعبة تُسمى <b style="color:#c9a04a">«الشاي بالياسمين»</b>. لا تمثل أي دفع حقيقي. القبول يخفض سمعتك.</p><div class="field"><label>المبلغ المطلوب (جنيه — افتراضي)</label><input type="number" id="bribeAmt" value="50" min="10" max="2000" step="10"></div><div style="display:flex;gap:7px;flex-wrap:wrap">'+[50,100,200,500].map(a=>'<button class="btn sm" data-amt="'+a+'">'+a+' ج.م</button>').join('')+'</div>';
+    const m=UI.modal('الشاي بالياسمين (خيالي)',html,[{label:'إلغاء',cls:''},{label:'عرض الطلب',cls:'primary',action:()=>{const amt=parseInt(m.box.querySelector('#bribeAmt').value,10)||0;if(amt<10||amt>2000){UI.toast('مبلغ غير صالح','err');return}this.resolveBribe(v,amt)}}]);
+    m.box.querySelectorAll('button[data-amt]').forEach(b=>{b.onclick=()=>{m.box.querySelector('#bribeAmt').value=b.dataset.amt}});
+  }
+  resolveBribe(v,amount){
+    const truth=hiddenTruthCodes(v.rec);let base=0.42+0.22*Math.min(truth.length,3);
+    if(v.rec.nervous)base+=0.15;base-=amount/4000;
+    const accept=clamp(base,0.08,0.9);
+    if(Math.random()<accept){
+      const finalAmt=Math.round(amount*rnd(0.7,1.0));
+      Save.data.balance+=finalAmt;Save.data.totalBribes++;Save.data.totalBribeValue+=finalAmt;
+      this.shiftStats.bribes++;this.shiftStats.bribeValue+=finalAmt;
+      Save.data.reputation=clamp(Save.data.reputation-6,0,100);
+      Save.data.transactions.push({t:Date.now(),type:'bribe',plate:v.rec.plate.full,amount:finalAmt});
+      Sfx.cash();this.logEvent('«شاي بالياسمين» — '+finalAmt+' ج.م من '+v.rec.plate.full);
+      UI.toast('السائق قبل ('+money(finalAmt)+' ج.م) — خصم من السمعة','warn',4200);
+    } else {this.logEvent('رفض «الشاي بالياسمين» — '+v.rec.plate.full);Sfx.err();UI.toast('السائق رفض وأصرّ على الفحص الرسمي','',3400)}
+    Save.save();this.updateHUD();this.renderInspectTab('act');
+  }
+  updateInspectHeader(){const v=this.selected;if(!v)return;$('#insTitle').textContent=v.rec.typeLabel+' — '+v.rec.vehicle.make+' '+v.rec.vehicle.model;$('#insSub').textContent=v.rec.plate.full+' • '+v.rec.vehicle.colorName+' • '+v.rec.vehicle.year+(v.rec.recordedSpeed?' • رصد: '+v.rec.recordedSpeed+' كم/س':'')}
+  renderInspectTab(tab){const v=this.selected;const body=$('#inspectBody');if(!v){body.innerHTML='<div style="color:#8a97a4;padding:8px">لا يوجد هدف محدد.</div>';return}if(tab==='docs')this.renderDocs(body,v);else if(tab==='db')this.renderDb(body,v);else if(tab==='phys')this.renderPhys(body,v);else this.renderActs(body,v)}
+  renderDocs(body,v){
+    const keys=[['nationalId','بطاقة الرقم القومي'],['license','رخصة القيادة'],['registration','رخصة تسيير المركبة'],['insurance','وثيقة التأمين الإجباري'],['plate','بيانات اللوحة المعدنية']];
+    let html='<div class="doclist">';
+    for(const[k,label]of keys){const asked=!!v.rec.revealed[k];html+='<button class="docbtn'+(asked?' done':'')+'" data-doc="'+k+'"><span>'+label+'</span><span class="st">'+(asked?'✔ تم العرض':'لم يُطلب')+'</span></button>'}
+    html+='</div>';
+    for(const[k]of keys){if(v.rec.revealed[k])html+=this.docHTML(v,k)}
+    body.innerHTML=html;
+    body.querySelectorAll('.docbtn').forEach(b=>{b.onclick=()=>{const k=b.dataset.doc;if(!v.rec.revealed[k]){v.rec.revealed[k]=true;Sfx.tone(700,0.08,'sine',0.07);this.logEvent('طلب مستند: '+k+' — '+v.rec.plate.full)}else Sfx.click();this.renderDocs(body,v)}});
+  }
+  docHTML(v,key){
+    const d=v.rec.docs[key];
+    const stateMap={valid:{cls:'',txt:'',stamp:'سليم'},expired:{cls:'warn',txt:'<span class="material-symbol">warning</span> منتهي',stamp:'منتهي'},missing:{cls:'bad',txt:'<span class="material-symbol">close</span> غير موجود',stamp:'مفقود'},suspicious:{cls:'warn',txt:'<span class="material-symbol">warning</span> مشتبه به',stamp:'مشتبه'},invalid:{cls:'bad',txt:'<span class="material-symbol">close</span> غير صالح',stamp:'باطل'}};
+    const st=stateMap[d.state]||stateMap.valid;const clsExtra=st.cls?' '+st.cls:'';
+    if(key==='nationalId'){const extra=d.state!=='valid'?'<div class="stamp">'+st.stamp+'</div>':'';return '<div class="doc doc-id'+clsExtra+'"><div class="hdr"><span>جمهورية مصر العربية</span><span style="font-size:16px">🦅</span><span>بطاقة الرقم القومي</span></div><div class="body"><div class="photo">👤</div><div class="fields"><div class="r"><span>الاسم</span><span>'+d.data['الاسم']+'</span></div><div class="r"><span>الرقم القومي</span><span class="id-num">'+d.data['الرقم القومي']+'</span></div><div class="r"><span>النوع</span><span>'+d.data['النوع']+'</span></div><div class="r"><span>السن</span><span>'+d.data['السن']+'</span></div><div class="r"><span>محل الإصدار</span><span>'+d.data['محل الإصدار']+'</span></div></div></div><div class="foot"><span>صالح حتى '+d.data['تاريخ الانتهاء']+'</span><span>||| |||| || |||||</span></div>'+extra+'</div>'}
+    if(key==='license'){const extra=d.state!=='valid'?'<div class="stamp">'+st.stamp+'</div>':'';return '<div class="doc doc-lic'+clsExtra+'"><div class="hdr"><span>وزارة الداخلية — الإدارة العامة للمرور</span><span class="ar">رخصة قيادة</span></div><div class="body"><div class="photo">👤</div><div class="fields"><div class="r"><span>الاسم</span><span>'+d.data['الاسم']+'</span></div><div class="r"><span>رقم الرخصة</span><span>'+d.data['رقم الرخصة']+'</span></div><div class="r"><span>الفئة</span><span>'+d.data['الفئة']+'</span></div><div class="r"><span>المرور المختص</span><span>'+d.data['المرور المختص']+'</span></div><div class="r"><span>من</span><span>'+d.data['تاريخ الإصدار']+'</span></div><div class="r"><span>حتى</span><span>'+d.data['تاريخ الانتهاء']+'</span></div></div><div class="cats"><div><b>خاصة</b> ✔</div><div><b>دراجة</b> ✔</div><div><b>نقل</b> '+(d.data['الفئة'].indexOf('ثانية')>=0?'✔':'<span class="material-symbol">close</span>')+'</div><div><b>أجرة</b> '+(d.data['الفئة'].indexOf('ثانية')>=0?'✔':'<span class="material-symbol">close</span>')+'</div></div></div>'+extra+'</div>'}
+    if(key==='registration'){const extra=d.state!=='valid'?'<div class="stamp">'+st.stamp+'</div>':'';return '<div class="doc doc-reg'+clsExtra+'"><div class="hdr"><span>رخصة تسيير مركبة</span><span class="en">VEHICLE REG.</span></div><div class="body"><div class="r"><span>المالك</span><span>'+d.data['المالك']+'</span></div><div class="r"><span>اللوحة</span><span>'+d.data['اللوحة']+'</span></div><div class="r"><span>الماركة</span><span>'+d.data['الماركة']+'</span></div><div class="r"><span>الموديل</span><span>'+d.data['الموديل']+'</span></div><div class="r"><span>سنة الصنع</span><span>'+d.data['سنة الصنع']+'</span></div><div class="r"><span>اللون</span><span>'+d.data['اللون']+'</span></div><div class="r"><span>رقم الشاسيه</span><span>'+d.data['رقم الشاسيه']+'</span></div><div class="r"><span>رقم الموتور</span><span>'+d.data['رقم الموتور']+'</span></div><div class="r full"><span>الوزن الصافي</span><span>'+d.data['الوزن الصافي']+'</span></div><div class="r full"><span>تاريخ الانتهاء</span><span>'+d.data['تاريخ الانتهاء']+'</span></div></div>'+extra+'</div>'}
+    if(key==='insurance'){return '<div class="doc doc-ins'+clsExtra+'"><div class="hdr"><div class="co">'+d.data['الشركة']+'<small>للتأمين التعاوني</small></div><div class="num">رقم الوثيقة<b>'+d.data['رقم الوثيقة']+'</b></div></div><div class="title">وثيقة تأمين إجباري — طرف ثالث</div><div class="grid"><div class="r"><span>المركبة</span><span>'+d.data['المركبة']+'</span></div><div class="r"><span>اللوحة</span><span>'+d.data['اللوحة']+'</span></div><div class="r"><span>نوع التغطية</span><span>'+d.data['التغطية']+'</span></div><div class="r"><span>قيمة التأمين</span><span>'+d.data['قيمة التأمين']+'</span></div><div class="r"><span>تاريخ الإصدار</span><span>'+d.data['تاريخ الإصدار']+'</span></div><div class="r"><span>تاريخ الانتهاء</span><span>'+d.data['تاريخ الانتهاء']+'</span></div></div><div class="seal">ختم الشركة<br>معتمد</div></div>'}
+    if(key==='plate'){const plateKind=d.data['نوع اللوحة'];const plateColor=plateKind==='ملاكي'?'#1a6a9a':(plateKind==='أجرة'?'#d97a1e':'#b22222');return '<div class="doc-plate" style="background:'+plateColor+'"><div><div class="ar">'+plateKind+'</div><div class="letters">'+d.data['الحروف']+'</div></div><div class="num">'+d.data['الرقم']+'</div><div class="region">'+d.data['المحافظة']+'<br>مصر</div></div><div style="font-size:11.5px;color:#8a97a4;padding:0 4px 8px">حالة اللوحة: <b style="color:#ddd">'+d.data['حالة اللوحة']+'</b> • مطابقة للرخصة: <b style="color:'+(d.data['مطابقة للرخصة']==='نعم'?'#4a9a68':'#c94a4a')+'">'+d.data['مطابقة للرخصة']+'</b></div>'}
+    return '';
+  }
+  renderDb(body,v){
+    const checks=[['identityCheck','التحقق من هوية السائق','مقارنة البيانات بقاعدة المعلومات'],['registrationCheck','التحقق من تسجيل المركبة','مطابقة اللوحة والمواصفات'],['wantedCheck','البحث في قوائم المطلوبين','فحص الأوامر والتحقيقات'],['reportsCheck','مطابقة البلاغات النشطة','البحث باللوحة في البلاغات']];
+    let html='<div class="doclist">';
+    for(const[k,l,sub]of checks){const done=!!v.rec.revealed[k];html+='<button class="docbtn'+(done?' done':'')+'" data-chk="'+k+'"><span>'+l+'<div style="font-size:10.5px;color:#8a97a4;margin-top:2px">'+sub+'</div></span><span class="st">'+(done?'✔ تم':'لم يُنفذ')+'</span></button>'}
+    html+='</div>';
+    for(const[k]of checks){if(v.rec.revealed[k])html+=this.checkHTML(v,k)}
+    body.innerHTML=html;
+    body.querySelectorAll('.docbtn').forEach(b=>{b.onclick=()=>{const k=b.dataset.chk;if(!v.rec.revealed[k]){v.rec.revealed[k]=true;Sfx.tone(520,0.1,'square',0.06);setTimeout(()=>Sfx.tone(880,0.09,'square',0.05),110);this.logEvent('فحص قاعدة بيانات: '+k+' — '+v.rec.plate.full);if(k==='registrationCheck'&&v.rec.hidden.stolen){Sfx.alarm();UI.toast('<span class="material-symbol">emergency</span> تنبيه: مركبة مسروقة!','err',5000)}if(k==='wantedCheck'&&v.rec.hidden.wanted){Sfx.alarm();UI.toast('<span class="material-symbol">emergency</span> تنبيه: شخص مطلوب أمنياً!','err',5000)}}else Sfx.click();this.renderDb(body,v)}});
+  }
+  checkHTML(v,key){
+    const r=v.rec;let title='',result='',cls='ok';
+    if(key==='identityCheck'){title='التحقق من هوية السائق';if(r.docs.nationalId.state==='missing'){result='<span class="no"><span class="material-symbol">close</span> لا يمكن التحقق — البطاقة غير موجودة</span>';cls='no'}else if(r.docs.nationalId.state==='expired'){result='<span class="wr"><span class="material-symbol">warning</span> الهوية مطابقة لكن الوثيقة منتهية</span>';cls='wr'}else if(chance(0.05)){result='<span class="wr"><span class="material-symbol">warning</span> تطابق جزئي — يُنصح بتحقق إضافي</span>';cls='wr'}else result='<span class="ok">✔ الهوية مطابقة تماماً</span>'}
+    else if(key==='registrationCheck'){title='التحقق من تسجيل المركبة';if(r.hidden.stolen){result='<span class="no"><span class="material-symbol">emergency</span> المركبة مُبلَّغ عنها مسروقة</span>';cls='no'}else if(r.hidden.plate_mismatch){result='<span class="no"><span class="material-symbol">close</span> عدم تطابق: اللوحة لا تتوافق مع البيانات المسجلة</span>';cls='no'}else if(r.docs.registration.state==='expired'){result='<span class="wr"><span class="material-symbol">warning</span> التسجيل سليم لكن الرخصة منتهية</span>';cls='wr'}else if(r.docs.registration.state==='missing'){result='<span class="no"><span class="material-symbol">close</span> لا توجد بيانات تسجيل متاحة</span>';cls='no'}else result='<span class="ok">✔ التسجيل سليم ومطابق للوحة</span>'}
+    else if(key==='wantedCheck'){title='البحث في قوائم المطلوبين';if(r.hidden.wanted){result='<span class="no"><span class="material-symbol">emergency</span> أمر ضبط بحق السائق — '+(r.hidden.wantedReason||'')+'</span>';cls='no'}else if(r.nervous){result='<span class="wr"><span class="material-symbol">warning</span> لا توجد أوامر ضبط — سلوك السائق متوتر لكن لا يوجد سجل</span>';cls='wr'}else result='<span class="ok">✔ لا توجد بلاغات أو أوامر ضبط نشطة</span>'}
+    else if(key==='reportsCheck'){title='مطابقة البلاغات النشطة';const active=this.reports.filter(rep=>rep.status==='active');if(!active.length)result='<span class="ok">✔ لا توجد بلاغات نشطة</span>';else{const match=active.find(rep=>rep.plate===r.plate.full);if(match){result='<span class="no"><span class="material-symbol">emergency</span> تطابق مع بلاغ نشط '+match.id+': '+match.reason+'</span>';cls='no'}else{result='<span class="wr"><span class="material-symbol">warning</span> يوجد '+active.length+' بلاغ نشط، لا يوجد تطابق</span>';cls='wr'}}}
+    return '<div class="checkres"><div class="ttl">'+title+'</div><div class="'+cls+'">'+result+'</div></div>';
+  }
+  renderPhys(body,v){
+    const zones=[['exterior','الفحص الخارجي','الهيكل، الأبواب، الزجاج، اللوحات'],['interior','الفحص الداخلي','المقاعد، لوحة القيادة'],['trunk','الصندوق الخلفي','فتح الصندوق وفحص المحتوى'],['cargo','فحص الحمولة','للمركبات التجارية والنقل']];
+    let html='<div class="doclist">';
+    for(const[k,l,sub]of zones){const done=!!v.rec.physDone[k];html+='<button class="docbtn'+(done?' done':'')+'" data-zone="'+k+'"><span>'+l+'<div style="font-size:10.5px;color:#8a97a4;margin-top:2px">'+sub+'</div></span><span class="st">'+(done?'✔ تم':'لم يُنفذ')+'</span></button>'}
+    html+='</div>';
+    if(v.rec.findings.length){html+='<div style="margin-top:6px;font-size:11.5px;color:#8a97a4;margin-bottom:6px">نتائج التفتيش:</div>';for(const f of v.rec.findings){html+='<div class="finding'+(f.good?' good':'')+'"><span class="ic">'+(f.good?'✔':'<span class="material-symbol">warning</span>')+'</span><span>'+f.text+'</span></div>'}}
+    body.innerHTML=html;
+    body.querySelectorAll('.docbtn').forEach(b=>{b.onclick=()=>{const z=b.dataset.zone;if(!v.rec.physDone[z]){v.rec.physDone[z]=true;Sfx.tone(340,0.14,'sawtooth',0.05,180);this.doPhysicalInspection(v,z)}else Sfx.click();this.renderPhys(body,v)}});
+  }
+  doPhysicalInspection(v,zone){
+    const r=v.rec;const findings=[];
+    const isCargo=['truck','van','pickup','microbus','bus'].indexOf(r.type)>=0;
+    if(zone==='exterior'){if(r.hidden.plate_mismatch)findings.push({text:'لوحة المركبة مُعاد تركيبها حديثاً.',good:false});if(chance(0.28))findings.push({text:'خدوش بسيطة في الهيكل الخلفي.',good:true});if(chance(0.15))findings.push({text:'مصباح خلفي مكسور.',good:false});if(!findings.length)findings.push({text:'الهيكل الخارجي سليم.',good:true})}
+    else if(zone==='interior'){if(r.nervous)findings.push({text:'السائق متوتر ويداه ترتجفان.',good:true});if(r.hidden.wanted&&chance(0.5))findings.push({text:'أوراق شخصية بأسماء مختلفة.',good:false});if(chance(0.14))findings.push({text:'حزام الأمان غير صالح.',good:false});if(!findings.length)findings.push({text:'المقصورة نظيفة.',good:true})}
+    else if(zone==='trunk'){if(r.hidden.suspicious_cargo&&isCargo&&chance(0.55))findings.push({text:'الصندوق يحتوي على '+(r.hidden.cargoDesc||'أغراض غير مُعلَّمة')+'.',good:false});if(chance(0.20))findings.push({text:'إطار احتياطي وأدوات.',good:true});if(!findings.length)findings.push({text:'الصندوق فارغ.',good:true})}
+    else if(zone==='cargo'){if(!isCargo)findings.push({text:'ليست مركبة نقل — لا توجد حمولة.',good:true});else if(r.hidden.suspicious_cargo)findings.push({text:'الحمولة: '+(r.hidden.cargoDesc||'غير مطابقة للبيان')+'.',good:false});else if(chance(0.22))findings.push({text:'الحمولة مطابقة لكن الوزن زائد قليلاً.',good:false});else findings.push({text:'الحمولة مطابقة للمستندات.',good:true})}
+    for(const f of findings)r.findings.push(f);
+    this.logEvent('تفتيش ('+zone+') — '+r.plate.full);
+    if(findings.some(f=>!f.good))Sfx.err();else Sfx.ok();
+  }
+  renderActs(body,v){
+    const known=violationsOf(v.rec);
+    const canArrest=(v.rec.hidden.stolen&&v.rec.revealed.registrationCheck)||(v.rec.hidden.wanted&&v.rec.revealed.wantedCheck)||(v.rec.hidden.suspicious_cargo&&v.rec.physDone.cargo);
+    let html='';
+    html+='<div class="card" style="margin-bottom:10px">';
+    html+='<div style="font-size:11.5px;color:#8a97a4;margin-bottom:5px">ملخص الهدف</div>';
+    if(v.rec.recordedSpeed)html+='<div style="display:flex;justify-content:space-between;padding:3px 0"><span>السرعة المرصودة</span><b style="color:'+(v.rec.speedViolation?'#c94a4a':'#4a9a68')+'">'+v.rec.recordedSpeed+' كم/س</b></div>';
+    html+='<div style="display:flex;justify-content:space-between;padding:3px 0"><span>مستندات</span><b>'+Object.keys(v.rec.revealed).filter(k=>['nationalId','license','registration','insurance','plate'].indexOf(k)>=0).length+' / 5</b></div>';
+    html+='<div style="display:flex;justify-content:space-between;padding:3px 0"><span>فحوصات</span><b>'+['identityCheck','registrationCheck','wantedCheck','reportsCheck'].filter(k=>v.rec.revealed[k]).length+' / 4</b></div>';
+    html+='<div style="display:flex;justify-content:space-between;padding:3px 0"><span>مناطق التفتيش</span><b>'+Object.keys(v.rec.physDone).length+' / 4</b></div>';
+    html+='<div style="display:flex;justify-content:space-between;padding:3px 0"><span>مخالفات مُثبتة</span><b style="color:'+(known.length?'#c94a4a':'#4a9a68')+'">'+known.length+'</b></div>';
+    html+='</div>';
+    if(known.length){html+='<div style="font-size:11.5px;color:#8a97a4;margin-bottom:5px">المخالفات المُثبتة:</div>';for(const c of known){const info=FINE_TABLE[c]||{label:c,amount:0};html+='<div class="finding"><span class="ic"><span class="material-symbol">warning</span></span><span>'+info.label+' — <b style="color:#c9a04a">'+money(fineAmountFor(c,v.rec))+' ج.م</b></span></div>'}}
+    if(canArrest)html+='<div class="finding" style="background:#240d0d;border-color:#5a2020"><span class="ic"><span class="material-symbol">emergency</span></span><span>يوجد دليل كافٍ للاحتجاز الفوري.</span></div>';
+    html+='<div style="display:flex;flex-direction:column;gap:7px;margin-top:10px">';
+    html+='<button class="btn danger" id="actArrestBtn"'+(canArrest?'':' disabled')+'>تنفيذ الاحتجاز</button>';
+    html+='<button class="btn primary" id="actFineBtn">تحرير مخالفة</button>';
+    html+='<button class="btn" id="actBribeBtn">الشاي بالياسمين (خيالي)</button>';
+    html+='<button class="btn green" id="actRelBtn">إذن بالمرور</button>';
+    html+='</div>';
+    if(v.rec.findings.length){html+='<div style="margin-top:12px;font-size:11.5px;color:#8a97a4;margin-bottom:5px">نتائج التفتيش:</div>';for(const f of v.rec.findings){html+='<div class="finding'+(f.good?' good':'')+'"><span class="ic">'+(f.good?'✔':'<span class="material-symbol">warning</span>')+'</span><span>'+f.text+'</span></div>'}}
+    body.innerHTML=html;
+    const ab=body.querySelector('#actArrestBtn');if(ab)ab.onclick=()=>{Sfx.click();this.actionArrest()};
+    const fb=body.querySelector('#actFineBtn');if(fb)fb.onclick=()=>{Sfx.click();this.actionFine()};
+    const bb=body.querySelector('#actBribeBtn');if(bb)bb.onclick=()=>{Sfx.click();this.actionBribe()};
+    const rb=body.querySelector('#actRelBtn');if(rb)rb.onclick=()=>{Sfx.click();this.actionRelease()};
+  }
+  updateReports(dt){
+    this.reportTimer-=dt;
+    if(this.reportTimer<=0){this.reportTimer=rnd(50,100)/(Save.data.settings.trafficDensity||1);this.generateReport()}
+    const now=performance.now();
+    for(const r of this.reports){if(r.status==='active'&&now-r.created>240000){r.status='expired';this.logEvent('انتهت صلاحية بلاغ '+r.id)}}
+  }
+  generateReport(){
+    if(!this.shiftActive)return;
+    const kind=pick(['stolen','stolen','wanted','suspicious']);
+    const forceCase=kind==='stolen'?'stolen':(kind==='wanted'?'wanted':'suspiciousCargo');
+    const rec=generateRecord(pickWeightedType(),{forceCase});
+    const id='R'+rndInt(1000,9999);rec.reportId=id;
+    const reasonMap={stolen:'مركبة مُبلَّغ عنها مسروقة',wanted:'شخص مطلوب أمنياً',suspicious:'مركبة مشتبه بها'};
+    const rep={id,plate:rec.plate.full,color:rec.vehicle.colorName,typeLabel:rec.typeLabel,make:rec.vehicle.make+' '+rec.vehicle.model,reason:reasonMap[kind],kind,status:'active',created:performance.now(),record:rec};
+    this.reports.push(rep);this.traffic.queueRecord(rec);Sfx.radio();
+    UI.toast('📻 بلاغ جديد: '+rep.reason+' — لوحة '+rep.plate,'radio',6500);
+    this.logEvent('بلاغ '+id+': '+rep.reason+' — '+rep.plate);this.updateHUD();
+  }
+  resolveReport(id,correct){
+    const r=this.reports.find(x=>x.id===id);
+    if(!r||r.status!=='active')return;
+    if(correct){r.status='resolved';this.shiftStats.reportsResolved++;Save.data.reputation=clamp(Save.data.reputation+2,0,100);UI.toast('<span class="material-symbol">check_circle</span> تم حل البلاغ '+id,'ok');this.logEvent('حل البلاغ '+id)}
+    else{r.status='expired';UI.toast('انتهى البلاغ '+id+' دون نتيجة','warn');this.logEvent('إغلاق البلاغ '+id+' دون نتيجة')}
+    Save.save();this.updateHUD();
+  }
+  openReports(){
+    let html='';
+    if(!this.reports.length)html='<p style="color:#8a97a4;margin:0">لا توجد بلاغات.</p>';
+    else{for(const r of this.reports.slice().reverse()){const cls=r.status==='active'?'act':(r.status==='resolved'?'res':'exp');const statusTxt=r.status==='active'?'نشط':(r.status==='resolved'?'تم حله':'منتهي');html+='<div class="rep-item '+cls+'"><div class="h"><span>بلاغ '+r.id+' — '+statusTxt+'</span><span style="color:#8a97a4;font-size:11.5px">'+r.reason+'</span></div><div class="p">'+r.plate+'</div><div style="font-size:11.5px;color:#8a97a4;margin-top:4px">'+r.typeLabel+' • '+r.make+' • لون: '+r.color+'</div></div>'}}
+    UI.modal('سجل البلاغات',html,[{label:'إغلاق',cls:''}]);
+  }
+  openLog(){
+    let html='';
+    if(!this.log.length)html='<p style="color:#8a97a4;margin:0">السجل فارغ.</p>';
+    else{html='<div style="display:flex;flex-direction:column;gap:4px">';for(const e of this.log.slice().reverse()){html+='<div style="font-size:12px;padding:6px 9px;background:#0e161e;border-radius:5px;border-right:3px solid #2a323c"><span style="color:#8a97a4;font-size:10.5px;font-family:Consolas,monospace">'+e.time+'</span> — '+e.text+'</div>'}html+='</div>'}
+    const tx=Save.data.transactions.slice(-30).reverse();
+    if(tx.length){html+='<div style="margin-top:14px;font-size:12.5px;color:#8a97a4;margin-bottom:6px">آخر الحركات:</div><div style="display:flex;flex-direction:column;gap:4px">';for(const t of tx){const label=t.type==='fine'?'مخالفة':(t.type==='bribe'?'شاي بالياسمين':'مكافأة احتجاز');const col=t.type==='bribe'?'#c9a04a':'#4a9a68';html+='<div style="font-size:12px;padding:6px 9px;background:#0e161e;border-radius:5px;display:flex;justify-content:space-between"><span>'+label+' — <span style="font-family:Consolas,monospace;direction:ltr">'+(t.plate||'—')+'</span></span><b style="color:'+col+'">+'+money(t.amount)+' ج.م</b></div>'}html+='</div>'}
+    UI.modal('سجل الأحداث والحركات',html,[{label:'إغلاق',cls:''}]);
+  }
+  logEvent(text){
+    const d=new Date();
+    this.log.push({time:pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds()),text});
+    if(this.log.length>200)this.log.shift();
+    Save.data.log.push({t:Date.now(),text});
+    if(Save.data.log.length>250)Save.data.log=Save.data.log.slice(-250);
+  }
+  updateHUD(){
+    const st=this.shiftStats||{inspected:0,correct:0,wrong:0,fines:0};
+    $('#hBal').textContent=money(Save.data.balance);$('#hRep').textContent=Save.data.reputation;
+    $('#hInsp').textContent=st.inspected;$('#hOk').textContent=st.correct;$('#hBad').textContent=st.wrong;
+    $('#hFines').textContent=st.fines;$('#hRep2').textContent=this.reports.filter(r=>r.status==='active').length;
+  }
+  refreshVehicleList(){
+    const list=this.traffic.approachingList().slice(0,8);const host=$('#vehList');
+    $('#radarCount').textContent=list.length;
+    if(!list.length){host.innerHTML='<div style="color:#8a97a4;text-align:center;font-size:11.5px;padding:8px">لا توجد أهداف…</div>';return}
+    let html='';
+    for(const v of list){const sel=this.selected===v?' sel':'';const fast=v.rec.speedViolation?' fast':'';const d=Math.round(v.z-CFG.stopLineZ);const distTxt=v.state==='stopped'?'متوقفة':(d>0?d+'م':'وصلت');const spdTxt=v.rec.recordedSpeed?v.rec.recordedSpeed:'—';html+='<div class="veh-item'+sel+fast+'" data-idx="'+v.__id+'"><div><div class="pl">'+v.rec.plate.num+'</div><div class="ty">'+v.rec.typeLabel+' • '+v.rec.vehicle.colorName+'</div>'+(v.marked?'<div class="badge">مُعلَّمة</div>':'')+'</div><div class="ty" style="text-align:center;font-size:10px">'+distTxt+'</div><div class="spd">'+spdTxt+'<small>كم/س</small></div></div>'}
+    host.innerHTML=html;
+    const self=this;
+    host.querySelectorAll('.veh-item').forEach(el=>{el.onclick=()=>{const id=parseInt(el.dataset.idx,10);const v=self.traffic.vehicles.find(x=>x.__id===id);if(v)self.selectVehicle(v)}});
+  }
+  togglePause(){
+    if(!this.shiftActive)return;
+    if(this.paused){this.paused=false;this.clock.getDelta();return}
+    this.paused=true;
+    UI.modal('إيقاف مؤقت','<p style="margin:0 0 8px">الوردية متوقفة.</p>',[{label:'متابعة',cls:'primary',action:()=>{this.paused=false;this.clock.getDelta()}},{label:'إنهاء الوردية',cls:'danger',action:()=>{this.paused=false;this.endShift()}}]);
+    const w=$('#modalRoot').lastElementChild;
+    if(w){const cb=w.querySelector('.closeX');if(cb)cb.onclick=()=>{this.paused=false;this.clock.getDelta();w.remove()}}
+  }
+  animate(){
+    requestAnimationFrame(()=>this.animate());
+    const dt=Math.min(this.clock.getDelta(),0.06);
+    if(!this.paused&&this.shiftActive){
+      this.elapsed+=dt;this.shiftTime-=dt;
+      this.traffic.update(dt);this.fieldOfficer.update(dt);this.roadBlock.update(dt);this.updateReports(dt);
+      const t=Math.max(0,this.shiftTime);
+      $('#shiftClock').textContent=pad2(Math.floor(t/60))+':'+pad2(Math.floor(t%60));
+      const d=new Date();
+      $('#radarTime').textContent=pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());
+      this.frameCount++;
+      if(this.frameCount%12===0){this.updateHUD();this.refreshVehicleList();this.updateActionBar();$('#cctvClock').textContent=$('#radarTime').textContent}
+      if(this.shiftTime<=0)this.endShift();
+      this.fpsAccum+=dt;this.fpsTime+=dt;
+      if(this.fpsTime>3&&!this.autoQualityChecked&&Save.data.settings.quality==='auto'){
+        const fps=this.fpsAccum/this.fpsTime;this.fpsAccum=0;this.fpsTime=0;
+        if(fps<32){this.autoQualityChecked=true;Save.data.settings.quality='low';Save.data.settings.trafficDensity=Math.min(Save.data.settings.trafficDensity,0.8);this.applySettings();UI.toast('تم تخفيض الجودة تلقائياً','warn',3000)}else this.autoQualityChecked=true;
+      }
+    }
+    this.world.update(dt,this.elapsed);
+    this.camCtl.update(dt);
+    this.renderer.render(this.scene,this.camera);
+  }
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  Save.load();
+  const game=new Game();
+  window.__game=game;
+  const ok=game.init();
+  if(!ok&&!$('#loadTxt').textContent.includes('WebGL')){$('#loading').innerHTML='<h1 style="color:#c94a4a">تعذر بدء اللعبة</h1><small>لم يتم تحميل مكتبة Three.js. تأكد من الاتصال بالإنترنت ثم أعد تحميل الصفحة.</small>'}
+  const unlock=()=>{Sfx.init();Sfx.resume()};
+  window.addEventListener('pointerdown',unlock,{once:true});
+  window.addEventListener('keydown',unlock,{once:true});
+});
+})();
+</script>
+</body>
+</html>
