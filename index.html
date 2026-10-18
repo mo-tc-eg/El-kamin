@@ -2766,12 +2766,11 @@ const AMBIENT_SOUND_SOURCES = [
   'main.mp3',
   'audio/main.mp3'
 ];
-
 const AMBIENT_CFG = {
-  volume: 0.28,
-  refDistance: 15,
-  rolloffFactor: 0.7,
-  maxDistance: 500,
+  volume: 0.50,             // أعلى بكتير — مسموع بوضوح
+  refDistance: 40,          // الصوت بيفضل بنفس المستوى لفترة أطول
+  rolloffFactor: 0.30,      // تراجع أبطأ بكتير مع المسافة
+  maxDistance: 1500,        // مسموع في كل أنحاء الماب
   distanceModel: 'exponential',
   localOffset: new THREE.Vector3(0, 4, 0)
 };
