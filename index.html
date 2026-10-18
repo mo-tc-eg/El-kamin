@@ -7,6 +7,8 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://huggingface.co" crossorigin>
+<link rel="dns-prefetch" href="https://huggingface.co">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,500,0,0" />
 
@@ -1350,11 +1352,79 @@ body.game-started #crosshair {
   .conv-btn .material-symbols-rounded { font-size: 17px; }
 }
 /* AI-VOICE-CSS-END */
+
+/* In-game smartphone and messaging overlay */
+#elkPhone{position:fixed;right:22px;bottom:22px;z-index:8200;width:min(350px,calc(100vw - 24px));height:min(650px,calc(100vh - 44px));padding:9px;border:2px solid #4c5157;border-radius:35px;background:linear-gradient(145deg,#292d32,#08090b 70%);box-shadow:0 20px 65px #000b;display:none;font-family:'Cairo',sans-serif;color:#f7f7f7;direction:rtl;overflow:hidden}
+#elkPhone.open{display:flex;flex-direction:column;animation:elkPhoneIn .22s ease-out}
+@keyframes elkPhoneIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+#elkPhoneScreen{position:relative;flex:1;min-height:0;border-radius:27px;overflow:hidden;background:linear-gradient(160deg,#101a1c,#080d11 70%);display:flex;flex-direction:column}
+#elkPhoneStatus{height:27px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:0 17px;font-size:10px;background:#071011}
+#elkPhoneHome,#elkPhoneMessages,#elkPhoneChat{display:none;flex:1;min-height:0;flex-direction:column}
+#elkPhoneHome.active,#elkPhoneMessages.active,#elkPhoneChat.active{display:flex}
+#elkPhoneHome{padding:28px 20px;background:radial-gradient(ellipse at 50% 20%,#285347,#0b1719 70%)}
+#elkPhoneClock{font-size:38px;font-weight:700;text-align:center;margin-top:22px;line-height:1.2}
+#elkPhoneDate{text-align:center;color:#c7d5d0;font-size:12px;margin-top:4px}
+#elkPhoneApps{display:flex;justify-content:center;margin-top:auto;margin-bottom:35px}
+#elkMessageApp{width:82px;border:0;background:none;color:white;font:inherit;cursor:pointer;position:relative}
+#elkMessageAppIcon{width:62px;height:62px;border-radius:19px;background:linear-gradient(145deg,#38df82,#0b9d59);margin:0 auto 7px;display:grid;place-items:center;box-shadow:0 8px 22px #0007;font-size:30px}
+#elkMessageBadge{position:absolute;top:-2px;right:5px;background:#e83b46;color:#fff;border-radius:99px;min-width:20px;height:20px;padding:0 5px;font-size:11px;display:none;align-items:center;justify-content:center}
+#elkPhoneHomeBar{height:4px;width:95px;background:#fff9;border-radius:9px;margin:7px auto 3px;flex-shrink:0}
+.elk-phone-head{display:flex;align-items:center;gap:10px;padding:12px;background:#11201f;border-bottom:1px solid #ffffff14;flex-shrink:0}
+.elk-phone-back{border:0;background:transparent;color:#d7e9df;font-size:22px;cursor:pointer;padding:0 5px}
+.elk-phone-head strong{font-size:14px}.elk-phone-head small{display:block;color:#a6bcb3;font-size:10px}
+#elkPhoneClose{margin-right:auto;border:0;background:#ffffff12;color:#fff;border-radius:50%;width:29px;height:29px;cursor:pointer}
+#elkConversationList{overflow:auto;padding:7px;flex:1}
+.elk-contact{width:100%;display:flex;align-items:center;gap:11px;text-align:right;padding:13px 9px;background:transparent;border:0;border-bottom:1px solid #ffffff10;color:#fff;font:inherit;cursor:pointer}
+.elk-avatar{width:43px;height:43px;border-radius:50%;background:linear-gradient(145deg,#d5b16b,#4a3820);display:grid;place-items:center;color:#19140c;font-weight:900;flex-shrink:0}
+.elk-contact:nth-child(2) .elk-avatar{background:linear-gradient(145deg,#9da8b5,#35404d);color:#10151a}
+.elk-contact-info{min-width:0;flex:1}.elk-contact-info strong{display:block;font-size:13px}.elk-contact-info small{display:block;color:#a4b3ae;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:210px}
+.elk-unread{background:#20bf72;border-radius:50%;width:8px;height:8px;flex-shrink:0}
+#elkChatMessages{flex:1;min-height:0;overflow-y:auto;padding:12px 9px;display:flex;flex-direction:column;gap:8px;background-color:#0c1516;background-image:radial-gradient(#ffffff07 1px,transparent 1px);background-size:15px 15px}
+.elk-bubble{max-width:88%;padding:8px 10px 5px;border-radius:13px;font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.elk-bubble.in{align-self:flex-start;background:#1e2b2b;border-top-right-radius:4px}.elk-bubble.out{align-self:flex-end;background:#075b42;border-top-left-radius:4px}
+.elk-bubble time{display:block;text-align:left;color:#c2d2cb;font-size:9px;margin-top:2px;opacity:.75}
+#elkTyping{display:none;color:#a9c5b8;font-size:11px;padding:4px 12px;flex-shrink:0}#elkTyping.show{display:block}
+#elkChatComposer{display:flex;gap:6px;padding:8px;background:#111e1d;flex-shrink:0}#elkChatInput{min-width:0;flex:1;border:1px solid #ffffff17;background:#263432;color:white;border-radius:18px;padding:9px 12px;font:12px 'Cairo',sans-serif;outline:none}#elkChatSend{border:0;background:#20bf72;color:#052214;border-radius:50%;width:38px;height:38px;font-size:17px;cursor:pointer;flex-shrink:0}#elkChatSend:disabled{opacity:.5}
+#elkPhoneToast{font-size:10px;color:#ffb7b7;padding:3px 12px;display:none;flex-shrink:0}#elkPhoneToast.show{display:block}
+@media(max-width:520px){#elkPhone{right:8px;bottom:8px;width:min(330px,calc(100vw - 16px));height:min(610px,calc(100vh - 16px))}}
+
+/* ==========================================================================
+   CINEMATIC OPENING — GTA-style intro camera + Arabic title
+   ========================================================================== */
+#cinematicFade {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 9150;
+  pointer-events: none;
+  opacity: 1;
+}
+#cinematicTitle {
+  position: fixed;
+  inset: 0;
+  z-index: 9160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cairo', 'Segoe UI', Tahoma, 'Noto Sans Arabic', sans-serif;
+  font-size: clamp(26px, 4.6vw, 58px);
+  font-weight: 900;
+  color: #f3ead7;
+  text-shadow: 0 4px 34px rgba(0,0,0,0.95), 0 0 74px rgba(232,200,122,0.35);
+  letter-spacing: 0.05em;
+  text-align: center;
+  line-height: 1.45;
+  padding: 0 6vw;
+  opacity: 0;
+  pointer-events: none;
+  direction: rtl;
+  will-change: opacity, letter-spacing;
+}
 </style>
 </head>
 <body>
 <div id="loading">LOADING CHECKPOINT…</div>
-<div id="info">WASD to move · Shift to sprint · Mouse to look · Click to lock cursor · 1-4 to toggle gates · G to inspect · T to talk</div>
+<div id="info">WASD to move · Shift to sprint · Mouse to look · Click to lock cursor · 1-4 to toggle gates · G to inspect · B phone</div>
 <div id="crosshair"></div>
 
 <!-- Interaction prompt -->
@@ -1395,42 +1465,7 @@ body.game-started #crosshair {
   </div>
 </div>
 
-<!-- AI-VOICE-HTML-START — Conversation UI -->
-<div id="conversationUI" aria-hidden="true" role="dialog" aria-label="محادثة صوتية مع السواق">
-  <header class="conv-header">
-    <div class="conv-header-info">
-      <div class="conv-avatar" id="convAvatar">؟</div>
-      <div class="conv-header-text">
-        <h3 id="convDriverName">السواق</h3>
-        <p id="convDriverSub">محادثة صوتية</p>
-      </div>
-    </div>
-    <button class="conv-close-btn" id="convCloseBtn" aria-label="إغلاق">
-      <span class="material-symbols-rounded">close</span>
-    </button>
-  </header>
-  <div class="conv-body" id="convBody"></div>
-  <div class="conv-status-bar">
-    <span class="conv-status-dot" id="convStatusDot"></span>
-    <span class="conv-status-text" id="convStatusText">اضغط على زر المايك وابدأ الكلام</span>
-  </div>
-  <div class="conv-controls">
-    <button class="conv-btn mic" id="convMicBtn" type="button">
-      <span class="material-symbols-rounded">mic</span>
-      <span id="convMicLabel">اضغط واتكلم</span>
-    </button>
-    <button class="conv-btn stop" id="convStopBtn" type="button" disabled>
-      <span class="material-symbols-rounded">stop_circle</span>
-      <span>إيقاف</span>
-    </button>
-    <button class="conv-btn end" id="convEndBtn" type="button">
-      <span class="material-symbols-rounded">call_end</span>
-      <span>إنهاء</span>
-    </button>
-  </div>
-  <div class="conv-hint">T لفتح المحادثة · ESC للإنهاء</div>
-</div>
-<!-- AI-VOICE-HTML-END -->
+
 
 <div id="intro">
 
@@ -1523,17 +1558,8 @@ body.game-started #crosshair {
 (function () {
   'use strict';
 
-  var BGM_SOURCES = [
-    'Sounds/Sound.mp3',
-    'Sound.mp3',
-    'audio/Sound.mp3'
-  ];
-
-  var STOP_SOURCES = [
-    'Sounds/stop.mp3',
-    'stop.mp3',
-    'audio/stop.mp3'
-  ];
+  var BGM_SOURCES = [];
+  var STOP_SOURCES = [];
 
   var BGM_VOLUME = 0.28;
   var STOP_SFX_VOLUME = 0.35;
@@ -1547,18 +1573,15 @@ body.game-started #crosshair {
   bgm.loop = true;
   bgm.preload = 'auto';
   bgm.volume = BGM_VOLUME;
-  bgm.src = BGM_SOURCES[0];
+  if (BGM_SOURCES.length) bgm.src = BGM_SOURCES[0];
 
   bgm.addEventListener('error', function () {
     if (bgmIdx < BGM_SOURCES.length - 1) {
       bgmIdx++;
       bgm.src = BGM_SOURCES[bgmIdx];
       try { bgm.load(); } catch (e) {}
-      if (bgmWanted) {
-        var p = bgm.play();
-        if (p && p.catch) p.catch(function () {});
-      }
-    }
+      if (bgmWanted) { var p = bgm.play(); if (p && p.catch) p.catch(function () {}); }
+    } else { bgmWanted = false; }
   });
 
   var stopIdx = 0;
@@ -1571,18 +1594,15 @@ body.game-started #crosshair {
   stopSfx.loop = false;
   stopSfx.preload = 'auto';
   stopSfx.volume = STOP_SFX_VOLUME;
-  stopSfx.src = STOP_SOURCES[0];
+  if (STOP_SOURCES.length) stopSfx.src = STOP_SOURCES[0];
 
   stopSfx.addEventListener('error', function () {
     if (stopIdx < STOP_SOURCES.length - 1) {
       stopIdx++;
       stopSfx.src = STOP_SOURCES[stopIdx];
       try { stopSfx.load(); } catch (e) {}
-      if (stopWanted && !stopDone) {
-        stopStarting = false;
-        tryStopSfxPlay();
-      }
-    }
+      if (stopWanted && !stopDone) { stopStarting = false; tryStopSfxPlay(); }
+    } else { stopWanted = false; }
   });
 
   function clearStopTimer() {
@@ -1611,7 +1631,7 @@ body.game-started #crosshair {
   }
 
   function tryStopSfxPlay() {
-    if (!stopWanted || stopDone || stopStarting) return;
+    if (!stopWanted || stopDone || stopStarting || !stopSfx.src || !STOP_SOURCES.length) return;
     stopStarting = true;
     try { stopSfx.currentTime = 0; } catch (e) {}
 
@@ -1631,7 +1651,7 @@ body.game-started #crosshair {
   }
 
   function tryBgmPlay() {
-    if (!bgmWanted) return;
+    if (!bgmWanted || !bgm.src || !BGM_SOURCES.length) return;
 
     var p = bgm.play();
 
@@ -1698,8 +1718,12 @@ body.game-started #crosshair {
   };
 
   var introFinished = false;
+  var activeIntroStage = null;
+  var disclaimerSkipRequested = false;
+  var disclaimerResolver = null;
 
   function showStage(name) {
+    activeIntroStage = name;
     for (var key in stages) {
       if (!Object.prototype.hasOwnProperty.call(stages, key)) continue;
       var el = stages[key];
@@ -1753,6 +1777,7 @@ body.game-started #crosshair {
       var last = 0;
 
       function tick(now) {
+        if (disclaimerSkipRequested) { resolve(); return; }
         if (!last) last = now;
         var dt = Math.min(now - last, 100);
         last = now;
@@ -1804,6 +1829,7 @@ body.game-started #crosshair {
 
   function runDisclaimerStage() {
     showStage('disclaimer');
+    disclaimerSkipRequested = false;
     bgmPause();
 
     var scroller = document.getElementById('discScroll');
@@ -1818,10 +1844,31 @@ body.game-started #crosshair {
 
     var units = arEls.concat(enEls);
 
-    return wait(850)
-      .then(function () { return typewriter(units, scroller); })
-      .then(function () { return wait(7000); });
+    return new Promise(function (resolve) {
+      var settled = false;
+      var finish = function () { if (settled) return; settled = true; disclaimerResolver = null; resolve(); };
+      disclaimerResolver = finish;
+      wait(850).then(function () { if (!disclaimerSkipRequested) return typewriter(units, scroller); })
+        .then(function () { if (!disclaimerSkipRequested) return wait(7000); })
+        .then(finish).catch(finish);
+    });
   }
+
+  function skipDisclaimer() {
+    if (activeIntroStage !== 'disclaimer' || introFinished || disclaimerSkipRequested) return;
+    disclaimerSkipRequested = true;
+    var units = document.querySelectorAll('#stageDisclaimer .tw');
+    units.forEach(function (el) { var full = el.getAttribute('data-full'); if (full) el.textContent = full; });
+    if (disclaimerResolver) disclaimerResolver();
+  }
+  var disclaimerEl = document.getElementById('stageDisclaimer');
+  if (disclaimerEl) disclaimerEl.addEventListener('dblclick', function (e) { e.preventDefault(); skipDisclaimer(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.code !== 'Enter' || e.repeat || activeIntroStage !== 'disclaimer') return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    e.preventDefault(); skipDisclaimer();
+  }, true);
 
   function runCharStage() {
     showStage('chars');
@@ -1949,6 +1996,16 @@ body.game-started #crosshair {
 }
 </script>
 
+
+<div id="elkPhone" aria-label="هاتف اللعبة">
+ <div id="elkPhoneScreen">
+  <div id="elkPhoneStatus"><span>13:24</span><span>● ▮▮▮ ▰</span></div>
+  <section id="elkPhoneHome" class="active"><div id="elkPhoneClock">13:24</div><div id="elkPhoneDate">El Kamin · مركز العمليات</div><div id="elkPhoneApps"><button id="elkMessageApp"><span id="elkMessageBadge">1</span><span id="elkMessageAppIcon">▤</span><span>Message</span></button></div></section>
+  <section id="elkPhoneMessages"><header class="elk-phone-head"><div><strong>Message</strong><small>مراسلات الكمين</small></div><button id="elkPhoneClose" title="إغلاق الهاتف">×</button></header><div id="elkConversationList"></div></section>
+  <section id="elkPhoneChat"><header class="elk-phone-head"><button class="elk-phone-back" id="elkChatBack" aria-label="رجوع">‹</button><div class="elk-avatar" id="elkChatAvatar">م</div><div><strong id="elkChatName">معتز باشا</strong><small id="elkChatSubtitle">متصل</small></div><button id="elkPhoneCloseChat" title="إغلاق الهاتف">×</button></header><div id="elkChatMessages"></div><div id="elkTyping">بيكتب دلوقتي...</div><div id="elkPhoneToast"></div><form id="elkChatComposer"><input id="elkChatInput" autocomplete="off" placeholder="اكتب رسالة..." maxlength="1200"><button id="elkChatSend" type="submit" aria-label="إرسال">➤</button></form></section>
+ </div><div id="elkPhoneHomeBar"></div>
+</div>
+
 <script type="module">
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
@@ -1969,18 +2026,93 @@ playerSpeed: 7,
 sprintMultiplier: 2.2,
 collisionRadius: 0.45,
 coneCount: 14,
-spawnX: 2.4,
-spawnZ: -80 + 12,
+/* Spawn on the right sidewalk next to the checkpoint booth, facing the checkpoint and road. */
+spawnX: 17.2,
+spawnZ: -73,
+spawnYaw: 0.55,      /* ~31° toward the road center from straight -Z */
+spawnPitch: -0.07,   /* slight downward tilt */
 };
 
-/* ==========================================================================
-   INSPECTION STATE FLAG (module scope, used by input handlers)
-   ========================================================================== */
-let inspectionActive = false;
+const HF_MODEL_BASE = 'https://huggingface.co/MoTc/El-Kamin/resolve/main/';
 
-/* AI-VOICE-JS-START — module-scope flag so player controls freeze during conversation */
+/* ==========================================================================
+   SILENT TEXTURE LOADER
+   ========================================================================== */
+const _SILENT_TEX_DATA_URL = (function () {
+  return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
+})();
+
+function applySilentTextureFallback(loader) {
+  const originalLoad = loader.load.bind(loader);
+  loader.load = function (url, onLoad, onProgress, onError) {
+    return originalLoad(
+      url,
+      (tex) => {
+        try {
+          if (tex && tex.image && tex.image.width === 0) {
+            const img = new Image();
+            img.onload = () => { tex.image = img; tex.needsUpdate = true; if (onLoad) onLoad(tex); };
+            img.src = _SILENT_TEX_DATA_URL;
+          } else if (onLoad) {
+            onLoad(tex);
+          }
+        } catch (e) { if (onLoad) onLoad(tex); }
+      },
+      onProgress,
+      () => {
+        const img = new Image();
+        img.onload = () => {
+          const tex = new THREE.Texture(img);
+          tex.needsUpdate = true;
+          if (onLoad) onLoad(tex);
+        };
+        img.onerror = () => {
+          if (onLoad) onLoad(new THREE.Texture());
+        };
+        img.src = _SILENT_TEX_DATA_URL;
+      }
+    );
+  };
+  return loader;
+}
+
+function createRemoteMTLLoader(basePath, stripTextures) {
+  const loader = new MTLLoader();
+  loader.setPath(basePath);
+  loader.setResourcePath(basePath);
+
+  const originalParse = loader.parse.bind(loader);
+  loader.parse = function (text, path) {
+    let cleaned = String(text);
+
+    if (stripTextures) {
+      cleaned = cleaned.replace(
+        /^[ \t]*(map_\w+|bump|disp|decal|refl|norm|map_bump)[ \t]+.*$/gmi,
+        ''
+      );
+    } else {
+      cleaned = cleaned.replace(
+        /^(\s*)(map_\w+|bump|disp|decal|refl|norm|map_bump)(\s+)(.+)$/gmi,
+        function (match, lead, key, sep, value) {
+          let v = String(value).trim();
+          if (/^https?:\/\//i.test(v)) return match;
+          if (/^data:/i.test(v)) return match;
+          v = v.replace(/\\/g, '/');
+          v = v.split('/').pop() || v;
+          v = v.split('?')[0].split('#')[0];
+          return lead + key + sep + v;
+        }
+      );
+    }
+
+    return originalParse(cleaned, path);
+  };
+
+  return loader;
+}
+
+let inspectionActive = false;
 let conversationActive = false;
-/* AI-VOICE-JS-END */
 
 let audioCtx = null;
 function ensureAudio() {
@@ -2444,23 +2576,36 @@ band(140, 162);
 addNoise(ctx, w, h, 6, 0.12);
 }, [1, 1]);
 
-const boothSignTex = createCanvasTexture(1024, 96, (ctx, w, h) => {
-ctx.fillStyle = '#12325a';
-ctx.fillRect(0, 0, w, h);
-ctx.strokeStyle = 'rgba(200,166,90,0.55)';
-ctx.lineWidth = 3;
-ctx.strokeRect(6, 6, w - 12, h - 12);
-ctx.fillStyle = '#e8c87a';
-ctx.font = 'bold 60px Tahoma, Arial, sans-serif';
-ctx.textAlign = 'center';
-ctx.textBaseline = 'middle';
-ctx.fillText('وحدة تأمين طريق بلبيس', w / 2, h / 2 + 3);
-for (let i = 0; i < 400; i++) {
-const x = Math.random() * w, y = Math.random() * h;
-ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.10})`;
-ctx.fillRect(x, y, 1, 1);
-}
-addNoise(ctx, w, h, 6, 0.10);
+const boothSignTex = createCanvasTexture(2048, 260, (ctx, w, h) => {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, '#1d3e63');
+  g.addColorStop(0.48, '#102c4a');
+  g.addColorStop(1, '#081d33');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(12, 12, w - 24, 8);
+  ctx.strokeStyle = '#c8a65a';
+  ctx.lineWidth = 7;
+  ctx.strokeRect(16, 16, w - 32, h - 32);
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(28, 28, w - 56, h - 56);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.direction = 'rtl';
+  ctx.font = 'bold 128px Tahoma, Arial, sans-serif';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(0,0,0,0.75)';
+  ctx.lineWidth = 8;
+  ctx.strokeText('وحدة تأمين طريق بلبيس', w / 2, h / 2 + 2);
+  ctx.fillStyle = '#fff4cf';
+  ctx.fillText('وحدة تأمين طريق بلبيس', w / 2, h / 2 + 2);
+  for (let i = 0; i < 500; i++) {
+    const x = Math.random() * w, y = Math.random() * h;
+    ctx.fillStyle = `rgba(0,0,0,${Math.random() * 0.055})`;
+    ctx.fillRect(x, y, 1 + Math.random() * 2, 1);
+  }
 }, [1, 1]);
 
 const skyVertexShader = `
@@ -2554,7 +2699,9 @@ const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0xc4a882, 0.0025);
 
 const camera = new THREE.PerspectiveCamera(72, window.innerWidth / window.innerHeight, 0.1, 1200);
-camera.position.set(CONFIG.spawnX, CONFIG.playerHeight, CONFIG.spawnZ);
+camera.position.set(CONFIG.spawnX, CONFIG.sidewalkWalkHeight + CONFIG.playerHeight, CONFIG.spawnZ);
+camera.rotation.order = 'YXZ';
+camera.rotation.set(CONFIG.spawnPitch, CONFIG.spawnYaw, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -2571,23 +2718,128 @@ camera.add(audioListener);
 
 let tractorAudioBuffer = null;
 const pendingTractorSounds = [];
+const TRACTOR_SOUND_SOURCES = [
+  HF_MODEL_BASE + 'freesound_community-tractor-engine-27641.mp3',
+  HF_MODEL_BASE + 'Sounds/freesound_community-tractor-engine-27641.mp3',
+  'Sounds/freesound_community-tractor-engine-27641.mp3',
+  'freesound_community-tractor-engine-27641.mp3',
+  'audio/freesound_community-tractor-engine-27641.mp3'
+];
 
+let tractorSoundIdx = 0;
+let tractorSoundExhausted = false;
 const tractorAudioLoader = new THREE.AudioLoader();
-tractorAudioLoader.load(
-'Sounds/freesound_community-tractor-engine-27641.mp3',
-(buffer) => {
-tractorAudioBuffer = buffer;
-for (const s of pendingTractorSounds) {
-try {
-s.setBuffer(buffer);
 
-} catch (e) {}
+function tryLoadTractorSound() {
+  if (tractorSoundExhausted) return;
+  if (tractorSoundIdx >= TRACTOR_SOUND_SOURCES.length) {
+    tractorSoundExhausted = true;
+    console.info('[El Kamin] Tractor engine sound not available — vehicles will run without engine audio.');
+    return;
+  }
+  const url = TRACTOR_SOUND_SOURCES[tractorSoundIdx++];
+  tractorAudioLoader.load(
+    url,
+    (buffer) => {
+      tractorAudioBuffer = buffer;
+      for (const s of pendingTractorSounds) {
+        try { s.setBuffer(buffer); } catch (e) {}
+      }
+      pendingTractorSounds.length = 0;
+      console.info('[El Kamin] Tractor engine sound loaded from: ' + url);
+    },
+    undefined,
+    () => { tryLoadTractorSound(); }
+  );
 }
-pendingTractorSounds.length = 0;
-},
-undefined,
-(err) => console.warn('Tractor sound failed to load:', err)
-);
+tryLoadTractorSound();
+
+/* ==========================================================================
+   AMBIENT BACKGROUND SOUND (main.mp3)
+   Continuous 3D-spatial ambient, infinite loop, starts 1s before first-person.
+   Plays alongside — never interrupts — the tractor engines and all other audio.
+   ========================================================================== */
+const AMBIENT_SOUND_SOURCES = [
+  HF_MODEL_BASE + 'main.mp3',
+  HF_MODEL_BASE + 'Sounds/main.mp3',
+  'Sounds/main.mp3',
+  'main.mp3',
+  'audio/main.mp3'
+];
+
+const AMBIENT_CFG = {
+  volume: 0.28,
+  refDistance: 15,
+  rolloffFactor: 0.7,
+  maxDistance: 500,
+  distanceModel: 'exponential',
+  localOffset: new THREE.Vector3(0, 4, 0)
+};
+
+let ambientSound = null;
+let ambientSoundReady = false;
+let ambientSoundStarted = false;
+let ambientSourceIdx = 0;
+let ambientLoadInProgress = false;
+const ambientAudioLoader = new THREE.AudioLoader();
+
+function loadAmbientSound() {
+  if (ambientLoadInProgress) return;
+  if (ambientSourceIdx >= AMBIENT_SOUND_SOURCES.length) {
+    console.info('[El Kamin] Ambient sound (main.mp3) not available at any known path.');
+    return;
+  }
+  ambientLoadInProgress = true;
+  const url = AMBIENT_SOUND_SOURCES[ambientSourceIdx++];
+  ambientAudioLoader.load(
+    url,
+    (buffer) => {
+      ambientLoadInProgress = false;
+      try {
+        ambientSound = new THREE.PositionalAudio(audioListener);
+        ambientSound.setBuffer(buffer);
+        ambientSound.setLoop(true);
+        ambientSound.setRefDistance(AMBIENT_CFG.refDistance);
+        ambientSound.setRolloffFactor(AMBIENT_CFG.rolloffFactor);
+        ambientSound.setMaxDistance(AMBIENT_CFG.maxDistance);
+        ambientSound.setDistanceModel(AMBIENT_CFG.distanceModel);
+        ambientSound.setVolume(AMBIENT_CFG.volume);
+        ambientSound.position.copy(AMBIENT_CFG.localOffset);
+        camera.add(ambientSound);
+        ambientSoundReady = true;
+        console.info('[El Kamin] Ambient sound loaded from: ' + url);
+        if (ambientSoundStarted) {
+          try { if (!ambientSound.isPlaying) ambientSound.play(); } catch (e) {}
+        }
+      } catch (e) {
+        console.warn('[El Kamin] Ambient sound setup failed:', e);
+      }
+    },
+    undefined,
+    () => {
+      ambientLoadInProgress = false;
+      loadAmbientSound();
+    }
+  );
+}
+
+function startAmbientSound() {
+  if (ambientSoundStarted) return;
+  ambientSoundStarted = true;
+  if (ambientSoundReady && ambientSound) {
+    try { if (!ambientSound.isPlaying) ambientSound.play(); } catch (e) {}
+  } else {
+    loadAmbientSound();
+  }
+}
+
+/* Autoplay-policy safety net: if the browser blocked playback when the
+   ambient was first requested, retry on the very next pointer interaction. */
+document.addEventListener('pointerdown', function () {
+  if (ambientSoundStarted && ambientSoundReady && ambientSound && !ambientSound.isPlaying) {
+    try { ambientSound.play(); } catch (e) {}
+  }
+}, { passive: true });
 
 const sunDir = new THREE.Vector3(-1.2, 0.35, 0.6).normalize();
 
@@ -2823,19 +3075,6 @@ scene.add(group);
 return group;
 }
 
-const barrierLeft1 = createJerseyBarrier(-(ROAD.halfWidth - 0.6), CP.z - 8, 0);
-const barrierLeft2 = createJerseyBarrier(-(ROAD.halfWidth - 0.6), CP.z - 4, 0);
-const barrierLeft3 = createJerseyBarrier(-(ROAD.halfWidth - 0.6), CP.z + 4, 0);
-const barrierRight1 = createJerseyBarrier(ROAD.halfWidth - 0.6, CP.z - 8, 0);
-const barrierRight2 = createJerseyBarrier(ROAD.halfWidth - 0.6, CP.z - 4, 0);
-const barrierRight3 = createJerseyBarrier(ROAD.halfWidth - 0.6, CP.z + 4, 0);
-
-for (let i = 0; i < 3; i++) {
-const zOff = CP.z + 12 + i * 4;
-createJerseyBarrier(-(ROAD.halfWidth - 0.6), zOff, 0);
-createJerseyBarrier(ROAD.halfWidth - 0.6, zOff, 0);
-}
-
 const CONE_HEIGHT = 1.00;
 const CONE_TOP_RADIUS = 0.075;
 const CONE_BASE_RADIUS = 0.30;
@@ -3029,7 +3268,6 @@ function updateClothFlag(flagMesh, time, seed) {
     geo.computeVertexNormals();
 }
 
-// ===== دالة بناء علم مصر (تُستخدم على أبراج المراقبة) =====
 function createEgyptFlag(scale = 1) {
   const flagGroup = new THREE.Group();
 
@@ -3063,7 +3301,6 @@ function createEgyptFlag(scale = 1) {
   return flagGroup;
 }
 
-// نسخة معدّلة من updateClothFlag بتتعامل مع عرض العلم المُقاس
 function updateClothFlagScaled(flagMesh, time, seed) {
   const geo = flagMesh.geometry;
   const posAttr = geo.attributes.position;
@@ -3111,52 +3348,322 @@ function updateClothFlagScaled(flagMesh, time, seed) {
 
 function createCheckpointBooth(x, y, z, rotY = 0) {
 const group = new THREE.Group();
-const wallMat = new THREE.MeshStandardMaterial({ color: 0xdedac9, roughness: 0.88 });
-const roofMat = new THREE.MeshStandardMaterial({ color: 0x2a333e, roughness: 0.8 });
-const glassMat = new THREE.MeshStandardMaterial({
-color: 0x0f1a22, roughness: 0.08, metalness: 0.6,
-transparent: true, opacity: 0.8
+
+const wallTexture = createCanvasTexture(1024, 1024, (ctx, w, h) => {
+  const g = ctx.createLinearGradient(0, 0, w, h);
+  g.addColorStop(0, '#d9d8d0');
+  g.addColorStop(0.5, '#c3c2b9');
+  g.addColorStop(1, '#a6a59d');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 7200; i++) {
+    const px = Math.random() * w, py = Math.random() * h;
+    const a = 0.025 + Math.random() * 0.065;
+    ctx.fillStyle = Math.random() > 0.48 ? `rgba(42,40,35,${a})` : `rgba(255,255,245,${a})`;
+    ctx.fillRect(px, py, 1 + Math.random() * 4, 1 + Math.random() * 3);
+  }
+  ctx.strokeStyle = 'rgba(70,67,60,0.15)'; ctx.lineWidth = 2;
+  for (let yy = 90; yy < h; yy += 250) { ctx.beginPath(); ctx.moveTo(0, yy); ctx.lineTo(w, yy + 2); ctx.stroke(); }
+  for (let i = 0; i < 35; i++) {
+    const px = Math.random() * w, py = Math.random() * h;
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px + (Math.random() - .5) * 30, py + 18 + Math.random() * 55); ctx.stroke();
+  }
+  const dirt = ctx.createLinearGradient(0, h * 0.68, 0, h);
+  dirt.addColorStop(0, 'rgba(85,76,61,0)'); dirt.addColorStop(1, 'rgba(73,65,52,0.18)');
+  ctx.fillStyle = dirt; ctx.fillRect(0, h * 0.68, w, h * 0.32);
 });
-const stripeMat = new THREE.MeshStandardMaterial({ color: 0x183c66, roughness: 0.75 });
-const trimMat = new THREE.MeshStandardMaterial({ color: 0xd4d0c2, roughness: 0.85 });
-const DEPTH = 4.8;
-const DEPTH_FOOT = 5.8;
-const DEPTH_PLINTH = 5.2;
-const DEPTH_ROOF = 5.4;
-const DEPTH_STRIPE = 4.84;
-const footingMat = new THREE.MeshStandardMaterial({ color: 0x8a7e6a, roughness: 0.98 });
-const footing = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.42, DEPTH_FOOT), footingMat);
-footing.position.y = -0.21;
-footing.castShadow = true;
-footing.receiveShadow = true;
-group.add(footing);
-const plinth = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.26, DEPTH_PLINTH), boothStoneMat);
-plinth.position.y = 0.13;
-plinth.castShadow = true;
-plinth.receiveShadow = true;
-group.add(plinth);
-const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.0, DEPTH), wallMat);
-body.position.y = 1.5;
-body.castShadow = true;
-body.receiveShadow = true;
-group.add(body);
-const roof = new THREE.Mesh(new THREE.BoxGeometry(4.8, 0.22, DEPTH_ROOF), roofMat);
-roof.position.y = 3.1;
-roof.castShadow = true;
-group.add(roof);
-const glass = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.3, 2.6), glassMat);
-glass.position.set(2.1, 1.9, 0);
-group.add(glass);
-const frame = new THREE.Mesh(new THREE.BoxGeometry(0.10, 1.5, 2.9), trimMat);
-frame.position.set(2.07, 1.9, 0);
-group.add(frame);
-const stripe = new THREE.Mesh(new THREE.BoxGeometry(4.24, 0.35, DEPTH_STRIPE), stripeMat);
-stripe.position.y = 0.65;
-group.add(stripe);
-const frieze = new THREE.Mesh(new THREE.PlaneGeometry(DEPTH - 0.2, 0.40), boothFriezeMat);
-frieze.position.set(2.115, 2.80, 0);
-frieze.rotation.y = Math.PI / 2;
-group.add(frieze);
+wallTexture.colorSpace = THREE.SRGBColorSpace;
+wallTexture.wrapS = THREE.RepeatWrapping;
+wallTexture.wrapT = THREE.RepeatWrapping;
+
+const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: wallTexture, roughness: 0.94, metalness: 0.0 });
+const roofMat = new THREE.MeshStandardMaterial({ color: 0x292f33, roughness: 0.82, metalness: 0.24 });
+const glassMat = new THREE.MeshPhysicalMaterial({
+  color: 0x718b99, roughness: 0.055, metalness: 0.02,
+  transparent: true, opacity: 0.56, transmission: 0.42,
+  thickness: 0.22, ior: 1.48, reflectivity: 0.82,
+  clearcoat: 1, clearcoatRoughness: 0.025,
+  side: THREE.DoubleSide, depthWrite: false
+});
+const stripeMat = new THREE.MeshStandardMaterial({ color: 0x173a5c, roughness: 0.72, metalness: 0.12 });
+const trimMat = new THREE.MeshStandardMaterial({ color: 0xb5b4ac, roughness: 0.65, metalness: 0.24 });
+const windowFrameMat = new THREE.MeshStandardMaterial({ color: 0x353d42, roughness: 0.42, metalness: 0.72 });
+const rubberMat = new THREE.MeshStandardMaterial({ color: 0x282b2c, roughness: 0.82 });
+const lampHousingMat = new THREE.MeshStandardMaterial({ color: 0x343a3d, roughness: 0.42, metalness: 0.72 });
+const lampGlowMat = new THREE.MeshStandardMaterial({ color: 0xffe2a2, emissive: 0xffb84a, emissiveIntensity: 2.4, roughness: 0.25 });
+const DEPTH = 4.8, DEPTH_FOOT = 5.8, DEPTH_PLINTH = 5.2, DEPTH_ROOF = 5.55, DEPTH_STRIPE = 4.84;
+const HS = 1.58;
+
+const footingMat = new THREE.MeshStandardMaterial({ color: 0x77746c, roughness: 0.98 });
+const footing = new THREE.Mesh(new THREE.BoxGeometry(3.75, 0.42 * HS, DEPTH_FOOT), footingMat);
+footing.position.y = -0.21 * HS; footing.castShadow = true; footing.receiveShadow = true; group.add(footing);
+const plinth = new THREE.Mesh(new THREE.BoxGeometry(4.6, 0.28 * HS, DEPTH_PLINTH), boothStoneMat);
+plinth.position.y = 0.14 * HS; plinth.castShadow = true; plinth.receiveShadow = true; group.add(plinth);
+const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.0 * HS, DEPTH), wallMat);
+body.position.y = 1.5 * HS; body.castShadow = true; body.receiveShadow = true; group.add(body);
+
+const windowCenterY = 1.94 * HS;
+const windowHeight = 1.16 * HS;
+const windowWidth = 3.72;
+const windowFrameHeight = 1.28 * HS;
+const windowFrameWidth = 3.88;
+const GLASS_THICKNESS = 0.003;
+
+const interiorBackMat = new THREE.MeshStandardMaterial({
+  color: 0x3c444c,
+  roughness: 0.7,
+  metalness: 0.05,
+  emissive: 0x2f2418,
+  emissiveIntensity: 0.55
+});
+const interiorBack = new THREE.Mesh(
+  new THREE.BoxGeometry(0.018, windowHeight - 0.03, windowWidth - 0.03),
+  interiorBackMat
+);
+interiorBack.position.set(2.108, windowCenterY, 0);
+group.add(interiorBack);
+
+let glassEnvMap = null;
+try {
+  const envCanvas = document.createElement('canvas');
+  envCanvas.width = 1024; envCanvas.height = 512;
+  const ectx = envCanvas.getContext('2d');
+
+  const eGrad = ectx.createLinearGradient(0, 0, 0, 512);
+  eGrad.addColorStop(0.00, '#4a7dae');
+  eGrad.addColorStop(0.22, '#7ea8cc');
+  eGrad.addColorStop(0.40, '#b8d2e6');
+  eGrad.addColorStop(0.50, '#e0eaf2');
+  eGrad.addColorStop(0.54, '#f2e8c8');
+  eGrad.addColorStop(0.62, '#d8c898');
+  eGrad.addColorStop(0.78, '#a89068');
+  eGrad.addColorStop(1.00, '#4a3a2a');
+  ectx.fillStyle = eGrad;
+  ectx.fillRect(0, 0, 1024, 512);
+
+  const sunX = 760, sunY = 175;
+  const sun = ectx.createRadialGradient(sunX, sunY, 0, sunX, sunY, 190);
+  sun.addColorStop(0, 'rgba(255,252,235,1)');
+  sun.addColorStop(0.25, 'rgba(255,242,205,0.75)');
+  sun.addColorStop(0.6, 'rgba(255,235,190,0.25)');
+  sun.addColorStop(1, 'rgba(255,235,190,0)');
+  ectx.fillStyle = sun;
+  ectx.fillRect(sunX - 190, sunY - 190, 380, 380);
+
+  for (let i = 0; i < 22; i++) {
+    const cx = Math.random() * 1024;
+    const cy = 40 + Math.random() * 150;
+    const cr = 30 + Math.random() * 90;
+    const cg = ectx.createRadialGradient(cx, cy, 0, cx, cy, cr);
+    const a = 0.10 + Math.random() * 0.22;
+    cg.addColorStop(0, `rgba(255,255,255,${a})`);
+    cg.addColorStop(1, 'rgba(255,255,255,0)');
+    ectx.fillStyle = cg;
+    ectx.fillRect(cx - cr, cy - cr, cr * 2, cr * 2);
+  }
+
+  const groundGrad = ectx.createLinearGradient(0, 300, 0, 512);
+  groundGrad.addColorStop(0, 'rgba(140,110,70,0)');
+  groundGrad.addColorStop(1, 'rgba(90,70,45,0.55)');
+  ectx.fillStyle = groundGrad;
+  ectx.fillRect(0, 300, 1024, 212);
+
+  const envTex = new THREE.CanvasTexture(envCanvas);
+  envTex.mapping = THREE.EquirectangularReflectionMapping;
+  envTex.colorSpace = THREE.SRGBColorSpace;
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  pmrem.compileEquirectangularShader();
+  glassEnvMap = pmrem.fromEquirectangular(envTex).texture;
+  pmrem.dispose();
+  envTex.dispose();
+} catch (e) {
+  console.warn('Glass env map failed:', e);
+}
+
+const slidingGlassMat = new THREE.MeshPhysicalMaterial({
+  color: 0x2b3843,
+  metalness: 0.0,
+  roughness: 0.006,
+  transmission: 0.86,
+  thickness: 0.026,
+  ior: 1.52,
+  reflectivity: 0.62,
+  clearcoat: 1.0,
+  clearcoatRoughness: 0.006,
+  attenuationColor: new THREE.Color(0x14242e),
+  attenuationDistance: 0.28,
+  transparent: true,
+  opacity: 1.0,
+  side: THREE.DoubleSide,
+  depthWrite: false,
+  envMap: glassEnvMap,
+  envMapIntensity: 1.75,
+  specularIntensity: 1.0,
+  specularColor: new THREE.Color(0xffffff)
+});
+const winFrameSlimMat = new THREE.MeshStandardMaterial({
+  color: 0x2a3036, roughness: 0.36, metalness: 0.72
+});
+const winTrackMat = new THREE.MeshStandardMaterial({
+  color: 0x161a1e, roughness: 0.55, metalness: 0.55
+});
+const winHandleMat = new THREE.MeshStandardMaterial({
+  color: 0xc2cad0, roughness: 0.18, metalness: 0.95
+});
+const winScrewMat = new THREE.MeshStandardMaterial({
+  color: 0x8a9096, roughness: 0.35, metalness: 0.9
+});
+
+const outerFrameThick = 0.028;
+const outerFrameDepth = 0.045;
+[
+  { size: [outerFrameDepth, outerFrameThick, windowFrameWidth], pos: [2.165, windowCenterY + windowFrameHeight/2 - outerFrameThick/2, 0] },
+  { size: [outerFrameDepth, outerFrameThick, windowFrameWidth], pos: [2.165, windowCenterY - windowFrameHeight/2 + outerFrameThick/2, 0] },
+  { size: [outerFrameDepth, windowFrameHeight, outerFrameThick], pos: [2.165, windowCenterY, -windowFrameWidth/2 + outerFrameThick/2] },
+  { size: [outerFrameDepth, windowFrameHeight, outerFrameThick], pos: [2.165, windowCenterY,  windowFrameWidth/2 - outerFrameThick/2] }
+].forEach(p => {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(...p.size), winFrameSlimMat);
+  m.position.set(...p.pos);
+  m.castShadow = true; m.receiveShadow = true;
+  group.add(m);
+});
+
+const trackInnerX = 2.152;
+const trackOuterX = 2.180;
+const trackLengthZ = windowWidth - outerFrameThick * 2;
+const trackTopY = windowCenterY + windowFrameHeight/2 - outerFrameThick - 0.010;
+const trackBotY = windowCenterY - windowFrameHeight/2 + outerFrameThick + 0.010;
+[trackInnerX, trackOuterX].forEach(tx => {
+  const tTop = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.012, trackLengthZ), winTrackMat);
+  tTop.position.set(tx, trackTopY, 0); group.add(tTop);
+  const tBot = new THREE.Mesh(new THREE.BoxGeometry(0.010, 0.012, trackLengthZ), winTrackMat);
+  tBot.position.set(tx, trackBotY, 0); group.add(tBot);
+});
+
+const centerMullion = new THREE.Mesh(
+  new THREE.BoxGeometry(outerFrameDepth * 0.85, windowFrameHeight - outerFrameThick*2, 0.024),
+  winFrameSlimMat
+);
+centerMullion.position.set(2.165, windowCenterY, 0);
+centerMullion.castShadow = true;
+group.add(centerMullion);
+
+const PANEL_W = windowWidth / 2 - 0.02;
+const PANEL_H = windowHeight - 0.06;
+const PANEL_STILE = 0.016;
+const PANEL_RAIL  = 0.016;
+const PANEL_DEPTH = 0.010;
+
+function buildSlidingPanel(px, pz, isSliding) {
+  const panel = new THREE.Group();
+
+  const leftStile = new THREE.Mesh(
+    new THREE.BoxGeometry(PANEL_DEPTH, PANEL_H, PANEL_STILE), winFrameSlimMat
+  );
+  leftStile.position.set(0, 0, -PANEL_W/2 + PANEL_STILE/2);
+  panel.add(leftStile);
+  const rightStile = leftStile.clone();
+  rightStile.position.z = PANEL_W/2 - PANEL_STILE/2;
+  panel.add(rightStile);
+
+  const topRail = new THREE.Mesh(
+    new THREE.BoxGeometry(PANEL_DEPTH, PANEL_RAIL, PANEL_W - PANEL_STILE*2), winFrameSlimMat
+  );
+  topRail.position.set(0, PANEL_H/2 - PANEL_RAIL/2, 0);
+  panel.add(topRail);
+  const botRail = topRail.clone();
+  botRail.position.y = -PANEL_H/2 + PANEL_RAIL/2;
+  panel.add(botRail);
+
+  const gw = PANEL_W - PANEL_STILE*2 + 0.012;
+  const gh = PANEL_H - PANEL_RAIL*2 + 0.012;
+  const glassPane = new THREE.Mesh(
+    new THREE.BoxGeometry(GLASS_THICKNESS, gh, gw),
+    slidingGlassMat
+  );
+  glassPane.renderOrder = isSliding ? 6 : 4;
+  panel.add(glassPane);
+
+  if (isSliding) {
+    const handle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.022, 0.14, 0.016), winHandleMat
+    );
+    handle.position.set(PANEL_DEPTH/2 + 0.010, 0, PANEL_W/2 - PANEL_STILE - 0.020);
+    handle.castShadow = true;
+    panel.add(handle);
+
+    [-0.048, 0.048].forEach(dy => {
+      const s = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.0030, 0.0030, 0.005, 8), winScrewMat
+      );
+      s.rotation.x = Math.PI / 2;
+      s.position.set(PANEL_DEPTH/2 + 0.010, dy, PANEL_W/2 - PANEL_STILE - 0.020);
+      panel.add(s);
+    });
+  }
+
+  panel.position.set(px, windowCenterY, pz);
+  return panel;
+}
+
+const fixedPanel = buildSlidingPanel(trackInnerX, -windowWidth/4, false);
+group.add(fixedPanel);
+
+const SLID_OPEN = 0.30;
+const slidingPanel = buildSlidingPanel(trackOuterX, windowWidth/4 - SLID_OPEN, true);
+group.add(slidingPanel);
+
+const sill = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.06, windowFrameWidth + 0.10), trimMat);
+sill.position.set(2.19, windowCenterY - windowFrameHeight / 2 - 0.030, 0);
+sill.castShadow = true;
+group.add(sill);
+
+const stripe = new THREE.Mesh(new THREE.BoxGeometry(4.24, 0.34 * HS, DEPTH_STRIPE), stripeMat);
+stripe.position.y = 0.68 * HS; group.add(stripe);
+const frieze = new THREE.Mesh(new THREE.PlaneGeometry(DEPTH - 0.16, 0.52 * HS), boothFriezeMat);
+frieze.position.set(2.116, 2.92 * HS, 0); frieze.rotation.y = Math.PI / 2; group.add(frieze);
+
+const roof = new THREE.Mesh(new THREE.BoxGeometry(4.86, 0.24 * HS, DEPTH_ROOF), roofMat);
+roof.position.y = 3.13 * HS; roof.castShadow = true; roof.receiveShadow = true; group.add(roof);
+const roofLip = new THREE.Mesh(new THREE.BoxGeometry(4.98, 0.06, 5.62), windowFrameMat);
+roofLip.position.y = 3.27 * HS; roofLip.castShadow = true; group.add(roofLip);
+const fascia = new THREE.Mesh(new THREE.BoxGeometry(4.9, 0.10, 5.48), rubberMat);
+fascia.position.y = 3.05 * HS; group.add(fascia);
+for (const sx of [-2.08, 2.08]) for (const sz of [-2.36, 2.36]) {
+  const corner = new THREE.Mesh(new THREE.BoxGeometry(0.055, 3.0 * HS, 0.055), trimMat);
+  corner.position.set(sx, 1.58 * HS, sz); group.add(corner);
+}
+const doorMat = new THREE.MeshStandardMaterial({ color: 0x777b78, roughness: 0.72, metalness: 0.32 });
+const door = new THREE.Mesh(new THREE.BoxGeometry(0.055, 2.0 * HS, 1.02), doorMat);
+door.position.set(-0.78, 1.10 * HS, 2.405); group.add(door);
+const doorInset = new THREE.Mesh(new THREE.BoxGeometry(0.025, 1.72 * HS, 0.78), trimMat);
+doorInset.position.set(-0.78, 1.10 * HS, 2.44); group.add(doorInset);
+const doorHandle = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.20, 0.055), lampHousingMat);
+doorHandle.position.set(-0.48, 1.13 * HS, 2.47); group.add(doorHandle);
+for (const hy of [0.45, 1.55]) {
+  const hinge = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 0.07), windowFrameMat);
+  hinge.position.set(-0.82, hy * HS, 2.46); group.add(hinge);
+}
+for (const lz of [-1.35, 1.35]) {
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.055, 0.08), lampHousingMat);
+  arm.position.set(2.27, 3.42 * HS, lz); group.add(arm);
+  const housing = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.34), lampHousingMat);
+  housing.position.set(2.39, 3.39 * HS, lz); group.add(housing);
+  const diffuser = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.035, 0.29), lampGlowMat);
+  diffuser.position.set(2.405, 3.32 * HS, lz); group.add(diffuser);
+  const light = new THREE.PointLight(0xffd59a, 1.1, 7.5, 2);
+  light.position.set(2.55, 3.24 * HS, lz); group.add(light);
+}
+for (let i = 0; i < 7; i++) {
+  const vent = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.035, 0.38), windowFrameMat);
+  vent.position.set(-2.115, (2.05 + i * 0.075) * HS, -1.62); group.add(vent);
+}
+const conduit = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.55 * HS, 8), windowFrameMat);
+conduit.position.set(-2.14, 1.45 * HS, 1.78); group.add(conduit);
+for (const dz of [-1.8, 1.8]) {
+  const baseGuard = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.22, 0.42), rubberMat);
+  baseGuard.position.set(2.13, 0.18 * HS, dz); group.add(baseGuard);
+}
 
 group.position.set(x, y, z);
 group.rotation.y = rotY;
@@ -3168,6 +3675,479 @@ return group;
 
 createCheckpointBooth(-(ROAD.halfWidth + 2.0), 0.39, CP.z + 10, -Math.PI / 2);
 createCheckpointBooth(ROAD.halfWidth + 2.0, 0.39, CP.z + 10, Math.PI / 2);
+
+createBuildingDoor(THREE, scene, {
+  x: 15.57,
+  y: 0.832,
+  z: CP.z + 10,
+  rotationY: -Math.PI / 2,
+  scale: 1.0
+});
+
+createBuildingDoor(THREE, scene, {
+  x: -15.57,
+  y: 0.832,
+  z: CP.z + 10,
+  rotationY: Math.PI / 2,
+  scale: 1.0
+});
+
+function createBuildingDoor(THREE, scene, options = {}) {
+  const root = new THREE.Group();
+  root.name = "BuildingEntranceDoor";
+
+  const doorLeafMat = new THREE.MeshPhysicalMaterial({
+    color: 0x30353a,
+    roughness: 0.36,
+    metalness: 0.58,
+    clearcoat: 0.48,
+    clearcoatRoughness: 0.24,
+    reflectivity: 0.78
+  });
+
+  const panelMat = new THREE.MeshPhysicalMaterial({
+    color: 0x292e33,
+    roughness: 0.40,
+    metalness: 0.58,
+    clearcoat: 0.38,
+    clearcoatRoughness: 0.28,
+    reflectivity: 0.72
+  });
+
+  const frameMat = new THREE.MeshStandardMaterial({
+    color: 0x171a1d,
+    roughness: 0.42,
+    metalness: 0.82
+  });
+
+  const hingeMat = new THREE.MeshStandardMaterial({
+    color: 0xc8ccd0,
+    roughness: 0.20,
+    metalness: 0.95
+  });
+
+  const handleMat = new THREE.MeshStandardMaterial({
+    color: 0xd5d9dd,
+    roughness: 0.12,
+    metalness: 0.98
+  });
+
+  const lockMat = new THREE.MeshStandardMaterial({
+    color: 0x080808,
+    roughness: 0.35,
+    metalness: 0.92
+  });
+
+  const rivetMat = new THREE.MeshStandardMaterial({
+    color: 0x808488,
+    roughness: 0.35,
+    metalness: 0.95
+  });
+
+  const plateMat = new THREE.MeshStandardMaterial({
+    color: 0xe0dcd2,
+    roughness: 0.60,
+    metalness: 0.10
+  });
+
+  const kickPlateMat = new THREE.MeshStandardMaterial({
+    color: 0xa8acb0,
+    roughness: 0.42,
+    metalness: 0.88
+  });
+
+  const rubberMat = new THREE.MeshStandardMaterial({
+    color: 0x0a0a0a,
+    roughness: 0.95,
+    metalness: 0.0
+  });
+
+  const slotMat = new THREE.MeshStandardMaterial({
+    color: 0x0a0a0a,
+    roughness: 0.9,
+    metalness: 0.05
+  });
+
+  const DOOR_W = 1.17;
+  const DOOR_H = 2.75;
+  const DOOR_D = 0.07;
+  const FRAME_T = 0.07;
+  const FRAME_DEPTH = DOOR_D + 0.03;
+
+  const frameLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(FRAME_T, DOOR_H + FRAME_T * 2, FRAME_DEPTH),
+    frameMat
+  );
+  frameLeft.position.set(-DOOR_W / 2 - FRAME_T / 2, DOOR_H / 2, 0);
+  frameLeft.castShadow = true;
+  frameLeft.receiveShadow = true;
+  root.add(frameLeft);
+
+  const frameRight = frameLeft.clone();
+  frameRight.position.x = DOOR_W / 2 + FRAME_T / 2;
+  root.add(frameRight);
+
+  const frameTop = new THREE.Mesh(
+    new THREE.BoxGeometry(DOOR_W + FRAME_T * 2, FRAME_T, FRAME_DEPTH),
+    frameMat
+  );
+  frameTop.position.set(0, DOOR_H + FRAME_T / 2, 0);
+  frameTop.castShadow = true;
+  frameTop.receiveShadow = true;
+  root.add(frameTop);
+
+  const frameBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(DOOR_W + FRAME_T * 2, FRAME_T * 0.5, FRAME_DEPTH),
+    frameMat
+  );
+  frameBottom.position.set(0, FRAME_T * 0.25, 0);
+  frameBottom.castShadow = true;
+  frameBottom.receiveShadow = true;
+  root.add(frameBottom);
+
+  for (const fx of [-DOOR_W / 2 - FRAME_T / 2, DOOR_W / 2 + FRAME_T / 2]) {
+    for (const fy of [0.30, DOOR_H * 0.5, DOOR_H - 0.30]) {
+      const screw = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.007, 0.007, 0.008, 8),
+        rivetMat
+      );
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(fx, fy, FRAME_DEPTH / 2 + 0.005);
+      root.add(screw);
+    }
+  }
+
+  const doorLeaf = new THREE.Mesh(
+    new THREE.BoxGeometry(DOOR_W, DOOR_H, DOOR_D),
+    doorLeafMat
+  );
+  doorLeaf.position.set(0, DOOR_H / 2, 0);
+  doorLeaf.castShadow = true;
+  doorLeaf.receiveShadow = true;
+  root.add(doorLeaf);
+
+  const PANEL_BORDER_T = 0.008;
+  const PANEL_BORDER_D = 0.006;
+  const PANEL_Z = DOOR_D / 2 + PANEL_BORDER_D / 2;
+
+  function addPanelBorder(cx, cy, cw, ch) {
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(cw, PANEL_BORDER_T, PANEL_BORDER_D),
+      panelMat
+    );
+    top.position.set(cx, cy + ch / 2, PANEL_Z);
+    top.castShadow = true;
+    root.add(top);
+    const bottom = top.clone();
+    bottom.position.set(cx, cy - ch / 2, PANEL_Z);
+    root.add(bottom);
+    const left = new THREE.Mesh(
+      new THREE.BoxGeometry(PANEL_BORDER_T, ch, PANEL_BORDER_D),
+      panelMat
+    );
+    left.position.set(cx - cw / 2, cy, PANEL_Z);
+    left.castShadow = true;
+    root.add(left);
+    const right = left.clone();
+    right.position.set(cx + cw / 2, cy, PANEL_Z);
+    root.add(right);
+  }
+
+  addPanelBorder(0, DOOR_H * 0.64, DOOR_W * 0.82, DOOR_H * 0.46);
+  addPanelBorder(0, DOOR_H * 0.20, DOOR_W * 0.82, DOOR_H * 0.18);
+
+  const PLATE_W = 0.42;
+  const PLATE_H = 0.46;
+  const PLATE_D = 0.008;
+  const PLATE_Y = DOOR_H * 0.64;
+  const PLATE_Z = DOOR_D / 2 + PLATE_D / 2 + 0.001;
+
+  const plate = new THREE.Mesh(
+    new THREE.BoxGeometry(PLATE_W, PLATE_H, PLATE_D),
+    plateMat
+  );
+  plate.position.set(0, PLATE_Y, PLATE_Z);
+  plate.castShadow = true;
+  root.add(plate);
+
+  const placeholderTex = (() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#a9161b";
+    ctx.fillRect(0, 0, 256, 256);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 40px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("LOGO", 128, 128);
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    return texture;
+  })();
+
+  const imageMat = new THREE.MeshStandardMaterial({
+    map: placeholderTex,
+    roughness: 0.55,
+    metalness: 0.05,
+    side: THREE.FrontSide
+  });
+
+  const imageDisc = new THREE.Mesh(
+    new THREE.PlaneGeometry(PLATE_W - 0.04, PLATE_H - 0.04),
+    imageMat
+  );
+  imageDisc.position.set(0, PLATE_Y, PLATE_Z + PLATE_D / 2 + 0.002);
+  imageDisc.renderOrder = 2;
+  root.add(imageDisc);
+
+  const imageUrl = "https://m.media-amazon.com/images/I/61g-d6xuICL._AC_UF1000,1000_QL80_.jpg";
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.setCrossOrigin("anonymous");
+
+  textureLoader.load(
+    imageUrl,
+    (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 8;
+      const imgW = texture.image.width || 1;
+      const imgH = texture.image.height || 1;
+      const imgAspect = imgW / imgH;
+      const frameAspect = (PLATE_W - 0.04) / (PLATE_H - 0.04);
+      let planeW;
+      let planeH;
+      if (imgAspect >= frameAspect) {
+        planeW = PLATE_W - 0.04;
+        planeH = planeW / imgAspect;
+      } else {
+        planeH = PLATE_H - 0.04;
+        planeW = planeH * imgAspect;
+      }
+      imageDisc.geometry.dispose();
+      imageDisc.geometry = new THREE.PlaneGeometry(planeW, planeH);
+      imageMat.map = texture;
+      imageMat.needsUpdate = true;
+    },
+    undefined,
+    (error) => {
+      console.warn("[BuildingDoor] Image failed (placeholder kept):", error && error.type);
+    }
+  );
+
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) {
+      const rivet = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.008, 0.008, 0.008, 8),
+        rivetMat
+      );
+      rivet.rotation.x = Math.PI / 2;
+      rivet.position.set(
+        sx * (PLATE_W / 2 - 0.02),
+        PLATE_Y + sy * (PLATE_H / 2 - 0.02),
+        PLATE_Z + PLATE_D / 2 + 0.005
+      );
+      root.add(rivet);
+    }
+  }
+
+  const kickPlate = new THREE.Mesh(
+    new THREE.BoxGeometry(DOOR_W * 0.94, 0.20, 0.006),
+    kickPlateMat
+  );
+  kickPlate.position.set(0, 0.12, DOOR_D / 2 + 0.003);
+  kickPlate.castShadow = true;
+  kickPlate.receiveShadow = true;
+  root.add(kickPlate);
+
+  for (const px of [-0.36, -0.18, 0, 0.18, 0.36]) {
+    for (const py of [0.05, 0.19]) {
+      const screw = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.006, 0.006, 0.006, 6),
+        rivetMat
+      );
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(px, py, DOOR_D / 2 + 0.008);
+      root.add(screw);
+    }
+  }
+
+  const doorWeather = new THREE.Mesh(
+    new THREE.BoxGeometry(DOOR_W * 0.96, 0.012, 0.018),
+    rubberMat
+  );
+  doorWeather.position.set(0, 0.008, DOOR_D / 2 - 0.008);
+  root.add(doorWeather);
+
+  for (const hy of [0.35, DOOR_H - 0.35]) {
+    const hingePlate = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 0.18, 0.02),
+      hingeMat
+    );
+    hingePlate.position.set(-DOOR_W / 2 + 0.025, hy, DOOR_D / 2 + 0.010);
+    hingePlate.castShadow = true;
+    root.add(hingePlate);
+    const hingeBarrel = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.012, 0.012, 0.19, 12),
+      hingeMat
+    );
+    hingeBarrel.position.set(-DOOR_W / 2 + 0.005, hy, DOOR_D / 2 + 0.020);
+    hingeBarrel.castShadow = true;
+    root.add(hingeBarrel);
+    for (let i = 0; i < 4; i++) {
+      const screw = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.005, 0.005, 0.009, 6),
+        rivetMat
+      );
+      screw.rotation.x = Math.PI / 2;
+      screw.position.set(
+        -DOOR_W / 2 + 0.025,
+        hy - 0.066 + i * 0.044,
+        DOOR_D / 2 + 0.025
+      );
+      root.add(screw);
+    }
+  }
+
+  const HANDLE_Y = DOOR_H * 0.45;
+  const HANDLE_X = DOOR_W / 2 - 0.11;
+
+  const escutcheon = new THREE.Mesh(
+    new THREE.BoxGeometry(0.075, 0.22, 0.008),
+    handleMat
+  );
+  escutcheon.position.set(HANDLE_X, HANDLE_Y, DOOR_D / 2 + 0.004);
+  escutcheon.castShadow = true;
+  root.add(escutcheon);
+
+  const handleBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.028, 0.028, 0.025, 16),
+    handleMat
+  );
+  handleBase.rotation.x = Math.PI / 2;
+  handleBase.position.set(HANDLE_X, HANDLE_Y, DOOR_D / 2 + 0.020);
+  handleBase.castShadow = true;
+  root.add(handleBase);
+
+  const handleLever = new THREE.Mesh(
+    new THREE.BoxGeometry(0.14, 0.024, 0.024),
+    handleMat
+  );
+  handleLever.position.set(HANDLE_X - 0.05, HANDLE_Y, DOOR_D / 2 + 0.038);
+  handleLever.castShadow = true;
+  root.add(handleLever);
+
+  const LOCK_Y = DOOR_H * 0.35;
+  const LOCK_X = DOOR_W / 2 - 0.11;
+
+  const lockBody = new THREE.Mesh(
+    new THREE.BoxGeometry(0.055, 0.095, 0.028),
+    lockMat
+  );
+  lockBody.position.set(LOCK_X, LOCK_Y, DOOR_D / 2 + 0.014);
+  lockBody.castShadow = true;
+  root.add(lockBody);
+
+  const keyhole = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.007, 0.007, 0.008, 12),
+    slotMat
+  );
+  keyhole.rotation.x = Math.PI / 2;
+  keyhole.position.set(LOCK_X, LOCK_Y, DOOR_D / 2 + 0.030);
+  root.add(keyhole);
+
+  const brushedSteelMat = new THREE.MeshStandardMaterial({
+    color: 0x777e84, roughness: 0.32, metalness: 0.92
+  });
+  const darkSeamMat = new THREE.MeshStandardMaterial({
+    color: 0x101214, roughness: 0.82, metalness: 0.12
+  });
+  const edgeMetalMat = new THREE.MeshStandardMaterial({
+    color: 0x454b50, roughness: 0.38, metalness: 0.78
+  });
+
+  function addDetailBox(width, height, depth, x, y, z, material, castShadow = true) {
+    const mesh = new THREE.Mesh(
+      new THREE.BoxGeometry(width, height, depth),
+      material
+    );
+    mesh.position.set(x, y, z);
+    mesh.castShadow = castShadow;
+    mesh.receiveShadow = true;
+    root.add(mesh);
+    return mesh;
+  }
+
+  addDetailBox(0.009, DOOR_H - 0.035, 0.004, -DOOR_W / 2 + 0.012, DOOR_H / 2, DOOR_D / 2 + 0.002, darkSeamMat, false);
+  addDetailBox(0.009, DOOR_H - 0.035, 0.004, DOOR_W / 2 - 0.012, DOOR_H / 2, DOOR_D / 2 + 0.002, darkSeamMat, false);
+  addDetailBox(DOOR_W - 0.035, 0.009, 0.004, 0, DOOR_H - 0.014, DOOR_D / 2 + 0.002, darkSeamMat, false);
+  addDetailBox(0.018, DOOR_H - 0.12, 0.006, -DOOR_W / 2 + 0.025, DOOR_H / 2, DOOR_D / 2 + 0.006, edgeMetalMat, false);
+  addDetailBox(0.018, DOOR_H - 0.12, 0.006, DOOR_W / 2 - 0.025, DOOR_H / 2, DOOR_D / 2 + 0.006, edgeMetalMat, false);
+
+  const lineZ = DOOR_D / 2 + 0.004;
+  const upperPanelY = DOOR_H * 0.64;
+  const upperPanelH = DOOR_H * 0.46;
+
+  for (const side of [-1, 1]) {
+    addDetailBox(0.004, upperPanelH - 0.045, 0.003, side * (DOOR_W * 0.82 / 2 - 0.025), upperPanelY, lineZ, edgeMetalMat, false);
+  }
+  addDetailBox(DOOR_W * 0.82 - 0.05, 0.004, 0.003, 0, upperPanelY + upperPanelH / 2 - 0.025, lineZ, edgeMetalMat, false);
+  addDetailBox(DOOR_W * 0.82 - 0.05, 0.004, 0.003, 0, upperPanelY - upperPanelH / 2 + 0.025, lineZ, edgeMetalMat, false);
+
+  const peepholeY = DOOR_H * 0.86;
+  const peepholeX = HANDLE_X - 0.02;
+
+  const peepholeBezel = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.024, 0.024, 0.012, 20),
+    brushedSteelMat
+  );
+  peepholeBezel.rotation.x = Math.PI / 2;
+  peepholeBezel.position.set(peepholeX, peepholeY, DOOR_D / 2 + 0.010);
+  peepholeBezel.castShadow = true;
+  root.add(peepholeBezel);
+
+  const peepholeGlassMat = new THREE.MeshStandardMaterial({
+    color: 0x111b22, roughness: 0.16, metalness: 0.42
+  });
+  const peepholeGlass = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.014, 0.014, 0.014, 20),
+    peepholeGlassMat
+  );
+  peepholeGlass.rotation.x = Math.PI / 2;
+  peepholeGlass.position.set(peepholeX, peepholeY, DOOR_D / 2 + 0.018);
+  root.add(peepholeGlass);
+
+  addDetailBox(0.075, 0.125, 0.004, LOCK_X, LOCK_Y, DOOR_D / 2 + 0.031, edgeMetalMat, false);
+
+  const keySlot = new THREE.Mesh(
+    new THREE.BoxGeometry(0.004, 0.018, 0.003),
+    rubberMat
+  );
+  keySlot.position.set(LOCK_X, LOCK_Y - 0.006, DOOR_D / 2 + 0.034);
+  root.add(keySlot);
+
+  addDetailBox(DOOR_W + FRAME_T * 1.55, 0.018, 0.13, 0, 0.008, 0.012, edgeMetalMat, true);
+
+  for (let i = -3; i <= 3; i++) {
+    addDetailBox(0.003, 0.002, 0.085, i * 0.13, 0.018, 0.012, brushedSteelMat, false);
+  }
+
+  for (const sx of [-1, 1]) {
+    const lowerRivet = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.006, 0.006, 0.006, 10),
+      brushedSteelMat
+    );
+    lowerRivet.rotation.x = Math.PI / 2;
+    lowerRivet.position.set(sx * (DOOR_W * 0.43), 0.12, DOOR_D / 2 + 0.009);
+    root.add(lowerRivet);
+  }
+
+  root.position.set(options.x ?? 0, options.y ?? 0, options.z ?? 0);
+  root.rotation.set(options.rotationX ?? 0, options.rotationY ?? 0, options.rotationZ ?? 0);
+  root.scale.setScalar(options.scale ?? 1);
+  scene.add(root);
+  return root;
+}
 
 function createWatchtower(x, z) {
 const group = new THREE.Group();
@@ -3233,7 +4213,6 @@ roof.position.y = roofY;
 roof.castShadow = true;
 group.add(roof);
 
-/* ===== علم مصر + سارية على سطح برج المراقبة ===== */
 const flagPoleMat = new THREE.MeshStandardMaterial({
   color: 0x9aa0a6, metalness: 0.7, roughness: 0.4
 });
@@ -3242,12 +4221,10 @@ const flagPole = new THREE.Mesh(
   new THREE.CylinderGeometry(0.035, 0.045, poleHeight, 8),
   flagPoleMat
 );
-/* السارية على جنب من الكاميرا — على بعد 1.1 متر من مركز السطح */
 flagPole.position.set(1.1, roofY + 0.05 + poleHeight / 2, 0);
 flagPole.castShadow = true;
 group.add(flagPole);
 
-/* قاعدة صغيرة للسارية */
 const poleBase = new THREE.Mesh(
   new THREE.CylinderGeometry(0.12, 0.15, 0.10, 12),
   flagPoleMat
@@ -3257,14 +4234,12 @@ poleBase.castShadow = true;
 poleBase.receiveShadow = true;
 group.add(poleBase);
 
-/* العلم نفسه */
 const egyptFlag = createEgyptFlag(0.9);
 egyptFlag.position.set(1.1, roofY + 0.15 + poleHeight - 0.55, 0);
 egyptFlag.rotation.y = Math.PI / 2;
 group.add(egyptFlag);
 group.userData.egyptFlag = egyptFlag;
 group.userData.egyptFlagMesh = egyptFlag.userData.flagMesh;
-/* ===== نهاية العلم ===== */
 
 group.position.set(x, 0, z);
 scene.add(group);
@@ -3354,10 +4329,10 @@ duration: 1.6
 });
 }
 
-registerBoom(boomLeft, false);
-registerBoom(boomRight, false);
-registerBoom(medianBoomLeft, true);
-registerBoom(medianBoomRight, true);
+registerBoom(boomLeft, false);        /* Gate 1 — permanently closed */
+registerBoom(boomRight, false);       /* Gate 2 — starts closed, player-controlled */
+registerBoom(medianBoomLeft, false);  /* Gate 3 — REQUIRED: starts closed */
+registerBoom(medianBoomRight, true);  /* Gate 4 — open, reserved for traffic automation */
 
 function toggleBoom(index) {
 if (index < 0 || index >= boomBarriers.length) return;
@@ -3370,15 +4345,15 @@ playCloseBeep();
 }
 
 /* ==========================================================================
-   CCTV UNITS — كاميرا على أبراج المراقبة فقط
+   CCTV UNITS
    ========================================================================== */
 const CCTV_CONFIG = {
   sources: [
+    { base: HF_MODEL_BASE, mtl: 'cctv.mtl', obj: 'cctv.obj' },
     { base: '',        mtl: 'cctv.mtl', obj: 'cctv.obj' },
     { base: 'models/', mtl: 'cctv.mtl', obj: 'cctv.obj' },
     { base: 'assets/', mtl: 'cctv.mtl', obj: 'cctv.obj' }
   ],
-
   targetSize: 3.2,
   modelOffsetX: 0,
   modelOffsetZ: 0,
@@ -3386,10 +4361,6 @@ const CCTV_CONFIG = {
   castShadows: true
 };
 
-/*
-  الأبراج: roofY = 6.5 + 2.2 + 0.05 = 8.75 (نصف سماكة السقف)
-  الكاميرا بتقف عند مركز السطح، والعلم على جنبها بـ 1.1 م.
-*/
 const CCTV_PLACEMENTS = [
   { x: -(ROAD.halfWidth + 5), y: 8.75, z: CP.z + 25, rotY: 0 },
   { x:  (ROAD.halfWidth + 5), y: 8.75, z: CP.z + 25, rotY: Math.PI }
@@ -3490,8 +4461,7 @@ function spawnCCTVUnits() {
     }
     const src = sources[idx++];
 
-    const mtlLoader = new MTLLoader();
-    mtlLoader.setPath(src.base);
+   const mtlLoader = createRemoteMTLLoader(src.base, false);
     mtlLoader.load(
       src.mtl,
       (materials) => {
@@ -3522,9 +4492,6 @@ function spawnCCTVUnits() {
 
   tryNext();
 })();
-/* ==========================================================================
-   END CCTV UNITS
-   ========================================================================== */
 
 const LAMP_HEIGHT = 9.6;
 
@@ -3842,9 +4809,6 @@ scene.add(group);
 return group;
 }
 
-createWoodenGate(-(ROAD.halfWidth - 6), CP.z + 30, 0);
-createWoodenGate(ROAD.halfWidth - 6, CP.z + 30, 0);
-
 function createReflectorPost(x, z) {
 const postMat = new THREE.MeshStandardMaterial({
 color: 0xf0e8d0, roughness: 0.65, emissive: 0x2a2418, emissiveIntensity: 0.18
@@ -3988,26 +4952,133 @@ createChainlinkFence(ROAD.halfWidth + 8, CP.z - 60, 20, 0);
 
 function createElectricalBox(x, z, rotY = 0) {
 const group = new THREE.Group();
-const boxMat = new THREE.MeshStandardMaterial({ color: 0x6a6e72, roughness: 0.6, metalness: 0.4 });
-const doorMat = new THREE.MeshStandardMaterial({ color: 0x5a5e62, roughness: 0.55, metalness: 0.5 });
-const base = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.15, 0.6), boxMat);
-base.position.y = 0.075;
+
+const rustTexture = createCanvasTexture(512, 768, (ctx, w, h) => {
+  ctx.fillStyle = '#bfc2c2';
+  ctx.fillRect(0, 0, w, h);
+  const grad = ctx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, 'rgba(35,40,43,0.28)');
+  grad.addColorStop(0.12, 'rgba(255,255,255,0.12)');
+  grad.addColorStop(0.55, 'rgba(255,255,255,0.02)');
+  grad.addColorStop(1, 'rgba(30,34,36,0.32)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h);
+  for (let i = 0; i < 95; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    const rw = 3 + Math.random() * 34;
+    const rh = 2 + Math.random() * 22;
+    ctx.fillStyle = ['rgba(105,55,28,0.20)','rgba(145,72,34,0.27)','rgba(75,49,35,0.18)','rgba(235,235,226,0.16)'][Math.floor(Math.random()*4)];
+    ctx.beginPath();
+    ctx.ellipse(x, y, rw, rh, Math.random() * 2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for (let i = 0; i < 1800; i++) {
+    const x = Math.random() * w, y = Math.random() * h;
+    ctx.fillStyle = Math.random() > 0.5 ? 'rgba(25,28,29,0.10)' : 'rgba(255,255,255,0.10)';
+    ctx.fillRect(x, y, 1 + Math.random() * 2, 1 + Math.random() * 3);
+  }
+  for (let i = 0; i < 22; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    ctx.strokeStyle = 'rgba(55,48,42,0.25)';
+    ctx.lineWidth = 1 + Math.random() * 2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + (Math.random() - 0.5) * 24, y + 8 + Math.random() * 65);
+    ctx.stroke();
+  }
+});
+rustTexture.colorSpace = THREE.SRGBColorSpace;
+rustTexture.wrapS = THREE.RepeatWrapping;
+rustTexture.wrapT = THREE.RepeatWrapping;
+
+const boxMat = new THREE.MeshStandardMaterial({
+  color: 0xd0d2d1, map: rustTexture, roughness: 0.78, metalness: 0.82
+});
+const doorMat = new THREE.MeshStandardMaterial({
+  color: 0xc6c9c8, map: rustTexture, roughness: 0.72, metalness: 0.88
+});
+const darkMetal = new THREE.MeshStandardMaterial({ color: 0x42474a, roughness: 0.7, metalness: 0.85 });
+const screwMat = new THREE.MeshStandardMaterial({ color: 0x777c7e, roughness: 0.35, metalness: 0.95 });
+const base = new THREE.Mesh(new THREE.BoxGeometry(1.08, 0.16, 0.68), darkMetal);
+base.position.y = 0.08;
 base.castShadow = true;
+base.receiveShadow = true;
 group.add(base);
-const body = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.3, 0.5), boxMat);
-body.position.y = 0.80;
+
+const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.42, 0.56), boxMat);
+body.position.y = 0.87;
 body.castShadow = true;
 body.receiveShadow = true;
 group.add(body);
-const door = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.2, 0.02), doorMat);
-door.position.set(0, 0.80, 0.26);
+
+const door = new THREE.Mesh(new THREE.BoxGeometry(0.93, 1.30, 0.035), doorMat);
+door.position.set(0, 0.88, 0.292);
+door.castShadow = true;
+door.receiveShadow = true;
 group.add(door);
-const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.12, 6), boxMat);
-handle.rotation.z = Math.PI / 2;
-handle.position.set(0.35, 0.80, 0.28);
+
+const edgeMat = new THREE.MeshStandardMaterial({ color: 0x929796, roughness: 0.58, metalness: 0.9 });
+for (const [px, py, sx, sy] of [
+  [-0.47, 0.88, 0.025, 1.31], [0.47, 0.88, 0.025, 1.31],
+  [0, 1.53, 0.94, 0.025], [0, 0.23, 0.94, 0.025]
+]) {
+  const edge = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, 0.045), edgeMat);
+  edge.position.set(px, py, 0.315);
+  edge.castShadow = true;
+  group.add(edge);
+}
+
+const labelTexture = new THREE.TextureLoader().load(
+  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpt0m6sH0VWSx7xwca9lVskmOK3D9zbUnoSeWgCOfLVQ&s=10',
+  (tex) => { tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); },
+  undefined,
+  () => console.warn('Electrical cabinet label image could not be loaded.')
+);
+const labelBacking = new THREE.Mesh(
+  new THREE.BoxGeometry(0.48, 0.48, 0.012),
+  new THREE.MeshStandardMaterial({ color: 0xe6e5df, roughness: 0.82, metalness: 0.12 })
+);
+labelBacking.position.set(0, 0.91, 0.342);
+group.add(labelBacking);
+const label = new THREE.Mesh(
+  new THREE.PlaneGeometry(0.44, 0.44),
+  new THREE.MeshStandardMaterial({ map: labelTexture, roughness: 0.86, metalness: 0.05, side: THREE.DoubleSide })
+);
+label.position.set(0, 0.91, 0.351);
+group.add(label);
+
+for (const hy of [0.42, 1.31]) {
+  const hinge = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.17, 0.055), darkMetal);
+  hinge.position.set(-0.43, hy, 0.34);
+  hinge.castShadow = true;
+  group.add(hinge);
+}
+const latch = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.17, 0.06), darkMetal);
+latch.position.set(0.37, 0.84, 0.35);
+group.add(latch);
+const handle = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.12, 0.045), screwMat);
+handle.position.set(0.37, 0.84, 0.39);
 group.add(handle);
+
+for (const px of [-0.39, 0.39]) {
+  for (const py of [0.29, 1.47]) {
+    const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.012, 12), screwMat);
+    screw.rotation.x = Math.PI / 2;
+    screw.position.set(px, py, 0.345);
+    group.add(screw);
+  }
+}
+for (let i = 0; i < 7; i++) {
+  const vent = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.012, 0.008), darkMetal);
+  vent.position.set(0, 0.43 + i * 0.025, 0.337);
+  group.add(vent);
+}
+
 group.position.set(x, 0, z);
 group.rotation.y = rotY;
+group.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
 scene.add(group);
 return group;
 }
@@ -4183,16 +5254,6 @@ const medianBox = new THREE.Box3().setFromObject(median);
 colliders.push(medianBox);
 }
 
-[
-barrierLeft1, barrierLeft2, barrierLeft3,
-barrierRight1, barrierRight2, barrierRight3
-].forEach(b => {
-if (!b) return;
-const box = new THREE.Box3().setFromObject(b);
-box.expandByScalar(0.15);
-colliders.push(box);
-});
-
 conePositions.slice(0, CONFIG.coneCount).forEach(pos => {
 addCollider(pos.x - 0.35, pos.x + 0.35, pos.z - 0.35, pos.z + 0.35);
 });
@@ -4232,7 +5293,7 @@ coneZBase + i * 1.5 - 0.4, coneZBase + i * 1.5 + 0.4
 const SAND_LOADER = {
 objPath: '01.obj',
 mtlPath: '01.mtl',
-modelBasePath: 'models/',
+modelBasePath: HF_MODEL_BASE,
 targetLength: 8.6,
 modelYawFix: 0,
 liftToGround: 0.0,
@@ -4646,13 +5707,11 @@ sandLoaders.push(vehicle);
 }
 
 function updateSandLoader(v, dt) {
-/* === INSPECTION PAUSE === */
 if (v.paused) {
 v.speed = 0;
 makeVehicleBox(v.pos.x, v.pos.z, v.halfWidth, v.halfLength, v.box);
 return;
 }
-/* === END INSPECTION PAUSE === */
 
 const cfg = SAND_LOADER;
 let targetSpeed = v.maxSpeed;
@@ -4689,11 +5748,9 @@ targetSpeed = Math.min(targetSpeed, allowed);
 }
 }
 
-/* === NEW: following logic now shared with trucks === */
-const SAND_LOADER_FORK_GAP = 5.5;
+const SAND_LOADER_FORK_GAP = 10.5;
 targetSpeed = applyVehicleFollowing(v, sandLoaders, cfg, targetSpeed, SAND_LOADER_FORK_GAP);
 targetSpeed = applyVehicleFollowing(v, trucks, cfg, targetSpeed, SAND_LOADER_FORK_GAP);
-/* === END NEW === */
 
 if (v.speed < targetSpeed) {
 v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
@@ -4744,25 +5801,21 @@ const v = sandLoaders[i];
 updateSandLoader(v, dt);
 dynamicColliders.push(v.box);
 }
-/* === NEW: also update the BYD Song trucks === */
 for (let i = 0; i < trucks.length; i++) {
 const v = trucks[i];
 updateTruck(v, dt);
 dynamicColliders.push(v.box);
 }
-/* === END NEW === */
 }
 
-/* ==========================================================================
-   NEW: BYD SONG 2022 TRUCK (Highway Vehicle)
-   ========================================================================== */
 const TRUCK = {
 sources: [
+{ base: HF_MODEL_BASE, mtl: 'BYD_SONG_2022.mtl', obj: 'BYD_SONG_2022.obj' },
 { base: '',        mtl: 'BYD_SONG_2022.mtl', obj: 'BYD_SONG_2022.obj' },
 { base: 'models/', mtl: 'BYD_SONG_2022.mtl', obj: 'BYD_SONG_2022.obj' },
 { base: 'assets/', mtl: 'BYD_SONG_2022.mtl', obj: 'BYD_SONG_2022.obj' }
 ],
-targetLength: 7,
+targetLength: 7.7,
 modelYawFix: 0,
 liftToGround: 0.0,
 maxSpeed: 118 / 3.6,
@@ -4778,9 +5831,12 @@ probeExtra: 10.0
 };
 
 const TRUCK_COLORS = [
-{ name: 'red',   hex: 0xb01818 },
-{ name: 'black', hex: 0x0f0f12 },
-{ name: 'white', hex: 0xececec }
+{ name: 'red',   hex: 0xc51f2b },
+{ name: 'white', hex: 0xf0f0ed },
+{ name: 'silver', hex: 0x9da5ad },
+{ name: 'blue',  hex: 0x174f88 },
+{ name: 'beige', hex: 0xb9a27b },
+{ name: 'dark-green', hex: 0x315b45 }
 ];
 
 const TRUCK_ROUTES = [
@@ -4825,7 +5881,7 @@ else m.color = new THREE.Color(0xffffff);
 
 switch (category) {
 case 'paint':
-    m.map = null;                     
+    m.map = null;
     m.color = new THREE.Color(bodyColorHex);
     m.roughness = 0.30;
     m.metalness = 0.35;
@@ -4989,18 +6045,109 @@ node.material = Array.isArray(node.material) ? newMats : newMats[0];
 });
 }
 
+function genEgyptianPlateText() {
+  const letters = ['ا','ب','ج','د','ر','س','ص','ط','ع','ف','ق','ل','م','ن','ه','و','ي'];
+  const code = () => letters[Math.floor(Math.random() * letters.length)];
+  const nums = String(Math.floor(1000 + Math.random() * 9000));
+  return { letters: `${code()} ${code()} ${code()}`, numbers: nums };
+}
+function createEgyptianPrivatePlateTexture(plateData) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 640; canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f4f3ed';
+  ctx.fillRect(0, 0, 640, 200);
+
+  ctx.fillStyle = '#159bd2';
+  ctx.fillRect(4, 4, 632, 65);
+
+  ctx.fillStyle = '#111820';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 27px Arial, sans-serif';
+  ctx.fillText('EGYPT', 24, 36);
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 28px Arial, sans-serif';
+  ctx.fillText('مصر', 615, 36);
+
+  ctx.fillStyle = '#202020';
+  ctx.fillRect(4, 70, 632, 2);
+
+  ctx.fillStyle = '#191919';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 63px Arial, Tahoma, sans-serif';
+  ctx.fillText(plateData.numbers, 205, 133, 260);
+  ctx.fillText(plateData.letters, 465, 133, 230);
+
+  ctx.fillStyle = '#a9a9a4';
+  ctx.fillRect(326, 80, 3, 107);
+
+  ctx.strokeStyle = '#25282b';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(2.5, 2.5, 635, 195);
+
+  ctx.fillStyle = '#36393b';
+  for (const x of [18, 622]) {
+    ctx.beginPath(); ctx.arc(x, 36, 3, 0, Math.PI * 2); ctx.fill();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return texture;
+}
+function addEgyptianPrivatePlates(group, halfLength) {
+  const plateTexture = createEgyptianPrivatePlateTexture(genEgyptianPlateText());
+
+  const PLATE_WIDTH  = 0.67;
+ const PLATE_ASPECT = 0.36;
+
+  const plateWidth  = PLATE_WIDTH;
+  const plateHeight = plateWidth * PLATE_ASPECT;
+
+  const plateMaterial = new THREE.MeshStandardMaterial({
+    map: plateTexture,
+    roughness: 0.55,
+    metalness: 0.04,
+    side: THREE.DoubleSide
+  });
+
+  const frontZ = Math.max(1.8, halfLength - 0.045);
+  const y = 0.40;
+
+  const mount = new THREE.Mesh(
+    new THREE.BoxGeometry(plateWidth + 0.018, plateHeight + 0.018, 0.012),
+    new THREE.MeshStandardMaterial({ color: 0x303033, roughness: 0.78, metalness: 0.03 })
+  );
+  mount.position.set(0, y, frontZ);
+  mount.castShadow = false;
+  mount.receiveShadow = true;
+  group.add(mount);
+
+  const plate = new THREE.Mesh(
+    new THREE.PlaneGeometry(plateWidth, plateHeight),
+    plateMaterial.clone()
+  );
+  plate.position.set(0, y, frontZ + 0.008);
+  plate.castShadow = false;
+  plate.renderOrder = 2;
+  group.add(plate);
+}
+
 function spawnTrucks() {
 if (!truckProto) return;
 
-TRUCK_ROUTES.forEach((route) => {
+TRUCK_ROUTES.forEach((route, routeIndex) => {
 const model = truckProto.clone(true);
 model.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
 
-const colorDef = TRUCK_COLORS[Math.floor(Math.random() * TRUCK_COLORS.length)];
+const colorDef = TRUCK_COLORS[routeIndex % TRUCK_COLORS.length];
 cloneTruckMaterialsForVehicle(model, colorDef.hex);
 
 const group = new THREE.Group();
 group.add(model);
+addEgyptianPrivatePlates(group, truckSize.halfLength);
 group.rotation.y = (route.dirZ > 0) ? 0 : Math.PI;
 group.position.set(route.laneX, 0, route.spawnZ);
 scene.add(group);
@@ -5036,11 +6183,6 @@ trucks.push(vehicle);
 });
 }
 
-/* ==========================================================================
-   MODIFIED: applyVehicleFollowing now accepts extraFrontGap so callers
-   can request a larger safety margin (used by the sand loader because
-   of its protruding front fork / bucket).
-   ========================================================================== */
 function applyVehicleFollowing(v, others, cfg, targetSpeed, extraFrontGap) {
 const extra = extraFrontGap || 0;
 let result = targetSpeed;
@@ -5074,13 +6216,11 @@ return true;
 }
 
 function updateTruck(v, dt) {
-/* === INSPECTION PAUSE === */
 if (v.paused) {
 v.speed = 0;
 makeVehicleBox(v.pos.x, v.pos.z, v.halfWidth, v.halfLength, v.box);
 return;
 }
-/* === END INSPECTION PAUSE === */
 
 const cfg = TRUCK;
 let targetSpeed = v.maxSpeed;
@@ -5116,6 +6256,13 @@ targetSpeed = Math.min(targetSpeed, allowed);
 
 targetSpeed = applyVehicleFollowing(v, sandLoaders, cfg, targetSpeed);
 targetSpeed = applyVehicleFollowing(v, trucks, cfg, targetSpeed);
+const playerDx = Math.abs(v.pos.x - playerPos.x);
+const playerAhead = (playerPos.z - v.pos.z) * v.dirZ;
+const playerStopGap = v.halfLength + CONFIG.collisionRadius + 1.15;
+if (playerDx < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAhead > 0 && playerAhead < playerStopGap + Math.max(0, v.speed * 0.6)) {
+  if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5) triggerPlayerKnockdown(v.speed);
+  targetSpeed = 0;
+}
 
 if (v.speed < targetSpeed) {
 v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
@@ -5169,8 +6316,7 @@ return;
 }
 const src = sources[idx++];
 
-const mtlLoader = new MTLLoader();
-mtlLoader.setPath(src.base);
+const mtlLoader = createRemoteMTLLoader(src.base, true);
 mtlLoader.load(
 src.mtl,
 (materials) => {
@@ -5201,18 +6347,13 @@ undefined,
 
 tryNext();
 })();
-/* ==========================================================================
-   END BYD SONG 2022 TRUCK
-   ========================================================================== */
 
 const controls = new PointerLockControls(camera, renderer.domElement);
 scene.add(controls.getObject());
 
-camera.rotation.set(-0.10, 0, 0);
-
 const keys = { w: false, a: false, s: false, d: false, shift: false };
 document.addEventListener('keydown', e => {
-/* === INSPECTION BLOCKS GAMEPLAY KEYS === */
+if (cinematic.active) return;
 if (inspectionActive) {
   if (e.code === 'Escape') {
     e.preventDefault();
@@ -5220,9 +6361,6 @@ if (inspectionActive) {
   }
   return;
 }
-/* === END INSPECTION BLOCK === */
-
-/* AI-VOICE-JS-START — Conversation blocks gameplay keys (matching inspection behavior) */
 if (conversationActive) {
   if (e.code === 'Escape') {
     e.preventDefault();
@@ -5230,7 +6368,6 @@ if (conversationActive) {
   }
   return;
 }
-/* AI-VOICE-JS-END */
 
 if (e.code === 'KeyW') keys.w = true;
 if (e.code === 'KeyA') keys.a = true;
@@ -5239,10 +6376,9 @@ if (e.code === 'KeyD') keys.d = true;
 if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true;
 
 if (!e.repeat) {
-if (e.code === 'Digit1') toggleBoom(0);
 if (e.code === 'Digit2') toggleBoom(1);
 if (e.code === 'Digit3') toggleBoom(2);
-if (e.code === 'Digit4') toggleBoom(3);
+// Barrier 1 is permanently closed; barrier 4 is reserved for traffic automation.
 }
 });
 document.addEventListener('keyup', e => {
@@ -5254,10 +6390,9 @@ if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = false;
 });
 
 renderer.domElement.addEventListener('click', () => {
+if (cinematic.active) return;
 if (inspectionActive) return;
-/* AI-VOICE-JS-START — prevent pointer lock while voice UI is open */
 if (conversationActive) return;
-/* AI-VOICE-JS-END */
 controls.lock();
 try {
 if (audioListener.context && audioListener.context.state === 'suspended') {
@@ -5274,11 +6409,20 @@ try { v.sound.play(); } catch (e) {}
 
 const playerPos = new THREE.Vector3(CONFIG.spawnX, CONFIG.playerHeight, CONFIG.spawnZ);
 const playerVel = new THREE.Vector3();
+const desiredPlayerVel = new THREE.Vector3();
 const tempDir = new THREE.Vector3();
+let walkPhase = 0;
+let playerKnockedDown = false;
+let playerRecovering = false;
+let knockdownTime = 0;
+let knockdownStartY = 0;
+let knockdownStartRotX = 0;
+let knockdownStartRotZ = 0;
+let impactCooldown = 0;
 const forward = new THREE.Vector3();
 const right = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0);
-let currentGroundY = 0;
+let currentGroundY = CONFIG.sidewalkWalkHeight;
 
 function checkCollision(newPos) {
 const r = CONFIG.collisionRadius;
@@ -5304,7 +6448,10 @@ return 0;
 }
 
 function updatePlayer(dt) {
-/* === INSPECTION FREEZES PLAYER === */
+if (playerKnockedDown || playerRecovering) {
+  updateKnockdownAnimation(dt);
+  return;
+}
 if (inspectionActive) {
   controls.getObject().position.set(
     playerPos.x,
@@ -5313,9 +6460,7 @@ if (inspectionActive) {
   );
   return;
 }
-/* === END INSPECTION FREEZE === */
 
-/* AI-VOICE-JS-START — Conversation also freezes player (same pattern as inspection) */
 if (conversationActive) {
   controls.getObject().position.set(
     playerPos.x,
@@ -5324,7 +6469,6 @@ if (conversationActive) {
   );
   return;
 }
-/* AI-VOICE-JS-END */
 
 tempDir.set(0, 0, 0);
 camera.getWorldDirection(forward);
@@ -5337,17 +6481,14 @@ if (keys.d) tempDir.add(right);
 if (keys.a) tempDir.sub(right);
 
 const speed = CONFIG.playerSpeed * (keys.shift ? CONFIG.sprintMultiplier : 1);
+desiredPlayerVel.set(0, 0, 0);
+if (tempDir.lengthSq() > 0) { tempDir.normalize(); desiredPlayerVel.set(tempDir.x * speed, 0, tempDir.z * speed); }
+const accel = tempDir.lengthSq() > 0 ? 11.5 : 8.5;
+const blend = 1 - Math.exp(-accel * dt);
+playerVel.x += (desiredPlayerVel.x - playerVel.x) * blend;
+playerVel.z += (desiredPlayerVel.z - playerVel.z) * blend;
 
-if (tempDir.lengthSq() > 0) {
-tempDir.normalize();
-playerVel.x = tempDir.x * speed;
-playerVel.z = tempDir.z * speed;
-} else {
-playerVel.x *= Math.max(0, 1 - dt * 12);
-playerVel.z *= Math.max(0, 1 - dt * 12);
-}
-
-const steps = 3;
+const steps = Math.max(3, Math.min(8, Math.ceil(Math.hypot(playerVel.x, playerVel.z) * dt / 0.18)));
 const stepX = playerVel.x * dt / steps;
 const stepZ = playerVel.z * dt / steps;
 
@@ -5372,18 +6513,53 @@ playerPos.z = Math.max(ROAD.centerZ - ROAD.length / 2 + 20,
 Math.min(ROAD.centerZ + ROAD.length / 2 - 20, playerPos.z));
 
 const targetGroundY = groundHeightAt(playerPos.x);
-currentGroundY += (targetGroundY - currentGroundY) * Math.min(1, dt * 10);
-
-controls.getObject().position.set(
-playerPos.x,
-currentGroundY + CONFIG.playerHeight,
-playerPos.z
-);
+const maxStep = 0.34;
+if (Math.abs(targetGroundY - currentGroundY) <= maxStep) currentGroundY += (targetGroundY - currentGroundY) * (1 - Math.exp(-12 * dt));
+const horizontalSpeed = Math.hypot(playerVel.x, playerVel.z);
+if (horizontalSpeed > 0.12) walkPhase += dt * (keys.shift ? 13.5 : 9.0) * Math.min(1.25, horizontalSpeed / Math.max(1, CONFIG.playerSpeed));
+const bobTarget = horizontalSpeed > 0.12 ? Math.sin(walkPhase) * 0.045 * Math.min(1, horizontalSpeed / Math.max(1, CONFIG.playerSpeed)) : 0;
+camera.position.y += (bobTarget - camera.position.y) * (1 - Math.exp(-10 * dt));
+camera.position.x += (0 - camera.position.x) * (1 - Math.exp(-10 * dt));
+controls.getObject().position.set(playerPos.x, currentGroundY + CONFIG.playerHeight, playerPos.z);
 }
 
-/* ==========================================================================
-   EGYPTIAN CHECKPOINT INSPECTION SYSTEM — FULL IMPLEMENTATION
-   ========================================================================== */
+function triggerPlayerKnockdown(impactSpeed) {
+  if (playerKnockedDown || playerRecovering || impactCooldown > 0 || impactSpeed < 7.5) return;
+  playerKnockedDown = true; knockdownTime = 0; impactCooldown = 4;
+  knockdownStartY = controls.getObject().position.y;
+  knockdownStartRotX = camera.rotation.x; knockdownStartRotZ = camera.rotation.z;
+  playerVel.set(0, 0, 0); keys.w = keys.a = keys.s = keys.d = false;
+}
+function updateKnockdownAnimation(dt) {
+  knockdownTime += dt;
+  const obj = controls.getObject();
+  if (playerKnockedDown) {
+    const t = Math.min(1, knockdownTime / 0.42);
+    const ease = t * t * (3 - 2 * t);
+    obj.position.y = knockdownStartY - 1.65 * ease;
+    camera.rotation.x = knockdownStartRotX + 0.34 * ease;
+    camera.rotation.z = knockdownStartRotZ + 0.12 * ease;
+    if (knockdownTime >= 1.45) { playerKnockedDown = false; playerRecovering = true; knockdownTime = 0; }
+  } else if (playerRecovering) {
+    const t = Math.min(1, knockdownTime / 0.62);
+    const ease = t * t * (3 - 2 * t);
+    obj.position.y = knockdownStartY - 1.65 * (1 - ease);
+    camera.rotation.x = knockdownStartRotX + 0.34 * (1 - ease);
+    camera.rotation.z = knockdownStartRotZ + 0.12 * (1 - ease);
+    if (t >= 1) { playerRecovering = false; knockdownTime = 0; obj.position.y = currentGroundY + CONFIG.playerHeight; camera.rotation.x = knockdownStartRotX; camera.rotation.z = knockdownStartRotZ; camera.position.y = 0; camera.position.x = 0; }
+  }
+}
+function updatePlayerVehicleImpact(dt) {
+  impactCooldown = Math.max(0, impactCooldown - dt);
+  if (playerKnockedDown || playerRecovering) return;
+  const px = playerPos.x, pz = playerPos.z;
+  const candidates = [...sandLoaders, ...trucks];
+  for (const v of candidates) {
+    if (!v || !v.pos || !v.box || !v.box.intersectsBox(new THREE.Box3(new THREE.Vector3(px-CONFIG.collisionRadius,0.1,pz-CONFIG.collisionRadius),new THREE.Vector3(px+CONFIG.collisionRadius,2.8,pz+CONFIG.collisionRadius)))) continue;
+    const speed = Math.abs(Number(v.speed) || 0);
+    if (speed > 7.5) { triggerPlayerKnockdown(speed); if (typeof v.speed === 'number') v.speed = Math.min(v.speed, 1.2); }
+  }
+}
 
 let inspectionVehicle = null;
 let inspectionProfile = null;
@@ -5398,7 +6574,6 @@ const INSPECT_CFG = {
   bribeBaseAccept: 0.70
 };
 
-/* ---------- Random helpers ---------- */
 const _ri = (a, b) => Math.floor(a + Math.random() * (b - a + 1));
 const _pk = a => a[Math.floor(Math.random() * a.length)];
 const _pd = (n, l) => String(n).padStart(l, '0');
@@ -5407,7 +6582,6 @@ const _fmtD = d => `${_pd(d.getDate(), 2)}/${_pd(d.getMonth() + 1, 2)}/${d.getFu
 const _addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const _esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-/* ---------- Arabic data pools ---------- */
 const AR_DATA = {
   male: ['محمد', 'أحمد', 'محمود', 'مصطفى', 'كريم', 'عمرو', 'هشام', 'يوسف', 'إبراهيم', 'خالد', 'طارق', 'سامح', 'رامي', 'شريف', 'وليد', 'عصام', 'تامر', 'سيد', 'عبد الله', 'فتحي', 'علاء', 'جمال', 'نادر', 'حسام', 'عاطف', 'صابر', 'مجدي', 'إيهاب', 'أيمن', 'بهاء', 'حسن', 'سلامة'],
   female: ['فاطمة', 'عائشة', 'منى', 'هدى', 'سارة', 'نور', 'ريم', 'دينا', 'ياسمين', 'هبة', 'أميرة', 'مروة', 'سلمى', 'نهى', 'رنا'],
@@ -5467,7 +6641,6 @@ function genEngineNo() {
   return s;
 }
 
-/* ---------- Violation definitions ---------- */
 const VIOLATION_DEFS = {
   lic_expired:        { name: 'رخصة قيادة منتهية',                 fine: 300,  reason: 'رخصة القيادة الخاصة بالسائق منتهية الصلاحية ولم يتم تجديدها.' },
   lic_category:       { name: 'فئة الرخصة غير مطابقة للمركبة',     fine: 500,  reason: 'فئة الرخصة لا تسمح بقيادة هذا النوع من المركبات.' },
@@ -5481,7 +6654,6 @@ const VIOLATION_DEFS = {
   fake_police:        { name: 'انتحال صفة ضابط شرطة',              fine: 3000, reason: 'وثائق هوية مزيفة تنتحل صفة ضابط شرطة.' }
 };
 
-/* ---------- Item pools ---------- */
 const TRUNK_POOL_PASSENGER = [
   { name: 'حقيبة سفر',          status: 'green',  note: 'ملابس شخصية ومستلزمات سفر.' },
   { name: 'شنطة أدوات',         status: 'green',  note: 'مفتاح إنجليزي ومفك وطقم عدة.' },
@@ -5521,7 +6693,6 @@ const PERSONAL_POOL = [
   { name: 'مواد مخدرة',         status: 'red',    note: 'مواد ممنوعة تبعًا للقانون.' }
 ];
 
-/* ---------- Profile generation ---------- */
 function generateProfile(kind) {
   const profile = { kind, id: 'V' + Date.now() + Math.floor(Math.random() * 10000) };
   const gender = kind === 'loader' ? 'male' : (_ch(0.88) ? 'male' : 'female');
@@ -5554,9 +6725,7 @@ function generateProfile(kind) {
     photoHue: _ri(20, 220)
   };
 
-  /* ----------- DRIVING LICENSE ----------- */
   if (kind === 'loader') {
-    /* Sand loader driver always has a commercial / heavy-vehicle license */
     const licenseStatusRoll = Math.random();
     let licStatus = 'valid';
     if (licenseStatusRoll < 0.60) licStatus = 'valid';
@@ -5584,7 +6753,6 @@ function generateProfile(kind) {
       valid: licStatus === 'valid' || licStatus === 'restricted'
     };
   } else {
-    /* Private car driver license */
     const licenseStatusRoll = Math.random();
     let licStatus = 'valid';
     if (licenseStatusRoll < 0.70) licStatus = 'valid';
@@ -5618,9 +6786,7 @@ function generateProfile(kind) {
     };
   }
 
-  /* ----------- VEHICLE REGISTRATION ----------- */
   if (kind === 'loader') {
-    /* Work-vehicle documentation (NOT a private passenger-car license) */
     const regRoll = Math.random();
     let regStatus = 'valid';
     if (regRoll < 0.78) regStatus = 'valid';
@@ -5671,7 +6837,6 @@ function generateProfile(kind) {
     };
   }
 
-  /* ----------- COMPANY PERMIT (only for sand loaders) ----------- */
   profile.company = null;
   profile.companyRequired = false;
   if (kind === 'loader') {
@@ -5690,7 +6855,6 @@ function generateProfile(kind) {
         ? _addDays(now, -_ri(20, 300))
         : _addDays(now, _ri(180, 1200));
 
-      /* For inconsistent scenario, driver name may not match */
       const permitDriverName = permitStatus === 'inconsistent'
         ? `${_pk(AR_DATA.male)} ${_pk(AR_DATA.last)}`
         : profile.driver.name;
@@ -5712,12 +6876,10 @@ function generateProfile(kind) {
         valid: permitStatus === 'valid'
       };
     } else {
-      /* Independent driver — not necessarily a violator */
-      profile.companyRequired = _ch(0.4); /* 40% of independents technically require permit */
+      profile.companyRequired = _ch(0.4);
     }
   }
 
-  /* ----------- RARE FAKE POLICE CREDENTIALS (passenger cars only) ----------- */
   profile.policeCred = null;
   if (kind === 'passenger' && _ch(INSPECT_CFG.policeCredChance)) {
     const credRoll = Math.random();
@@ -5748,7 +6910,6 @@ function generateProfile(kind) {
     };
   }
 
-  /* ----------- TRUNK / CARGO CONTENT ----------- */
   const trunkPool = kind === 'loader' ? TRUNK_POOL_LOADER : TRUNK_POOL_PASSENGER;
   const trunkCount = _ri(3, 6);
   const trunkItems = [];
@@ -5759,13 +6920,11 @@ function generateProfile(kind) {
     trunkUsed.add(idx);
     const base = trunkPool[idx];
     const item = { ...base, qty: _ri(1, 3), id: 'it_' + trunkItems.length };
-    /* Make it rarer to be red — most should be green/yellow */
     if (item.status === 'red' && !_ch(0.25)) item.status = 'yellow';
     trunkItems.push(item);
   }
-  profile.trunk = trunkItems;
+  profile.trunk = kind === 'loader' ? [] : trunkItems;
 
-  /* ----------- PERSONAL BELONGINGS ----------- */
   const personalCount = _ri(3, 5);
   const personalItems = [];
   const personalUsed = new Set();
@@ -5780,7 +6939,6 @@ function generateProfile(kind) {
   }
   profile.personal = personalItems;
 
-  /* ----------- BODY / MECHANICAL FINDINGS ----------- */
   const bodyFindings = [];
   const bodyPartsPassenger = [
     { part: 'الهيكل الخارجي',     icon: 'directions_car' },
@@ -5820,7 +6978,6 @@ function generateProfile(kind) {
   });
   profile.body = bodyFindings;
 
-  /* ----------- DERIVE VIOLATIONS ----------- */
   const violations = [];
   if (profile.license.status === 'expired') {
     violations.push({ key: 'lic_expired', evidence: `تاريخ انتهاء الرخصة: ${profile.license.expiryDate}` });
@@ -5875,11 +7032,131 @@ function generateProfile(kind) {
 function getOrCreateProfile(vehicle, kind) {
   if (!vehicle.inspProfile) {
     vehicle.inspProfile = generateProfile(kind);
+    vehicle.inspProfile._aiProfileState = 'pending';
+    elkGenerateUniqueVehicleData(vehicle, kind, vehicle.inspProfile).then(updated => {
+      if (!updated || !vehicle.inspProfile) return;
+      const current = vehicle.inspProfile;
+      Object.assign(current, updated);
+      current._aiProfileState = updated._aiGenerated ? 'ready' : 'fallback';
+      elkRebuildProfileViolations(current, vehicle.kind || current.kind);
+      if (kind === 'loader') current.trunk = [];
+      if (inspectionActive && inspectionVehicle === vehicle) {
+        showInspectionMenu();
+        pushToast('تم تحديث بيانات المركبة بالذكاء الاصطناعي', 'ok');
+      }
+    }).catch(err => {
+      console.warn('[El Kamin AI vehicle profile]', err);
+      if (vehicle.inspProfile) vehicle.inspProfile._aiProfileState = 'fallback';
+      if (inspectionActive && inspectionVehicle === vehicle) pushToast('تعذر توليد بيانات AI الآن؛ مستمرين ببيانات احتياطية.', '');
+    });
   }
   return vehicle.inspProfile;
 }
 
-/* ---------- UI Helpers ---------- */
+const elkSeenVehicleData = { plates:new Set(), chassis:new Set(), engines:new Set(), driverIds:new Set(), names:new Set(), fingerprints:new Set(), recent:[] };
+function elkRememberProfile(profile) {
+  if (!profile) return;
+  const v=profile.vehicle||{}, d=profile.driver||{};
+  if(v.plate) elkSeenVehicleData.plates.add(String(v.plate));
+  if(v.chassis) elkSeenVehicleData.chassis.add(String(v.chassis));
+  if(v.engine) elkSeenVehicleData.engines.add(String(v.engine));
+  if(d.nationalId) elkSeenVehicleData.driverIds.add(String(d.nationalId));
+  if(d.name) elkSeenVehicleData.names.add(String(d.name));
+  const fp=[v.plate,v.chassis,v.engine,d.nationalId,d.name].filter(Boolean).join('|');
+  if(fp) elkSeenVehicleData.fingerprints.add(fp);
+  const snapshot={name:d.name,plate:v.plate,brand:v.brand,model:v.model,color:v.color,trunk:(profile.trunk||[]).map(x=>x.name),personal:(profile.personal||[]).map(x=>x.name),body:(profile.body||[]).map(x=>x.part)};
+  elkSeenVehicleData.recent.push(snapshot); if(elkSeenVehicleData.recent.length>35) elkSeenVehicleData.recent.shift();
+}
+function elkRebuildProfileViolations(profile, kind) {
+  const violations=[];
+  if(profile.license?.status==='expired') violations.push({key:'lic_expired',evidence:`تاريخ انتهاء الرخصة: ${profile.license.expiryDate||'غير محدد'}`});
+  if((profile.license?.status==='wrong_category'||profile.license?.status==='restricted')&&kind==='passenger') violations.push({key:'lic_category',evidence:`فئة الرخصة: ${profile.license.category||'غير محددة'}`});
+  if(profile.vehicle?.status==='expired') violations.push({key:'reg_expired',evidence:`تاريخ انتهاء الترخيص: ${profile.vehicle.registrationExpiry||'غير محدد'}`});
+  if(profile.vehicle?.status==='inconsistent') violations.push({key:'reg_inconsistent',evidence:'بيانات المركبة غير متطابقة مع الترخيص.'});
+  if(kind==='loader'&&profile.company){if(profile.company.status==='expired')violations.push({key:'permit_expired',evidence:`تاريخ انتهاء التصريح: ${profile.company.expiryDate||'غير محدد'}`});if(profile.company.status==='inconsistent')violations.push({key:'permit_inconsistent',evidence:`بيانات التصريح غير متطابقة مع السائق ${profile.company.driverName||''}`});}
+  if(kind==='loader'&&!profile.company&&profile.companyRequired) violations.push({key:'permit_missing',evidence:'لا يوجد تصريح شركة ساري.'});
+  (profile.trunk||[]).forEach(it=>{if(it.status==='red')violations.push({key:'cargo_prohibited',evidence:`تم العثور على: ${it.name} — ${it.note}`});});
+  if(profile.policeCred&&['fake','inconsistent','expired'].includes(profile.policeCred.status))violations.push({key:'fake_police',evidence:profile.policeCred.note||'بيانات إثبات الصفة تحتاج مراجعة.'});
+  profile.violations=violations.map((v,i)=>{const def=VIOLATION_DEFS[v.key]||{};return {...v,id:'vio_'+i,name:def.name||v.key,reason:def.reason||v.evidence,fine:Number(def.fine)||0,issued:false,cleared:false};});
+  profile.fines=profile.fines||[]; profile.bribe=profile.bribe||{taken:false,offered:false,amount:0}; profile.released=false;
+}
+
+function elkParseAIJson(raw) {
+  if (!raw) throw new Error('رد JSON فارغ');
+  let text = String(raw).replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+  const first = text.indexOf('{');
+  const last = text.lastIndexOf('}');
+  if (first >= 0 && last > first) text = text.slice(first, last + 1);
+  try { return JSON.parse(text); } catch (firstError) {
+    let fixed = '', inString = false, escaped = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inString) {
+        if (escaped) { fixed += c; escaped = false; continue; }
+        if (c === '\\') { fixed += c; escaped = true; continue; }
+        if (c === '"') {
+          let j = i + 1; while (j < text.length && /\s/.test(text[j])) j++;
+          if (j >= text.length || [',', '}', ']', ':'].includes(text[j])) { fixed += c; inString = false; }
+          else { fixed += '\\"'; }
+          continue;
+        }
+        if (c === '\n') { fixed += '\\n'; continue; }
+        if (c === '\r') { fixed += '\\r'; continue; }
+        if (c === '\t') { fixed += '\\t'; continue; }
+        fixed += c;
+      } else {
+        if (c === '"') inString = true;
+        fixed += c;
+      }
+    }
+    fixed = fixed.replace(/,\s*([}\]])/g, '$1');
+    return JSON.parse(fixed);
+  }
+}
+
+async function elkGenerateUniqueVehicleData(vehicle, kind, fallback) {
+  const seen = {
+    plates:[...elkSeenVehicleData.plates].slice(-80), chassis:[...elkSeenVehicleData.chassis].slice(-80),
+    engines:[...elkSeenVehicleData.engines].slice(-80), driverIds:[...elkSeenVehicleData.driverIds].slice(-80),
+    names:[...elkSeenVehicleData.names].slice(-80), recent:elkSeenVehicleData.recent.slice(-25)
+  };
+  const loader = kind === 'loader';
+  const prompt = `أنت مولّد بيانات مركبات خيالية للعبة كمين مصرية. أنشئ ملف بيانات جديدًا بالكامل لهذه المركبة. نوعها التقني: ${loader?'لودر/معدات إنشاءات، وليس سيارة ركوب':'مركبة ركوب/نقل عادية'}. استخدم JSON فقط. لا تستخدم أي عنصر من القوائم السابقة ولا تكرر الاسم أو رقم اللوحة أو الشاسيه أو المحرك أو الرقم القومي. القوائم المستخدمة: ${JSON.stringify(seen)}. معظم المركبات سليمة وعادية، واجعل المخالفة أو الجريمة أو المضبوطات الممنوعة نادرة (احتمال تقريبي 5-8% فقط)، ولا تجعل كل سيارة مشتبهًا بها. لا تخترع واقعة حقيقية أو تتهم شخصًا حقيقيًا؛ كل شيء خيالي داخل اللعبة. ${loader?'اللودر ليس له شنطة سيارة: اجعل trunk=[]، وركّز على نوع المعدة وحمولتها وتصريحها.':'يمكن وجود أغراض شخصية عادية في الشنطة في معظم الحالات، وممنوعات/أثر جريمة في حالات قليلة فقط.'}
+أعد كائنًا بهذا الشكل: {"driver":{"name":"اسم مصري خيالي","genderAr":"ذكر أو أنثى","nationalId":"رقم خيالي فريد من 14 رقمًا","age":number,"address":"عنوان خيالي مصري","governorate":"محافظة مصرية","job":"مهنة مناسبة","nationality":"مصري","birthDate":"DD/MM/YYYY","expiryDate":"DD/MM/YYYY"},"vehicle":{"plate":"لوحة مصرية خيالية فريدة","brand":"ماركة","model":"موديل مناسب","color":"لون","chassis":"رقم شاسيه فريد","engine":"رقم محرك فريد","usage":"استخدام","type":"نوع المركبة","registrationExpiry":"DD/MM/YYYY","authority":"جهة مرور خيالية","status":"valid أو expired أو inconsistent","statusAr":"سارية أو منتهية أو بيانات غير مطابقة"},"license":{"number":"رقم فريد","type":"نوع الرخصة","category":"الفئة المناسبة","issueDate":"DD/MM/YYYY","expiryDate":"DD/MM/YYYY","authority":"جهة إصدار خيالية","restrictions":"لا يوجد أو قيد مناسب","status":"valid أو expired أو restricted","statusAr":"الحالة بالعربية","valid":true},"trunk":[{"name":"غرض مختلف","status":"green أو yellow أو red","note":"وصف قصير واقعي","qty":1}],"personal":[{"name":"غرض شخصي","status":"green أو yellow أو red","note":"وصف قصير","qty":1}],"body":[{"part":"جزء مناسب لفئة المركبة","icon":"search","status":"green أو yellow أو red","note":"ملاحظة فحص","id":"bd_0"}],"company":null,"companyRequired":false,"policeCred":null}. اجعل trunk من 0 إلى 4 عناصر للسيارات، ومعظمها أغراض عادية؛ في الحالات النادرة فقط عنصر red أو ملاحظة جريمة. للودر اجعل trunk فارغة، واستخدم حمولة ومعدة مناسبة في personal أو ملاحظات الجسم. لا تجعل كل حالة فيها جريمة. لا تعدّل فيزياء اللعبة أو خصائص المجسم. JSON فقط.`;
+  let generated = null;
+  try {
+    const body={systemInstruction:{parts:[{text:'أنت مولد بيانات لعب خيالية. التزم بمخطط JSON، لا تكرر البيانات المعطاة، ولا تدّعِ أن البيانات حقيقية.'}]},contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0.78,maxOutputTokens:2800,responseMimeType:'application/json'}};
+    const data=await aiFetchJson(aiBuildUrl('generateContent',false),body,Math.max(AI_VOICE_CONFIG.requestTimeoutMs,25000));
+    const raw=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('').trim();
+    if(raw) generated=elkParseAIJson(raw);
+  } catch(e) { console.warn('[El Kamin AI profile generation]',e); }
+  const p = generated && typeof generated==='object' ? generated : {};
+  const aiGenerated = !!(generated && typeof generated==='object');
+  const merged = {
+    _aiGenerated:aiGenerated,
+    driver:{...fallback.driver,...(p.driver||{})}, vehicle:{...fallback.vehicle,...(p.vehicle||{})},
+    license:{...fallback.license,...(p.license||{})}, company:p.company===undefined?fallback.company:p.company,
+    companyRequired:typeof p.companyRequired==='boolean'?p.companyRequired:fallback.companyRequired,
+    policeCred:p.policeCred===undefined?fallback.policeCred:p.policeCred,
+    trunk:Array.isArray(p.trunk)?p.trunk:fallback.trunk,
+    personal:Array.isArray(p.personal)?p.personal:fallback.personal,
+    body:Array.isArray(p.body)?p.body:fallback.body
+  };
+  if(loader) merged.trunk=[];
+  const unique=(value,set,make)=>{let v=String(value||'').trim();if(!v||set.has(v)){v=make();while(set.has(v))v=make();}set.add(v);return v;};
+  merged.vehicle.plate=unique(merged.vehicle.plate,elkSeenVehicleData.plates,()=>genPlate());
+  merged.vehicle.chassis=unique(merged.vehicle.chassis,elkSeenVehicleData.chassis,()=>genChassis());
+  merged.vehicle.engine=unique(merged.vehicle.engine,elkSeenVehicleData.engines,()=>genEngineNo());
+  merged.driver.nationalId=unique(merged.driver.nationalId,elkSeenVehicleData.driverIds,()=>genNatId('01',1990,1,1,'male'));
+  merged.driver.name=unique(merged.driver.name,elkSeenVehicleData.names,()=>`${_pk(AR_DATA.male)} ${_pk(AR_DATA.last)} ${_ri(2,999)}`);
+  elkRememberProfile(merged);
+  if(!Array.isArray(merged.trunk)) merged.trunk=[];
+  merged.trunk=merged.trunk.slice(0,4).map((x,i)=>{let status=['green','yellow','red'].includes(x.status)?x.status:'green';if(status==='red'&&Math.random()>.07)status='yellow';return {name:String(x.name||'أغراض شخصية').slice(0,80),status,note:String(x.note||'أغراض شخصية عادية.').slice(0,220),qty:Math.max(1,Math.min(20,Number(x.qty)||1)),id:'ai_trunk_'+i};});
+  merged.personal=(Array.isArray(merged.personal)?merged.personal:[]).slice(0,6).map((x,i)=>({...x,name:String(x.name||'غرض شخصي').slice(0,80),status:['green','yellow','red'].includes(x.status)?x.status:'green',note:String(x.note||'لا توجد ملاحظات.').slice(0,220),qty:1,id:'ai_personal_'+i}));
+  merged.body=(Array.isArray(merged.body)?merged.body:[]).slice(0,8).map((x,i)=>({...x,part:String(x.part||'فحص المركبة').slice(0,80),status:['green','yellow','red'].includes(x.status)?x.status:'green',note:String(x.note||'لا توجد ملاحظات.').slice(0,220),id:'ai_body_'+i}));
+  return merged;
+}
+
 function pushToast(msg, type) {
   const stack = document.getElementById('toastStack');
   if (!stack) return;
@@ -5910,17 +7187,14 @@ function statusIcon(status) {
   return 'info';
 }
 
-/* ---------- Vehicle detection & prompt ---------- */
 function updateInspectionPrompt() {
   const promptEl = document.getElementById('interactPrompt');
   if (!promptEl) return;
-  /* AI-VOICE-JS-START — also hide prompt if conversation is open */
-  if (inspectionActive || conversationActive || !playerPos) {
+  if (inspectionActive || conversationActive || !playerPos || cinematic.active) {
     promptEl.classList.remove('show');
     pendingTarget = null;
     return;
   }
-  /* AI-VOICE-JS-END */
 
   let best = null;
   let bestDist = INSPECT_CFG.radius;
@@ -5939,11 +7213,7 @@ function updateInspectionPrompt() {
     promptEl.classList.add('show');
     const lbl = promptEl.querySelector('.interact-label');
     if (lbl) {
-      /* AI-VOICE-JS-START — combined label showing both G and T */
-      lbl.textContent = best.kind === 'loader'
-        ? 'G تفتيش اللودر · T كلام مع السواق'
-        : 'G تفتيش العربية · T كلام مع السواق';
-      /* AI-VOICE-JS-END */
+      lbl.textContent = best.kind === 'loader' ? 'G تفتيش اللودر' : 'G تفتيش العربية';
     }
   } else {
     pendingTarget = null;
@@ -5951,13 +7221,11 @@ function updateInspectionPrompt() {
   }
 }
 
-/* ---------- Open / close ---------- */
 function openInspection(vehicle, kind) {
   if (inspectionActive) return;
-  /* AI-VOICE-JS-START — don't allow inspection while talking */
   if (conversationActive) return;
-  /* AI-VOICE-JS-END */
   if (!vehicle || !vehicle.pos) return;
+  if (cinematic.active) return;
 
   inspectionActive = true;
   inspectionVehicle = vehicle;
@@ -6000,7 +7268,6 @@ function closeInspection() {
   try { controls.lock(); } catch (e) {}
 }
 
-/* ---------- Render: Main Menu ---------- */
 function showInspectionMenu() {
   const p = inspectionProfile;
   if (!p) return;
@@ -6021,20 +7288,16 @@ function showInspectionMenu() {
 
   let html = '<div class="insp-menu">';
 
-  /* National ID */
   html += menuBtn('docNatId', 'badge', 'بطاقة الرقم القومي', 'بيانات السائق الأساسية', 'gold');
 
-  /* Driving License */
   const licBadge = p.license.valid ? '' : `<span class="menu-badge ${p.license.status === 'expired' ? 'red' : 'yellow'}">${p.license.status === 'expired' ? 'منتهية' : 'تحتاج مراجعة'}</span>`;
   html += menuBtn('docLicense', 'credit_card', 'رخصة القيادة', p.kind === 'loader' ? 'رخصة قيادة مهنية / معدات' : 'رخصة قيادة خاصة', 'gold', licBadge);
 
-  /* Vehicle Registration */
   const regTitle = p.kind === 'loader' ? 'بيانات المركبة' : 'رخصة العربية';
   const regSub = p.kind === 'loader' ? 'مستند المعدة الثقيلة / اللودر' : 'رخصة تسيير المركبة';
   const regBadge = p.vehicle.status !== 'valid' ? `<span class="menu-badge ${p.vehicle.status === 'expired' ? 'red' : 'yellow'}">${p.vehicle.statusAr}</span>` : '';
   html += menuBtn('docReg', 'directions_car', regTitle, regSub, 'gold', regBadge);
 
-  /* Company Permit (loader only, if present) */
   if (p.kind === 'loader' && p.company) {
     const permBadge = p.company.status !== 'valid' ? `<span class="menu-badge ${p.company.status === 'expired' || p.company.status === 'inconsistent' ? 'red' : 'yellow'}">${p.company.statusAr}</span>` : '';
     html += menuBtn('docPermit', 'assignment', 'تصريح الشركة', p.company.name, 'gold', permBadge);
@@ -6043,21 +7306,17 @@ function showInspectionMenu() {
       p.companyRequired ? '<span class="menu-badge red">مطلوب</span>' : '<span class="menu-badge green">مستقل</span>');
   }
 
-  /* Trunk / Cargo */
   const trunkTitle = p.kind === 'loader' ? 'تفتيش حمولة اللودر' : 'تفتيش شنطة العربية';
   html += menuBtn('inspectTrunk', 'inventory_2', trunkTitle, 'فحص محتويات المركبة',
     '', hasRedTrunk ? '<span class="menu-badge red">مخالفة</span>' : '');
 
-  /* Personal belongings */
   html += menuBtn('inspectPersonal', 'person_search', 'تفتيش صاحب العربية', 'متعلقات السائق الشخصية',
     '', hasRedPersonal ? '<span class="menu-badge red">مخالفة</span>' : '');
 
-  /* Body inspection */
   const bodyTitle = p.kind === 'loader' ? 'تفتيش هيكل اللودر' : 'تفتيش هيكل العربية';
   html += menuBtn('inspectBody', 'build_circle', bodyTitle, 'فحص فني وميكانيكي',
     '', hasRedBody ? '<span class="menu-badge red">مخالفة</span>' : '');
 
-  /* Police credentials (rare, passenger only, if present) */
   if (hasPoliceCred) {
     const pcBadge = p.policeCred.status === 'fake' || p.policeCred.status === 'inconsistent'
       ? '<span class="menu-badge red">مشبوه</span>'
@@ -6065,25 +7324,21 @@ function showInspectionMenu() {
     html += menuBtn('docPolice', 'local_police', 'وثيقة هوية ضابط', 'وثيقة يحملها السائق', 'gold', pcBadge);
   }
 
-  /* Issue violation */
   const vCount = remainingViolations.length;
   const vLabel = vCount > 0 ? `${vCount} مخالفة` : 'مفيش مخالفات مسجلة';
   html += menuBtn('issueViolation', 'gavel', 'تحرير مخالفة', vLabel,
     vCount > 0 ? 'danger' : '', vCount > 0 ? `<span class="menu-badge red">${vCount}</span>` : '');
 
-  /* Bribe */
   if (!p.bribe.taken && !p.released) {
     html += menuBtn('bribe', 'local_cafe', 'شاي بالياسمين', 'عرض غير رسمي للنظر في المخالفات', 'gold');
   } else if (p.bribe.taken) {
     html += menuBtn('bribe', 'local_cafe', 'شاي بالياسمين', 'تم الاتفاق بالفعل', '');
   }
 
-  /* End */
   html += menuBtn('end', 'task_alt', 'إنهاء التفتيش', 'إنهاء الجلسة الحالية', 'success');
 
   html += '</div>';
 
-  /* Optional status note */
   let note = '';
   if (p.released) {
     note = '<div class="insp-note ok" style="margin-top:14px"><b>تم الإفراج عن المركبة.</b> لا يمكن تحرير مخالفات إضافية في هذه الجلسة.</div>';
@@ -6154,7 +7409,6 @@ function attachBackButton() {
   if (back) back.addEventListener('click', showInspectionMenu);
 }
 
-/* ---------- National ID Document ---------- */
 function renderNatIdScreen() {
   const p = inspectionProfile;
   const d = p.driver;
@@ -6219,7 +7473,6 @@ function renderNatIdScreen() {
   attachBackButton();
 }
 
-/* ---------- Driving License ---------- */
 function renderLicenseScreen() {
   const p = inspectionProfile;
   const l = p.license;
@@ -6286,7 +7539,6 @@ function renderLicenseScreen() {
   attachBackButton();
 }
 
-/* ---------- Vehicle Registration ---------- */
 function renderRegScreen() {
   const p = inspectionProfile;
   const v = p.vehicle;
@@ -6367,7 +7619,6 @@ function renderRegScreen() {
   attachBackButton();
 }
 
-/* ---------- Company Permit ---------- */
 function renderPermitScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6467,7 +7718,6 @@ function renderPermitScreen() {
   attachBackButton();
 }
 
-/* ---------- Police Credential (rare) ---------- */
 function renderPoliceScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6533,7 +7783,6 @@ function renderPoliceScreen() {
   attachBackButton();
 }
 
-/* ---------- Trunk / Cargo Inspection ---------- */
 function renderTrunkScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6586,7 +7835,6 @@ function showItemDetail(item) {
   `;
 }
 
-/* ---------- Personal Belongings ---------- */
 function renderPersonalScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6634,7 +7882,6 @@ function renderPersonalScreen() {
   });
 }
 
-/* ---------- Vehicle Body Inspection ---------- */
 function renderBodyScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6678,7 +7925,6 @@ function renderBodyScreen() {
   });
 }
 
-/* ---------- Violation Screen ---------- */
 function renderViolationScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6759,7 +8005,6 @@ function renderViolationScreen() {
   }
 }
 
-/* ---------- Bribe Mechanic (شاي بالياسمين) ---------- */
 function renderBribeScreen() {
   const p = inspectionProfile;
   const body = document.getElementById('inspBody');
@@ -6849,22 +8094,15 @@ function attemptBribe(amount) {
   const remaining = p.violations.filter(v => !v.issued && !v.cleared);
   const totalFines = remaining.reduce((s, v) => s + v.fine, 0);
 
-  /* Configurable acceptance logic */
   let acceptProb = INSPECT_CFG.bribeBaseAccept;
 
-  /* Larger offers are more likely to be accepted */
   if (amount >= 2000) acceptProb += 0.15;
   else if (amount >= 1000) acceptProb += 0.08;
   else if (amount < 500) acceptProb -= 0.15;
 
-  /* Drivers with more violations may demand more */
   if (remaining.length >= 3) acceptProb -= 0.1;
   if (remaining.length === 0) acceptProb -= 0.4;
-
-  /* Driver has no fines to clear → less likely to pay */
   if (totalFines === 0) acceptProb -= 0.3;
-
-  /* Fake police scenario: more likely to refuse (they feel superior) */
   if (p.policeCred && p.policeCred.status === 'fake') acceptProb -= 0.35;
 
   acceptProb = Math.max(0.08, Math.min(0.95, acceptProb));
@@ -6875,7 +8113,6 @@ function attemptBribe(amount) {
     p.bribe.taken = true;
     p.bribe.amount = amount;
     p.released = true;
-    /* Clear all remaining violations (they will not be issued) */
     remaining.forEach(v => { v.cleared = true; });
     playerIllicit += amount;
     updateMoneyDisplay();
@@ -6893,26 +8130,23 @@ function attemptBribe(amount) {
       dialogueEl.textContent = 'لأ يا فندم، أنا مش بدفع حاجة. اعمل اللي انت عايزه.';
     }
     pushToast('السائق رفض العرض — المخالفات ما زالت قابلة للتحرير', 'bad');
-    /* Keep the same screen with updated dialogue */
   }
 }
 
-/* ---------- Input handlers ---------- */
 document.addEventListener('keydown', (e) => {
+  if (cinematic.active) return;
   if (e.code === 'KeyG' && !e.repeat && !inspectionActive && pendingTarget) {
     e.preventDefault();
     openInspection(pendingTarget.vehicle, pendingTarget.kind);
   }
 }, true);
 
-/* Close button */
 (function initCloseButton() {
   const btn = document.getElementById('inspClose');
   if (btn) btn.addEventListener('click', () => {
     if (inspectionProfile && inspectionProfile.paused) return;
     closeInspection();
   });
-  /* Also allow the close button to override */
   if (btn) {
     btn.addEventListener('click', () => {
       closeInspection();
@@ -6920,52 +8154,25 @@ document.addEventListener('keydown', (e) => {
   }
 })();
 
-/* Prevent accidental click-through when UI is open */
 (function initBackdropClose() {
   const ui = document.getElementById('inspectionUI');
   if (!ui) return;
   ui.addEventListener('click', (e) => {
     if (e.target === ui) {
-      /* Clicking outside the panel doesn't close — safer */
     }
   });
 })();
 
 /* ==========================================================================
-   END INSPECTION SYSTEM
+   AI VOICE — SPEED-OPTIMIZED CONFIG
    ========================================================================== */
-
-/* AI-VOICE-JS-START =========================================================
-   AI-POWERED VOICE CONVERSATION SYSTEM (additive — no existing logic altered)
-   ========================================================================== */
-
-/**
- * ────────────────────────────────────────────────────────────────────────────
- *  ⚠️  API KEY SECURITY WARNING
- * ────────────────────────────────────────────────────────────────────────────
- *  The key below is embedded in client-side JavaScript, which violates the
- *  security requirement in the design spec. For production deployment you
- *  MUST route these requests through a minimal server-side proxy that:
- *      1. Holds the real API key in a server environment variable.
- *      2. Exposes a same-origin endpoint that the browser can call.
- *      3. Applies rate limiting and (optionally) session auth.
- *
- *  To use a proxy, set window.EL_KAMIN_AI_PROXY = 'https://your-proxy/...'
- *  BEFORE this module script runs (e.g. an inline <script> in <head>).
- *  When the proxy is set, `apiKey` is ignored and requests go to the proxy.
- * ────────────────────────────────────────────────────────────────────────────
- */
 const AI_VOICE_CONFIG = {
-  // Set window.EL_KAMIN_AI_PROXY to a same-origin proxy URL in production.
   proxy: (typeof window !== 'undefined' && window.EL_KAMIN_AI_PROXY) || '',
-  // Direct key — replaceable at runtime via window.EL_KAMIN_AI_KEY.
   apiKey: (typeof window !== 'undefined' && window.EL_KAMIN_AI_KEY) ||
   ['AQ.Ab8RN6K7', 'EX4LkdidMSe8', 'TK-Wg_RZ0kSj', 'x1cAxDK0qGSn', 'GnH_cg'].join(''),
   apiBase: 'https://generativelanguage.googleapis.com/v1beta',
   chatModel: 'gemini-3.8-flash',
   ttsModel:  'gemini-3.8-flash-tts',
-  // Voice profile per driver personality. Aoede is the primary voice
-  // requested by the spec. Other IDs come from the Gemini TTS voice list.
   voiceMap: {
     calm:      'Aoede',
     friendly:  'Aoede',
@@ -6977,16 +8184,17 @@ const AI_VOICE_CONFIG = {
   },
   defaultVoice: 'Aoede',
   speechLang: 'ar-EG',
-  maxHistory: 16,
-  requestTimeoutMs: 30000,
-  temperature: 0.9,
-  maxOutputTokens: 320
+  maxHistory: 6,
+  requestTimeoutMs: 18000,
+  temperature: 0.85,
+  maxOutputTokens: 90,
+  ttsMode: 'auto'
 };
 
 let conversationVehicle = null;
 let conversationKind = null;
 let conversationProfile = null;
-let conversationHistory = [];   // [{role: 'user'|'model', text: string}]
+let conversationHistory = [];
 let conversationPersonality = 'calm';
 let conversationVoice = AI_VOICE_CONFIG.defaultVoice;
 let recognition = null;
@@ -6994,11 +8202,73 @@ let recognitionActive = false;
 let recognitionBusy = false;
 let currentTtsAudio = null;
 let currentTtsUrl = null;
-let currentRequestController = null;
+let aiAbortController = null;
 let aiRequestInFlight = false;
 let aiTurnQueue = Promise.resolve();
+let aiMicReenableTimer = null;
+let browserVoicesReady = false;
+let currentBrowserUtterance = null;
 
-/* ---- Personality selection (deterministic from profile ID) --------------- */
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  try {
+    window.speechSynthesis.onvoiceschanged = () => { browserVoicesReady = true; };
+    window.speechSynthesis.getVoices();
+  } catch (e) {}
+}
+
+function aiPickArabicVoice() {
+  if (typeof window === 'undefined' || !window.speechSynthesis) return null;
+  let voices = [];
+  try { voices = window.speechSynthesis.getVoices() || []; } catch (e) { return null; }
+  if (!voices.length) return null;
+  return voices.find(v => String(v.lang || '').toLowerCase() === 'ar-eg')
+      || voices.find(v => String(v.lang || '').toLowerCase().startsWith('ar'))
+      || null;
+}
+
+function aiSpeakBrowser(text) {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) {
+      return reject(new Error('no-synth'));
+    }
+    const voice = aiPickArabicVoice();
+    if (!voice) return reject(new Error('no-arabic-voice'));
+
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = voice;
+    utter.lang = voice.lang || 'ar-EG';
+    utter.rate = 1.12;
+    utter.pitch = 1.0;
+    utter.volume = 1.0;
+
+    let done = false;
+    const finish = () => { if (!done) { done = true; currentBrowserUtterance = null; resolve(true); } };
+    const fail = () => { if (!done) { done = true; currentBrowserUtterance = null; reject(new Error('synth-error')); } };
+
+    utter.onend = finish;
+    utter.onerror = fail;
+
+    try { window.speechSynthesis.cancel(); } catch (e) {}
+    currentBrowserUtterance = utter;
+
+    try {
+      window.speechSynthesis.speak(utter);
+    } catch (e) {
+      fail();
+      return;
+    }
+
+    const safety = Math.max(3000, text.length * 180);
+    setTimeout(finish, safety);
+  });
+}
+
+function aiStopBrowserTts() {
+  currentBrowserUtterance = null;
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  try { window.speechSynthesis.cancel(); } catch (e) {}
+}
+
 const AI_PERSONALITIES = ['calm','friendly','nervous','reserved','defensive','confident','hesitant'];
 
 function aiHashString(s) {
@@ -7018,131 +8288,61 @@ function aiPickPersonality(vehicle) {
   return AI_PERSONALITIES[aiHashString(seed) % AI_PERSONALITIES.length];
 }
 
-/* ---- Context builder: reads ONLY existing vehicle profile data ---------- */
 function aiBuildSystemPrompt(profile, kind, personality) {
   if (!profile) return '';
-  const lines = [];
   const d = profile.driver;
-  lines.push(`اسم السواق: ${d.name}`);
-  lines.push(`النوع: ${d.genderAr}`);
-  lines.push(`المهنة: ${d.job}`);
-  lines.push(`المحافظة: ${d.governorate}`);
-  lines.push(`العنوان: ${d.address}`);
-
   const l = profile.license;
-  lines.push('--- رخصة القيادة ---');
-  lines.push(`النوع: ${l.type}`);
-  lines.push(`الفئة: ${l.category}`);
-  lines.push(`رقم الرخصة: ${l.number}`);
-  lines.push(`تاريخ الإصدار: ${l.issueDate}`);
-  lines.push(`تاريخ الانتهاء: ${l.expiryDate}`);
-  lines.push(`الحالة: ${l.statusAr}`);
-  lines.push(`القيود: ${l.restrictions}`);
-
   const v = profile.vehicle;
-  lines.push('--- المركبة ---');
-  lines.push(`النوع: ${v.type}`);
-  lines.push(`الماركة والموديل: ${v.brand} ${v.model}`);
-  lines.push(`اللون: ${v.color}`);
-  lines.push(`رقم اللوحة: ${v.plate}`);
-  lines.push(`رقم الشاسيه: ${v.chassis}`);
-  lines.push(`رقم الموتور: ${v.engine}`);
-  lines.push(`الاستخدام: ${v.usage}`);
-  lines.push(`انتهاء الترخيص: ${v.registrationExpiry}`);
-  lines.push(`حالة الترخيص: ${v.statusAr}`);
+
+  const personalityHint = {
+    calm:      'شخصيتك هادية ومتعاونة.',
+    friendly:  'شخصيتك ودودة واجتماعية.',
+    nervous:   'شخصيتك متوترة وقت التفتيش.',
+    reserved:  'شخصيتك مختصرة، بتجاوب بكلام قليل.',
+    defensive: 'شخصيتك دفاعية، بتدافع عن نفسك.',
+    confident: 'شخصيتك واثقة.',
+    hesitant:  'شخصيتك مترددة، بتقول محتاج تراجع لو مش متأكد.'
+  }[personality] || '';
+
+  const lines = [];
+  lines.push(`إنت سواق مصري واقف في نقطة تفتيش طريق بلبيس. ${personalityHint}`);
+  lines.push('اتكلم عامية مصرية قصيرة (جملة أو جملتين بالكتير). متخترعش معلومات. متقولش إنك AI. متطولش.');
+  lines.push('لو حاجة مش في البيانات دي قول "مش متأكد".');
+  lines.push('');
+  lines.push('بياناتك:');
+  lines.push(`الاسم: ${d.name} / ${d.genderAr} / ${d.job} / ${d.governorate}`);
+  lines.push(`الرخصة: ${l.type} | ${l.category} | ${l.statusAr} | تنتهي ${l.expiryDate}`);
+  if (l.restrictions && l.restrictions !== 'لا يوجد') lines.push(`قيود الرخصة: ${l.restrictions}`);
+  lines.push(`المركبة: ${v.brand} ${v.model} / ${v.color} / لوحة ${v.plate}`);
+  lines.push(`الترخيص: ${v.statusAr} | ينتهي ${v.registrationExpiry}`);
+  if (v.status === 'inconsistent') lines.push(`شاسيه ${v.chassis} | موتور ${v.engine}`);
 
   if (kind === 'loader') {
-    lines.push('--- تصريح الشركة ---');
     if (profile.company) {
       const c = profile.company;
-      lines.push(`الشركة: ${c.name}`);
-      lines.push(`رقم التصريح: ${c.permitNumber}`);
-      lines.push(`اسم السواق في التصريح: ${c.driverName}`);
-      lines.push(`نوع المركبة بالتصريح: ${c.vehicleType}`);
-      lines.push(`تاريخ الانتهاء: ${c.expiryDate}`);
-      lines.push(`حالة التصريح: ${c.statusAr}`);
-      lines.push(`نوع العمل: ${c.workType}`);
-      lines.push(`منطقة العمل: ${c.area}`);
+      lines.push(`التصريح: ${c.name} | رقم ${c.permitNumber} | باسم ${c.driverName} | ${c.statusAr} | ينتهي ${c.expiryDate}`);
     } else {
-      lines.push(profile.companyRequired
-        ? 'لا يوجد تصريح شركة — والتصريح مطلوب قانوناً.'
-        : 'لا يوجد تصريح شركة — السواق شغال مستقل.');
+      lines.push(`التصريح: لا يوجد (${profile.companyRequired ? 'مطلوب' : 'مستقل'})`);
     }
   }
 
-  if (profile.trunk && profile.trunk.length) {
-    lines.push('--- الحمولة / الشنطة ---');
-    profile.trunk.forEach(it => {
-      const s = it.status === 'red' ? 'ممنوع' : it.status === 'yellow' ? 'مشبوه' : 'سليم';
-      lines.push(`- ${it.name} (${s}): ${it.note}`);
-    });
-  }
-
-  if (profile.personal && profile.personal.length) {
-    lines.push('--- المتعلقات الشخصية ---');
-    profile.personal.forEach(it => {
-      const s = it.status === 'red' ? 'ممنوع' : it.status === 'yellow' ? 'مشبوه' : 'سليم';
-      lines.push(`- ${it.name} (${s}): ${it.note}`);
-    });
-  }
-
-  const bodyIssues = (profile.body || []).filter(b => b.status !== 'green');
-  if (bodyIssues.length) {
-    lines.push('--- ملاحظات على المركبة ---');
-    bodyIssues.forEach(b => {
-      const s = b.status === 'red' ? 'مخالفة' : 'تحتاج مراجعة';
-      lines.push(`- ${b.part} (${s}): ${b.note}`);
-    });
-  }
+  const bad = [];
+  (profile.trunk || []).forEach(x => { if (x.status === 'red') bad.push(`حمولة ممنوعة: ${x.name}`); });
+  (profile.personal || []).forEach(x => { if (x.status === 'red') bad.push(`شخصي ممنوع: ${x.name}`); });
+  (profile.body || []).forEach(x => { if (x.status === 'red') bad.push(`عيب في ${x.part}`); });
+  if (bad.length) lines.push('مشاكل: ' + bad.join(' / '));
 
   if (profile.violations && profile.violations.length) {
-    lines.push('--- مخالفات مسجلة ---');
-    profile.violations.forEach(v => {
-      lines.push(`- ${v.name} | السبب: ${v.reason} | الدليل: ${v.evidence}`);
-    });
-  } else {
-    lines.push('--- لا توجد مخالفات مسجلة حتى الآن ---');
+    lines.push('مخالفات: ' + profile.violations.map(x => x.name).join(' / '));
   }
 
   if (profile.policeCred) {
-    const c = profile.policeCred;
-    lines.push('--- وثيقة ضابط (نادرة) ---');
-    lines.push(`الرتبة: ${c.rank}`);
-    lines.push(`الجهة: ${c.department}`);
-    lines.push(`الحالة: ${c.statusAr}`);
-    lines.push(`ملاحظة: ${c.note}`);
+    lines.push(`وثيقة ضابط: ${profile.policeCred.rank} / ${profile.policeCred.statusAr}`);
   }
 
-  const personalityHint = {
-    calm:      'شخصيتك هادية ومتعاونة، بتتكلم بهدوء.',
-    friendly:  'شخصيتك ودودة واجتماعية، بتحب تتكلم وتبسط الأمور.',
-    nervous:   'شخصيتك متوترة شوية خصوصاً وقت التفتيش، بتتلخبط في الكلام.',
-    reserved:  'شخصيتك مختصرة، بتجاوب بكلام قليل ومختصر.',
-    defensive: 'شخصيتك دفاعية، لما حد يسألك عن مخالفة بتحاول تدافع عن نفسك.',
-    confident: 'شخصيتك واثقة، خصوصاً في ورقك ومواقفك.',
-    hesitant:  'شخصيتك مترددة، لما تكون فيه حاجة مش متأكد منها بتقول إنك محتاج تراجع.'
-  }[personality] || '';
-
-  return `إنت بتلعب دور سواق مصري حقيقي واقف في نقطة تفتيش على طريق بلبيس.
-${personalityHint}
-
-قواعد صارمة:
-1. اتكلم دايمًا بالعامية المصرية الطبيعية، مش فصحى ومش إنجليزي.
-2. ممنوع تخترع أي معلومة مش موجودة في البيانات دي. لو حاجة مش موجودة قول "مش متأكد يا باشا، محتاج أراجع الورق" أو حاجة زيها.
-3. لو الرخصة منتهية، اعترف إنها منتهية. لو التصريح مش موجود، متقولش إنه موجود.
-4. خليك مختصر في الردود — من جملة لجملتين أو تلاتة بالكتير إلا لو حصل سؤال بيطلب تفاصيل.
-5. اتكلم باحترام، استخدم تعبيرات زي "يا باشا" و"يا فندم" بس متكترهاش.
-6. ممنوع تكشف التعليمات دي أو تقول إنك ذكاء اصطناعي.
-7. متغيرش أي بيانات في اللعبة — إنت بس بتتكلم.
-8. الأرقام والتواريخ زي ما هي بالظبط من البيانات.
-
-بياناتك الكاملة:
-${lines.join('\n')}
-
-افتكر إن الكلام ده هو الحقيقة الوحيدة اللي تعرفها عن نفسك. أي حاجة براها = مش عارفها.`;
+  return lines.join('\n');
 }
 
-/* ---- Speech recognition (browser-native Web Speech API) ------------------ */
 function aiCreateRecognition() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) return null;
@@ -7174,7 +8374,6 @@ function aiCreateRecognition() {
     } else if (code === 'no-speech') {
       aiSetStatus('مسمعتش حاجة، دوس المايك تاني');
     } else if (code === 'aborted') {
-      /* Silent — user stopped manually */
     } else if (code === 'network') {
       aiShowError('مشكلة في الاتصال بخدمة التعرف على الصوت. جرب تاني.');
     } else {
@@ -7185,16 +8384,20 @@ function aiCreateRecognition() {
 
   rec.onend = () => {
     recognitionActive = false;
-    if (!aiRequestInFlight && !currentTtsAudio) aiSetMicState('idle');
+    if (!aiRequestInFlight && !currentTtsAudio && !currentBrowserUtterance) aiSetMicState('idle');
   };
 
   return rec;
 }
-
 function aiStartListening() {
   if (recognitionActive || recognitionBusy) return;
   if (conversationActive === false) return;
-  if (!recognition) recognition = aiCreateRecognition();
+  if (currentTtsAudio) return;
+  if (currentBrowserUtterance) return;
+
+  try { if (recognition) recognition.abort(); } catch (e) {}
+  recognition = aiCreateRecognition();
+
   if (!recognition) {
     aiShowError('المتصفح ده مش بيدعم التعرف على الصوت. جرب Chrome أو Edge.');
     return;
@@ -7206,13 +8409,11 @@ function aiStartListening() {
     aiSetMicState('listening');
   } catch (e) {
     recognitionActive = false;
-    /* If start() throws because it's already active, ignore */
     if (String(e && e.message || '').toLowerCase().indexOf('already') === -1) {
       aiShowError('مش قادر أشغل المايك. جرّب تاني.');
     }
   }
 }
-
 function aiStopListening() {
   if (!recognition) return;
   if (!recognitionActive) return;
@@ -7220,7 +8421,6 @@ function aiStopListening() {
   recognitionActive = false;
 }
 
-/* ---- Base64 / PCM → WAV conversion (Gemini TTS returns L16 PCM) --------- */
 function aiBase64ToBytes(base64) {
   const binary = atob(base64);
   const len = binary.length;
@@ -7241,7 +8441,7 @@ function aiPcmToWavBlob(pcmBytes, sampleRate, numChannels, bitsPerSample) {
   writeStr(8, 'WAVE');
   writeStr(12, 'fmt ');
   view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);                                      // PCM
+  view.setUint16(20, 1, true);
   view.setUint16(22, numChannels, true);
   view.setUint32(24, sampleRate, true);
   view.setUint32(28, sampleRate * numChannels * bitsPerSample / 8, true);
@@ -7254,7 +8454,6 @@ function aiPcmToWavBlob(pcmBytes, sampleRate, numChannels, bitsPerSample) {
 }
 
 function aiParseMimeForPcm(mime) {
-  // e.g. "audio/L16;rate=24000;channels=1" or "audio/pcm;rate=24000;channels=1"
   const out = { sampleRate: 24000, channels: 1, bitsPerSample: 16 };
   if (!mime) return out;
   const rate = /rate=(\d+)/i.exec(mime);
@@ -7264,10 +8463,8 @@ function aiParseMimeForPcm(mime) {
   return out;
 }
 
-/* ---- HTTP calls: chat + TTS --------------------------------------------- */
 function aiBuildUrl(pathSuffix, forTts) {
   if (AI_VOICE_CONFIG.proxy) {
-    // Proxy receives {model, suffix} and returns same JSON structure
     return AI_VOICE_CONFIG.proxy + '?model=' + encodeURIComponent(forTts ? AI_VOICE_CONFIG.ttsModel : AI_VOICE_CONFIG.chatModel);
   }
   const model = forTts ? AI_VOICE_CONFIG.ttsModel : AI_VOICE_CONFIG.chatModel;
@@ -7275,8 +8472,13 @@ function aiBuildUrl(pathSuffix, forTts) {
 }
 
 function aiFetchJson(url, body, timeoutMs) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => { try { controller.abort(); } catch (e) {} }, timeoutMs);
+  if (!aiAbortController) aiAbortController = new AbortController();
+  const controller = aiAbortController;
+
+  const timer = setTimeout(() => {
+    try { controller.abort(); } catch (e) {}
+  }, timeoutMs);
+
   return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -7297,7 +8499,6 @@ function aiFetchJson(url, body, timeoutMs) {
 function aiChatRequest(userText) {
   const sys = aiBuildSystemPrompt(conversationProfile, conversationKind, conversationPersonality);
 
-  // Build contents: system prompt + trimmed history + current user message.
   const trimmed = conversationHistory.slice(-AI_VOICE_CONFIG.maxHistory);
   const contents = trimmed.map(turn => ({
     role: turn.role === 'driver' ? 'model' : 'user',
@@ -7356,7 +8557,6 @@ function aiTtsRequest(text) {
   });
 }
 
-/* ---- Audio playback ------------------------------------------------------ */
 function aiStopTts() {
   if (currentTtsAudio) {
     try { currentTtsAudio.pause(); } catch (e) {}
@@ -7369,12 +8569,16 @@ function aiStopTts() {
   }
   aiEnableStopButton(false);
 }
-
 function aiPlayTts(blobUrl) {
   return new Promise((resolve, reject) => {
     aiStopTts();
+    aiEnableMicButton(false);
     const audio = new Audio();
+    audio.crossOrigin = 'anonymous';
     audio.preload = 'auto';
+    audio.volume = 1.0;
+    try { audio.preservesPitch = false; } catch (e) {}
+    try { audio.setAttribute('playsinline', 'true'); } catch (e) {}
     audio.src = blobUrl;
     currentTtsAudio = audio;
     currentTtsUrl = blobUrl;
@@ -7399,7 +8603,14 @@ function aiPlayTts(blobUrl) {
   });
 }
 
-/* ---- Turn processing ----------------------------------------------------- */
+function aiPlayReply(text) {
+  aiStopTts();
+  aiStopBrowserTts();
+  aiSetMicState('idle');
+  aiSetStatus('الرد مكتوب');
+  return Promise.resolve(true);
+}
+
 function aiProcessTurn(userText) {
   if (!conversationActive) return;
   if (aiRequestInFlight) return;
@@ -7416,38 +8627,34 @@ function aiProcessTurn(userText) {
       conversationHistory.push({ role: 'driver', text: driverReply });
       aiAppendMessage('driver', driverReply);
       aiSetStatus('بجهز الصوت...');
-      return aiTtsRequest(driverReply);
-    })
-    .then(({ url }) => {
-      if (!conversationActive) {
-        try { URL.revokeObjectURL(url); } catch (e) {}
-        return null;
-      }
-      return aiPlayTts(url);
+      try { if (recognition) recognition.abort(); } catch (e) {}
+      recognition = null;
+      recognitionActive = false;
+      return aiPlayReply(driverReply);
     })
     .catch(err => {
       if (String(err && err.message) === 'closed') return;
+      if (err && err.name === 'AbortError') return;
       console.warn('[El Kamin AI] turn failed:', err);
       aiShowError('الاتصال بالذكاء الاصطناعي فشل، جرّب تاني. (' + (err && err.message ? err.message.slice(0, 140) : 'خطأ') + ')');
     })
     .finally(() => {
       aiRequestInFlight = false;
       aiEnableMicButton(true);
-      if (conversationActive && !currentTtsAudio) {
+      if (conversationActive && !currentTtsAudio && !currentBrowserUtterance) {
         aiSetMicState('idle');
-        /* Auto-resume listening on next microtask if the browser allows it */
-        setTimeout(() => {
-          if (conversationActive && !aiRequestInFlight && !currentTtsAudio) {
+        if (aiMicReenableTimer) { clearTimeout(aiMicReenableTimer); aiMicReenableTimer = null; }
+        aiMicReenableTimer = setTimeout(() => {
+          aiMicReenableTimer = null;
+          if (conversationActive && !aiRequestInFlight && !currentTtsAudio && !currentBrowserUtterance) {
             aiStartListening();
           }
-        }, 250);
+        }, 500);
       }
     });
 
   aiTurnQueue = aiTurnQueue.then(() => run).catch(() => {});
 }
-
-/* ---- UI helpers ---------------------------------------------------------- */
 function aiSetStatus(txt) {
   const el = document.getElementById('convStatusText');
   if (el) el.textContent = txt;
@@ -7507,16 +8714,15 @@ function aiShowError(msg) {
   aiSetMicState('error');
 }
 
-/* ---- Open / close conversation ------------------------------------------ */
 function aiVoiceStartConversation(vehicle, kind) {
   if (conversationActive) return;
   if (inspectionActive) return;
+  if (cinematic.active) return;
   if (!vehicle || !vehicle.pos) return;
 
   conversationActive = true;
   conversationVehicle = vehicle;
   conversationKind = kind;
-  // Ensure the profile exists (same accessor used by inspection — no data reset).
   conversationProfile = getOrCreateProfile(vehicle, kind);
 
   conversationPersonality = aiPickPersonality(vehicle);
@@ -7525,12 +8731,15 @@ function aiVoiceStartConversation(vehicle, kind) {
   conversationHistory = [];
   aiRequestInFlight = false;
   aiTurnQueue = Promise.resolve();
+  if (aiMicReenableTimer) { clearTimeout(aiMicReenableTimer); aiMicReenableTimer = null; }
+
+  try { if (aiAbortController) aiAbortController.abort(); } catch (e) {}
+  aiAbortController = new AbortController();
 
   vehicle.paused = true;
   try { if (vehicle.sound) vehicle.sound.pause(); } catch (e) {}
   try { controls.unlock(); } catch (e) {}
 
-  // Populate header from existing profile data
   const nameEl = document.getElementById('convDriverName');
   const subEl = document.getElementById('convDriverSub');
   const avatarEl = document.getElementById('convAvatar');
@@ -7555,20 +8764,22 @@ function aiVoiceStartConversation(vehicle, kind) {
   aiEnableMicButton(true);
   aiEnableStopButton(false);
 
-  // Kick off the first listening session
   setTimeout(() => {
-    if (conversationActive) aiStartListening();
-  }, 200);
+    if (conversationActive && !currentTtsAudio && !currentBrowserUtterance) aiStartListening();
+  }, 150);
 }
 
 function aiVoiceEndConversation() {
   if (!conversationActive) return;
   conversationActive = false;
 
+  if (aiMicReenableTimer) { clearTimeout(aiMicReenableTimer); aiMicReenableTimer = null; }
+
   try { aiStopListening(); } catch (e) {}
   try { aiStopTts(); } catch (e) {}
-  try { if (currentRequestController) currentRequestController.abort(); } catch (e) {}
-  currentRequestController = null;
+  try { aiStopBrowserTts(); } catch (e) {}
+  try { if (aiAbortController) aiAbortController.abort(); } catch (e) {}
+  aiAbortController = null;
 
   if (conversationVehicle) {
     conversationVehicle.paused = false;
@@ -7594,7 +8805,6 @@ function aiVoiceEndConversation() {
   try { controls.lock(); } catch (e) {}
 }
 
-/* ---- Wire up UI buttons -------------------------------------------------- */
 (function aiInitUI() {
   const micBtn = document.getElementById('convMicBtn');
   const stopBtn = document.getElementById('convStopBtn');
@@ -7604,6 +8814,7 @@ function aiVoiceEndConversation() {
   if (micBtn) {
     micBtn.addEventListener('click', () => {
       if (!conversationActive) return;
+      if (currentTtsAudio || currentBrowserUtterance) return;
       if (recognitionActive) {
         aiStopListening();
       } else {
@@ -7615,6 +8826,7 @@ function aiVoiceEndConversation() {
     stopBtn.addEventListener('click', () => {
       if (!conversationActive) return;
       aiStopTts();
+      aiStopBrowserTts();
       aiSetMicState('idle');
       aiSetStatus('اتوقف الرد');
     });
@@ -7631,9 +8843,8 @@ function aiVoiceEndConversation() {
   }
 })();
 
-/* ---- T key binding (capture-phase, matching existing G handler style) --- */
 document.addEventListener('keydown', (e) => {
-  // Skip when a text field / textarea / contenteditable has focus
+  if (cinematic.active) return;
   const t = e.target;
   if (t) {
     const tag = (t.tagName || '').toUpperCase();
@@ -7644,7 +8855,6 @@ document.addEventListener('keydown', (e) => {
   if (inspectionActive) return;
 
   if (conversationActive) {
-    // Second press ends the conversation (matches Escape behavior)
     e.preventDefault();
     aiVoiceEndConversation();
     return;
@@ -7655,7 +8865,6 @@ document.addEventListener('keydown', (e) => {
   aiVoiceStartConversation(pendingTarget.vehicle, pendingTarget.kind);
 }, true);
 
-/* ---- Public API (for debugging / external control) ---------------------- */
 window.ElKaminAI = {
   start: function (vehicle, kind) { aiVoiceStartConversation(vehicle, kind); },
   end: function () { aiVoiceEndConversation(); },
@@ -7663,8 +8872,301 @@ window.ElKaminAI = {
   config: AI_VOICE_CONFIG
 };
 
-/* AI-VOICE-JS-END ========================================================= */
 
+/* ==========================================================================
+   IN-GAME PHONE + AI MESSAGING
+   ========================================================================== */
+const elkPhoneState = { open:false, view:'home', contact:null, busy:false, unread:0, chats:{moataz:[], commander:[]} };
+const elkContacts = {
+  moataz:{name:'Moataz Basha',arabic:'معتز باشا',initial:'م',role:'ضابط الكمين'},
+  commander:{name:'Major General Ali Zakaria',arabic:'اللواء علي زكريا',initial:'ع',role:'قيادة العمليات'}
+};
+const elkPhone = document.getElementById('elkPhone');
+function elkPhoneView(view){elkPhoneState.view=view;['Home','Messages','Chat'].forEach(v=>document.getElementById('elkPhone'+v).classList.toggle('active',view.toLowerCase()===v.toLowerCase()));}
+function elkPhoneToggle(force){elkPhoneState.open=typeof force==='boolean'?force:!elkPhoneState.open;elkPhone.classList.toggle('open',elkPhoneState.open);if(elkPhoneState.open){elkPhoneView(elkPhoneState.view||'home');if(controls&&controls.isLocked)controls.unlock();}else{const i=document.getElementById('elkChatInput');if(i)i.blur();}}
+function elkRenderContacts(){const list=document.getElementById('elkConversationList');list.innerHTML='';Object.keys(elkContacts).forEach(id=>{const c=elkContacts[id],messages=elkPhoneState.chats[id],last=messages[messages.length-1];const b=document.createElement('button');b.className='elk-contact';b.innerHTML='<span class="elk-avatar">'+c.initial+'</span><span class="elk-contact-info"><strong></strong><small></small></span>'+(id==='commander'&&elkPhoneState.unread?'<span class="elk-unread"></span>':'');b.querySelector('strong').textContent=c.name;b.querySelector('small').textContent=last?last.text:'مفيش رسائل لسه';b.addEventListener('click',()=>elkOpenChat(id));list.appendChild(b);});}
+function elkOpenChat(id){elkPhoneState.contact=id;elkPhoneState.unread=0;const c=elkContacts[id];document.getElementById('elkChatName').textContent=c.name;document.getElementById('elkChatAvatar').textContent=c.initial;document.getElementById('elkChatSubtitle').textContent=c.role;document.getElementById('elkMessageBadge').style.display='none';elkPhoneView('chat');elkRenderChat();setTimeout(()=>document.getElementById('elkChatInput')?.focus(),0);}
+function elkRenderChat(){const box=document.getElementById('elkChatMessages');box.innerHTML='';(elkPhoneState.chats[elkPhoneState.contact]||[]).forEach(m=>{const b=document.createElement('div');b.className='elk-bubble '+(m.from==='player'?'out':'in');const t=document.createElement('div');t.textContent=m.text;b.appendChild(t);const time=document.createElement('time');time.textContent=m.time||new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});b.appendChild(time);box.appendChild(b);});box.scrollTop=box.scrollHeight;}
+function elkAddMessage(id,from,text){elkPhoneState.chats[id].push({from,text:String(text).slice(0,4000),time:new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})});if(elkPhoneState.chats[id].length>80)elkPhoneState.chats[id].shift();if(elkPhoneState.contact===id&&elkPhoneState.view==='chat')elkRenderChat();elkRenderContacts();}
+function elkGameContext(){return {barriers:boomBarriers.map((s,i)=>({number:i+1,state:s.progress>.85?'open':s.progress<.15?'closed':'moving'})),vehicles:{sandLoaders:sandLoaders.length,trucks:trucks.length},mission:'لا يوجد نظام مهام متصل برسائل الهاتف حتى الآن.'};}
+function elkResolveAction(proposal,id){if(!proposal||typeof proposal!=='object')return null;const action=String(proposal.action||'none');if(!['none','open_barrier','close_barrier'].includes(action))return null;let n=Number(proposal.barrier);if(action!=='none'&&(!Number.isInteger(n)||n<1||n>4))return null;if(action!=='none'&&n===1)return 'البوابة رقم 1 مقفولة بشكل دائم ومش مسموح فتحها.';if(action==='open_barrier'||action==='close_barrier'){const index=n-1;if(index===3&&id!=='moataz')return 'مش مسموح بتنفيذ التحكم في البوابة 4 من جهة الاتصال دي.';const state=boomBarriers[index];if(!state)return 'البوابة المطلوبة مش متاحة.';if(action==='open_barrier'){state.target=1;return 'بدأ أمر فتح البوابة رقم '+n+'.';}if(action==='close_barrier'){if(index===3){const near=[...sandLoaders,...trucks].some(v=>v&&v.pos&&Math.abs(v.pos.z-state.barrier.group.position.z)<8);if(near)return 'مش هقفل البوابة 4 دلوقتي عشان فيه عربية قريبة من مسارها.';}state.target=0;return 'بدأ أمر غلق البوابة رقم '+n+'.';}}return null;}
+async function elkSendChat(text){const id=elkPhoneState.contact;if(!id||elkPhoneState.busy)return;const message=text.trim();if(!message)return;elkAddMessage(id,'player',message);const input=document.getElementById('elkChatInput'),send=document.getElementById('elkChatSend'),typing=document.getElementById('elkTyping');input.value='';elkPhoneState.busy=true;send.disabled=true;typing.classList.add('show');document.getElementById('elkPhoneToast').classList.remove('show');
+ try{const context=elkGameContext();const history=elkPhoneState.chats[id].slice(0,-1).slice(-8).map(m=>({role:m.from==='player'?'user':'model',parts:[{text:m.text}]}));const sys=id==='moataz'?'أنت معتز باشا، ضابط مصري خيالي في لعبة El Kamin. رد بالمصري الطبيعي وباختصار. اسأل للتوضيح لو أمر التحكم ملتبس. بوابة 1 ممنوع فتحها نهائيا. بوابتان 2 و3 تحت تحكم اللاعب، وبوابة 4 للمرور التلقائي ويمكنك اقتراح التحكم بها. لا تدعي تنفيذ أمر إلا بعد نتيجة اللعبة. أخرج JSON فقط بالشكل {"reply":"...","action":"none|open_barrier|close_barrier","barrier":1} عند وجود أمر واضح، وإلا action=none. حالة اللعبة: '+JSON.stringify(context):'أنت اللواء علي زكريا، شخصية خيالية في لعبة مصرية. تحدث بالمصري الطبيعي، ونسّق مهام وتوجيهات خيالية فقط. لا تخترع حقائق حقيقية عن أشخاص أو لوحات سيارات. لا تنفذ أوامر بوابات. أخرج JSON فقط بالشكل {"reply":"...","action":"none","barrier":0}. حالة اللعبة: '+JSON.stringify(context);
+ const body={systemInstruction:{parts:[{text:sys}]},contents:[...history,{role:'user',parts:[{text:message}]}],generationConfig:{temperature:.55,maxOutputTokens:180,responseMimeType:'application/json'}};const data=await aiFetchJson(aiBuildUrl('generateContent',false),body,AI_VOICE_CONFIG.requestTimeoutMs);const raw=data?.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('').trim();if(!raw)throw new Error('رد فاضي');let result;try{result=JSON.parse(raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim())}catch{result={reply:raw,action:'none',barrier:0}}const reply=String(result.reply||'تمام يا فندم.').slice(0,1500);const actionResult=elkResolveAction(result,id);elkAddMessage(id,'ai',reply);if(actionResult)elkAddMessage(id,'ai',actionResult);}
+ catch(err){console.warn('[El Kamin phone AI]',err);const toast=document.getElementById('elkPhoneToast');toast.textContent='تعذر الاتصال بالذكاء الاصطناعي. راجع الاتصال وإعدادات الخدمة.';toast.classList.add('show');}
+ finally{elkPhoneState.busy=false;send.disabled=false;typing.classList.remove('show');elkRenderContacts();}}
+document.getElementById('elkMessageApp').addEventListener('click',()=>{elkPhoneView('messages');elkRenderContacts();});document.getElementById('elkPhoneClose').addEventListener('click',()=>elkPhoneToggle(false));document.getElementById('elkPhoneCloseChat').addEventListener('click',()=>elkPhoneToggle(false));document.getElementById('elkChatBack').addEventListener('click',()=>{elkPhoneView('messages');elkRenderContacts();});document.getElementById('elkChatComposer').addEventListener('submit',e=>{e.preventDefault();elkSendChat(document.getElementById('elkChatInput').value);});
+document.addEventListener('keydown',e=>{if(cinematic.active)return;const t=e.target;const typingTarget=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable);if(e.code==='KeyB'&&!e.repeat&&!inspectionActive&&!conversationActive&&!typingTarget){e.preventDefault();e.stopImmediatePropagation();elkPhoneToggle();return;}if(elkPhoneState.open){if(typingTarget){e.stopImmediatePropagation();if(e.code==='Escape'){e.preventDefault();document.getElementById('elkChatInput')?.blur();}return;}e.preventDefault();e.stopImmediatePropagation();if(e.code==='Escape')elkPhoneToggle(false);return;}},true);
+const elkOriginalToggleBoom=toggleBoom;
+toggleBoom=function(index){if(index===0)return;if(elkPhoneState.open)return;return elkOriginalToggleBoom(index);};
+
+const elkHornState = new WeakMap();
+let elkHornAudioContext = null;
+function elkPlayShortHorn() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    if (!elkHornAudioContext) elkHornAudioContext = new Ctx();
+    const ctx = elkHornAudioContext;
+    if (ctx.state === 'suspended') ctx.resume().catch(()=>{});
+    const now = ctx.currentTime;
+    [0, 0.24].forEach((offset, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = 'sawtooth'; osc.frequency.setValueAtTime(i ? 415 : 390, now + offset);
+      gain.gain.setValueAtTime(0.0001, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.045, now + offset + 0.025);
+      gain.gain.setTargetAtTime(0.0001, now + offset + 0.12, 0.025);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now + offset); osc.stop(now + offset + 0.19);
+    });
+  } catch (e) {}
+}
+function updateContextualVehicleHorns(dt) {
+  for (const v of trucks) {
+    if (!v || !v.pos) continue;
+    let st = elkHornState.get(v);
+    if (!st) { st = {wait:0,cooldown:0,done:false,roll:Math.random()}; elkHornState.set(v,st); }
+    st.cooldown = Math.max(0, st.cooldown - dt);
+    const dist = Math.hypot(v.pos.x-playerPos.x, v.pos.z-playerPos.z);
+    const nearBarrier = boomBarriers.some(b => b && b.progress < 0.15 && Math.abs(v.pos.z-b.barrier.group.position.z) < 11 && Math.abs(v.pos.x) < ROAD.halfWidth+1.5);
+    const slow = Math.abs(Number(v.speed)||0) < 1.3;
+    if (nearBarrier && slow && dist < 32) {
+      st.wait += dt;
+      if (st.wait > 5.5 && !st.done && st.cooldown <= 0 && st.roll < 0.48) {
+        elkPlayShortHorn(); st.done = true; st.cooldown = 16;
+      }
+    } else if (dist > 38 || !nearBarrier) { st.wait = 0; if (!nearBarrier) st.done = false; }
+    const inFront = dist < 4.2 && Math.abs(Number(v.speed)||0) > 2.5 && Math.abs(v.pos.x-playerPos.x) < 2.5;
+    if (inFront && st.cooldown <= 0 && st.roll < 0.22) { elkPlayShortHorn(); st.cooldown = 12; st.roll = Math.random(); }
+  }
+}/* ==========================================================================
+   CINEMATIC OPENING SEQUENCE
+   GTA-style camera sweep focused on the checkpoint.
+   12-second total duration.
+   — Slower, buttery-smooth motion via quintic smootherstep over a fine
+     arc-length-parameterised CatmullRom spline.
+   ========================================================================== */
+const cinematic = {
+  active: false,
+  switched: false,
+  ambientTriggered: false,
+  startTime: 0,
+
+  /* ---- 12-second timeline ---- */
+  totalDuration:    12.00,
+  fadeInFromBlack:   1.20,   /* 0.00 → 1.20s : fade up from the intro’s black */
+  cameraMoveStart:   0.30,
+  cameraMoveEnd:     8.80,   /* 8.5s of continuous, unhurried motion */
+  fadeOutStart:      9.80,
+  fadeOutEnd:       10.60,
+  switchTime:       10.60,   /* hand-off to first-person */
+  fadeInEnd:        12.00,
+
+  /* ---- Cinematic lens blur (12px → 0px over the first 6.5s) ---- */
+  blurMaxPx:   12,
+  blurEndTime:  6.50,
+
+  /* ---- Fine 7-point spline — densely defined so easing never feels linear ---- */
+  path: new THREE.CatmullRomCurve3([
+    new THREE.Vector3(48, 32, -22),
+    new THREE.Vector3(42, 27, -28),
+    new THREE.Vector3(36, 22, -35),
+    new THREE.Vector3(30, 17, -43),
+    new THREE.Vector3(25, 13, -51),
+    new THREE.Vector3(20, 10, -58),
+    new THREE.Vector3(16,  8, -64)
+  ], false, 'catmullrom', 0.5),
+
+  /* Fixed aim point for perfectly stable rotation. */
+  lookAt: new THREE.Vector3(0, 1.5, -76),
+
+  fadeEl: null,
+  titleEl: null,
+  canvasEl: null,
+  originalFilter: '',
+  originalTransform: ''
+};
+
+/* Smootherstep (quintic) — velocity AND acceleration = 0 at both ends.
+   This is the smoothest standard easing used in cinematic camera rigs. */
+function smootherstep(t) {
+  t = Math.max(0, Math.min(1, t));
+  return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
+function beginCinematic() {
+  cinematic.active = true;
+  cinematic.switched = false;
+  cinematic.ambientTriggered = false;
+  cinematic.startTime = performance.now() / 1000;
+
+  /* Ensure the AudioContext is running so the ambient sound can start
+     on cue, even before the player's first in-game click. */
+  try {
+    if (audioListener.context && audioListener.context.state === 'suspended') {
+      audioListener.context.resume();
+    }
+  } catch (e) {}
+
+  /* Sharpen the spline LUT to 800 samples (default 200). 5× finer arc-length
+     distribution = no visible position quantization anywhere on the path. */
+  cinematic.path.arcLengthDivisions = 800;
+
+  /* Warm up the curve cache so the first getPointAt() call is instant. */
+  cinematic.path.getLength();
+  cinematic.path.getPointAt(0, camera.position);
+
+  /* Black cover — bridges the gap from the intro and fades up at the start. */
+  const fadeEl = document.createElement('div');
+  fadeEl.id = 'cinematicFade';
+  fadeEl.style.opacity = '1';
+  document.body.appendChild(fadeEl);
+  cinematic.fadeEl = fadeEl;
+
+  /* Arabic title */
+  const titleEl = document.createElement('div');
+  titleEl.id = 'cinematicTitle';
+  titleEl.setAttribute('dir', 'rtl');
+  titleEl.setAttribute('lang', 'ar');
+  titleEl.textContent = 'طريق بلبيس الصحراوي';
+  titleEl.style.opacity = '0';
+  document.body.appendChild(titleEl);
+  cinematic.titleEl = titleEl;
+
+  /* Cinematic lens blur on the WebGL canvas only (HUD unaffected). */
+  cinematic.canvasEl = renderer.domElement;
+  cinematic.originalFilter    = cinematic.canvasEl.style.filter    || '';
+  cinematic.originalTransform = cinematic.canvasEl.style.transform || '';
+  cinematic.canvasEl.style.transformOrigin = 'center center';
+  cinematic.canvasEl.style.willChange      = 'filter, transform';
+  cinematic.canvasEl.style.filter    = `blur(${cinematic.blurMaxPx}px)`;
+  cinematic.canvasEl.style.transform = 'scale(1.05)';
+
+  camera.lookAt(cinematic.lookAt);
+}
+
+function cinematicTitleOpacity(t) {
+  /* Fade-in 1.20 → 2.20s, long hold until 7.20s, fade-out 7.20 → 8.50s. */
+  if (t < 1.20) return 0;
+  if (t < 2.20) return (t - 1.20) / 1.00;
+  if (t < 7.20) return 1;
+  if (t < 8.50) return 1 - (t - 7.20) / 1.30;
+  return 0;
+}
+
+function cinematicBlurPx(t) {
+  if (t >= cinematic.blurEndTime) return 0;
+  /* smootherstep across the full blur window = zero “pop” at the end. */
+  const k = smootherstep(1 - t / cinematic.blurEndTime);
+  return cinematic.blurMaxPx * k;
+}
+
+function updateCinematic() {
+  const now = performance.now() / 1000;
+  const t = now - cinematic.startTime;
+
+  /* ---------- Black cover ---------- */
+  if (cinematic.fadeEl) {
+    let op;
+    if (t < cinematic.fadeInFromBlack) {
+      op = 1 - t / cinematic.fadeInFromBlack;               /* fade up from black */
+    } else if (t < cinematic.fadeOutStart) {
+      op = 0;
+    } else if (t < cinematic.fadeOutEnd) {
+      op = (t - cinematic.fadeOutStart) /
+           (cinematic.fadeOutEnd - cinematic.fadeOutStart);
+    } else if (t < cinematic.switchTime) {
+      op = 1;
+    } else if (t < cinematic.fadeInEnd) {
+      op = 1 - (t - cinematic.switchTime) /
+               (cinematic.fadeInEnd - cinematic.switchTime);
+    } else {
+      op = 0;
+    }
+    op = op < 0 ? 0 : op > 1 ? 1 : op;
+    cinematic.fadeEl.style.opacity = String(op);
+  }
+
+  /* ---------- Title (opacity only — no reflow-triggering properties) ---------- */
+  if (cinematic.titleEl) {
+    cinematic.titleEl.style.opacity = String(cinematicTitleOpacity(t));
+  }
+
+  /* ---------- Lens blur + overscan ---------- */
+  if (cinematic.canvasEl) {
+    const b = cinematicBlurPx(t);
+    if (b > 0.05) {
+      const scale = 1 + (b / cinematic.blurMaxPx) * 0.05;
+      cinematic.canvasEl.style.filter    = `blur(${b.toFixed(2)}px)`;
+      cinematic.canvasEl.style.transform = `scale(${scale.toFixed(4)})`;
+    } else {
+      cinematic.canvasEl.style.filter    = '';
+      cinematic.canvasEl.style.transform = '';
+    }
+  }
+
+  /* ---------- Camera: smootherstep over arc-length spline ----------
+     Writes DIRECTLY into camera.position via getPointAt’s optional target,
+     avoiding per-frame Vector3 allocation and any GC-induced micro-stutter. */
+  if (!cinematic.switched && t < cinematic.switchTime) {
+    const u = Math.max(0, Math.min(1,
+      (t - cinematic.cameraMoveStart) /
+      (cinematic.cameraMoveEnd - cinematic.cameraMoveStart)
+    ));
+    const eased = smootherstep(u);
+    cinematic.path.getPointAt(eased, camera.position);
+    camera.lookAt(cinematic.lookAt);
+  }
+
+  /* ---------- Ambient sound: start 1s before first-person hand-off ---------- */
+  if (!cinematic.ambientTriggered && t >= cinematic.switchTime - 1.0) {
+    cinematic.ambientTriggered = true;
+    startAmbientSound();
+  }
+
+  /* ---------- Hand-off to first-person ---------- */
+  if (!cinematic.switched && t >= cinematic.switchTime) {
+    cinematic.switched = true;
+    camera.position.set(
+      CONFIG.spawnX,
+      CONFIG.sidewalkWalkHeight + CONFIG.playerHeight,
+      CONFIG.spawnZ
+    );
+    camera.rotation.order = 'YXZ';
+    camera.rotation.set(CONFIG.spawnPitch, CONFIG.spawnYaw, 0);
+    playerPos.set(CONFIG.spawnX, CONFIG.playerHeight, CONFIG.spawnZ);
+    currentGroundY = CONFIG.sidewalkWalkHeight;
+    playerVel.set(0, 0, 0);
+
+    if (cinematic.canvasEl) {
+      cinematic.canvasEl.style.filter    = '';
+      cinematic.canvasEl.style.transform = '';
+    }
+  }
+
+  /* ---------- Cleanup ---------- */
+  if (t >= cinematic.totalDuration) {
+    cinematic.active = false;
+
+    if (cinematic.fadeEl) {
+      const el = cinematic.fadeEl;
+      el.style.transition = 'opacity 0.35s ease';
+      el.style.opacity = '0';
+      setTimeout(() => el.remove(), 450);
+      cinematic.fadeEl = null;
+    }
+    if (cinematic.titleEl) {
+      cinematic.titleEl.remove();
+      cinematic.titleEl = null;
+    }
+    if (cinematic.canvasEl) {
+      cinematic.canvasEl.style.filter     = cinematic.originalFilter;
+      cinematic.canvasEl.style.transform  = cinematic.originalTransform;
+      cinematic.canvasEl.style.willChange = '';
+      cinematic.canvasEl = null;
+    }
+  }
+}
 const clock = new THREE.Clock();
 let elapsed = 0;
 
@@ -7674,8 +9176,18 @@ const dt = Math.min(clock.getDelta(), 0.05);
 elapsed += dt;
 
 skyUniforms.time.value = elapsed;
-sunLight.target.position.set(playerPos.x, 0, playerPos.z);
-sunLight.position.copy(playerPos).add(sunDir.clone().multiplyScalar(150));
+
+if (cinematic.active) {
+  updateCinematic();
+}
+
+if (cinematic.active && !cinematic.switched) {
+  sunLight.target.position.set(0, 0, -80);
+  sunLight.position.set(0, 40, -80).add(sunDir.clone().multiplyScalar(150));
+} else {
+  sunLight.target.position.set(playerPos.x, 0, playerPos.z);
+  sunLight.position.copy(playerPos).add(sunDir.clone().multiplyScalar(150));
+}
 
 if (radioTowerLeft && radioTowerLeft.beacon) {
 const blink = (Math.floor(elapsed * 2) % 2) ? 1.5 : 0.2;
@@ -7696,7 +9208,6 @@ const eased = p * p * (3 - 2 * p);
 s.barrier.boomGroup.rotation.z = BOOM_CLOSED_ROT + (BOOM_OPEN_ROT - BOOM_CLOSED_ROT) * eased;
 }
 
-/* ===== تحديث العلم على أبراج المراقبة ===== */
 [watchtowerLeft, watchtowerRight].forEach((wt, i) => {
   const fm = wt.userData.egyptFlagMesh;
   const fg = wt.userData.egyptFlag;
@@ -7715,11 +9226,13 @@ s.barrier.boomGroup.rotation.z = BOOM_CLOSED_ROT + (BOOM_OPEN_ROT - BOOM_CLOSED_
 });
 
 updateSandLoaders(dt);
+updateContextualVehicleHorns(dt);
 
-updatePlayer(dt);
-
-/* ===== Inspection prompt detection ===== */
-try { updateInspectionPrompt(); } catch (e) {}
+if (!cinematic.active) {
+  updatePlayerVehicleImpact(dt);
+  updatePlayer(dt);
+  try { updateInspectionPrompt(); } catch (e) {}
+}
 
 renderer.render(scene, camera);
 }
@@ -7732,7 +9245,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 let gameStarted = false;
 let gameStartCheckInterval = null;
-
 function startGame() {
   if (gameStarted) return;
   gameStarted = true;
@@ -7745,9 +9257,27 @@ function startGame() {
   const loadingEl = document.getElementById('loading');
   if (loadingEl) loadingEl.classList.add('hidden');
 
-  animate();
-}
+  /* Black hold overlay placed BELOW the intro (z=8950 < 9000) but ABOVE the
+     loading screen. The intro fades out over this black layer, producing a
+     clean "fade to black" that visually flows into the cinematic fade-in.
+     It also blocks any flash of the rendered game view during the gap. */
+  const holdEl = document.createElement('div');
+  holdEl.style.cssText = 'position:fixed;inset:0;background:#000;z-index:8950;pointer-events:none;';
+  document.body.appendChild(holdEl);
 
+  /* Warm up the renderer behind the black hold so the first cinematic frame
+     is drawn immediately when beginCinematic() runs. */
+  animate();
+
+  /* The intro element is removed 1300 ms after endIntro() fires (which is
+     the exact moment startGame() is called). Wait until it is fully gone
+     plus a small buffer before starting the cinematic. */
+  const CINEMATIC_DELAY_MS = 1500;
+  setTimeout(() => {
+    if (holdEl.parentNode) holdEl.parentNode.removeChild(holdEl);
+    beginCinematic();
+  }, CINEMATIC_DELAY_MS);
+}
 function tryStartGame() {
   if (window.ElKaminIntro && window.ElKaminIntro.finished) {
     startGame();
@@ -7784,18 +9314,16 @@ return (window.ElKaminIntro && window.ElKaminIntro.character) || null;
 isGameRunning() {
 return gameStarted;
 },
-/* Inspection public API */
 isInspectionActive() { return inspectionActive; },
 closeInspection() { try { closeInspection(); } catch (e) {} },
 getPlayerMoney() { return playerMoney; },
 getPlayerIllicit() { return playerIllicit; },
 INSPECT_CFG,
-/* AI-VOICE-JS-START — expose the voice conversation API publicly */
 isConversationActive() { return conversationActive; },
 startConversation(vehicle, kind) { try { aiVoiceStartConversation(vehicle, kind); } catch (e) {} },
 endConversation() { try { aiVoiceEndConversation(); } catch (e) {} },
-AI_VOICE_CONFIG
-/* AI-VOICE-JS-END */
+AI_VOICE_CONFIG,
+cinematic
 };
 </script>
 </body>
