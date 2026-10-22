@@ -2152,7 +2152,7 @@ body.game-started #topControls { opacity: 1; }
 </head>
 <body>
 <div id="loading">LOADING CHECKPOINT…</div>
-<div id="info">WASD to move · Shift to sprint · Mouse to look · Click to lock cursor · 1-4 to toggle gates · G to inspect · B phone · F repair gate · P pull over · R release · T talk · E enter/exit police car · Q horn · Space handbrake</div>
+<div id="info" dir="rtl">التحكم: W A S D للحركة والقيادة · Shift للجري على القدمين أو تسارع قوي بعربية الشرطة · الماوس للنظر واضغط داخل اللعبة لتفعيل المؤشر · 2 و3 لفتح/غلق الحواجز · G للتفتيش · B للهاتف · F لإصلاح الحاجز · P لإيقاف مركبة · R للإفراج عن مركبة أو الرجوع للكمين أثناء القيادة · E لدخول/الخروج من عربية الشرطة · H لتشغيل/إيقاف السرينة · Q للكلاكس · Space لفرامل اليد</div>
 <div id="crosshair"></div>
 
 <div id="topControls">
@@ -5290,7 +5290,7 @@ function clampToAvoidOverlap(v, prevZ, proposedZ) {
     if (o === v || o._despawned) continue;
     if (Math.abs(o.pos.x - v.pos.x) > v.halfWidth + o.halfWidth + 0.2) continue;
     const minSep = v.halfLength + o.halfLength + HARD_MIN_BUMPER_GAP_M;
-    const dz = (o.pos.z - clampedZ) * v.dirZ;
+    const dz = (o.pos.z - proposedZ) * v.dirZ;
     if (dz > 0 && dz < minSep) {
       const targetZ = o.pos.z - v.dirZ * minSep;
       if (v.dirZ < 0) {
@@ -5300,20 +5300,6 @@ function clampToAvoidOverlap(v, prevZ, proposedZ) {
         if (prevZ < targetZ) clampedZ = Math.min(clampedZ, targetZ);
         else clampedZ = Math.min(clampedZ, prevZ);
       }
-    }
-  }
-  // Treat the player-driven police car as a solid traffic obstacle for every vehicle type.
-  // Clamp the proposed position before the car can cross the police car's bumper line.
-  if (drivingActive && policeCar.loaded && policeCar.root &&
-      Math.abs(policeCar.position.x - v.pos.x) < policeCar.halfWidth + v.halfWidth + 0.25) {
-    const minSep = policeCar.halfLength + v.halfLength + HARD_MIN_BUMPER_GAP_M;
-    const policeAhead = (policeCar.position.z - v.pos.z) * v.dirZ;
-    const proposedGap = (policeCar.position.z - clampedZ) * v.dirZ;
-    if (policeAhead > 0 && proposedGap < minSep) {
-      const targetZ = policeCar.position.z - v.dirZ * minSep;
-      if (v.dirZ < 0) clampedZ = Math.max(prevZ > targetZ ? targetZ : prevZ, clampedZ);
-      else clampedZ = Math.min(prevZ < targetZ ? targetZ : prevZ, clampedZ);
-      v.speed = 0;
     }
   }
   return clampedZ;
@@ -5356,17 +5342,7 @@ function updateSandLoader(v, dt) {
   }
   if (v.speed < 0.02) v.speed = 0;
   const prevZ = v.pos.z;
-  let proposedZ = v.pos.z + v.dirZ * v.speed * dt;
-  // Hard physical stop behind the player-driven police car; do not allow tunnelling through it.
-  if (policeCar.loaded && policeCar.root && drivingActive) {
-    const lateralGap = Math.abs(v.pos.x - policeCar.position.x);
-    const stopGap = v.halfLength + policeCar.halfLength + 1.35;
-    const policeAhead = (policeCar.position.z - v.pos.z) * v.dirZ;
-    if (lateralGap < v.halfWidth + policeCar.halfWidth + 0.25 && policeAhead > 0 && policeAhead < stopGap + Math.max(0, v.speed * dt) + 1.0) {
-      proposedZ = policeCar.position.z - v.dirZ * stopGap;
-      v.speed = 0;
-    }
-  }
+  const proposedZ = v.pos.z + v.dirZ * v.speed * dt;
   v.pos.z = clampToAvoidOverlap(v, prevZ, proposedZ);
   if (v.speed > 0.5 && Math.abs(v.pos.x - v.correctionLaneX) > 0.2) {
     const laneDiff = v.correctionLaneX - v.pos.x;
@@ -5427,7 +5403,7 @@ const TRUCK = {
   gateClearance: 2.2, probeExtra: 10.0
 };
 
-const TRUCK_COLORS = [{ name: 'black', hex: 0x0a0a0a }];
+const TRUCK_COLORS = [{ name: 'orange', hex: 0xe87519 }];
 
 const TRUCK_ROUTES = [
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 150, wrapZ: CP.z - 470, model: 'truck' },
@@ -5442,10 +5418,6 @@ const TRUCK_ROUTES = [
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 400, wrapZ: CP.z + 470, model: 'truck' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 200, wrapZ: CP.z - 470, model: 'belban' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 220, wrapZ: CP.z + 470, model: 'hiace' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 120, wrapZ: CP.z - 470, model: 'hiace' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 160, wrapZ: CP.z + 470, model: 'hiace' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 360, wrapZ: CP.z - 470, model: 'hiace' },
-  { laneX: -3.7, dirZ: 1, spawnZ: CP.z - 320, wrapZ: CP.z + 470, model: 'hiace' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 50, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 350, wrapZ: CP.z + 470, model: 'truck' },
   // Extra passenger cars spread along both directions of the road.
@@ -5708,7 +5680,7 @@ function createEgyptianTransitModel(kind, paintHex) {
 
 function createHeavyPersonLuxurySUV() {
   const g = new THREE.Group();
-  const paint = new THREE.MeshPhysicalMaterial({ color: 0x090b0d, roughness: 0.22, metalness: 0.62, clearcoat: 1, clearcoatRoughness: 0.08 });
+  const paint = new THREE.MeshPhysicalMaterial({ color: 0xc51f2b, roughness: 0.22, metalness: 0.48, clearcoat: 1, clearcoatRoughness: 0.08 });
   const trim = new THREE.MeshStandardMaterial({ color: 0x111315, roughness: 0.42, metalness: 0.55 });
   const glass = new THREE.MeshPhysicalMaterial({ color: 0x101b25, roughness: 0.08, metalness: 0.18, transparent: true, opacity: 0.86, clearcoat: 1 });
   const chrome = new THREE.MeshStandardMaterial({ color: 0x9da5ab, roughness: 0.18, metalness: 0.95 });
@@ -5749,7 +5721,7 @@ function applyHeavyPersonProfile(profile, seed) {
   profile.driverExplanation = 'معايا تصريح مرور خاص يا باشا، ياريت نخلّص الإجراءات بهدوء.';
   profile.vehicle.brand = 'BMW';
   profile.vehicle.model = 'BMW SUV فاخر — مرور نادر';
-  profile.vehicle.color = 'أسود لامع';
+  profile.vehicle.color = 'أحمر';
   profile.vehicle.type = 'سيارة شخصية مهمة';
   profile.vehicle.usage = 'مرور خاص';
   profile.vehicle.plate = 'م هـ م ' + String(1000 + (Number(seed || 1) * 37) % 9000).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
@@ -5771,7 +5743,7 @@ function applyHeavyPersonProfile(profile, seed) {
 function createBelbanDeliveryTruck() {
   const g = new THREE.Group();
   const white = new THREE.MeshStandardMaterial({ color: 0xf0eee8, roughness: 0.68 });
-  const cream = new THREE.MeshStandardMaterial({ color: 0xf7f2df, roughness: 0.72 });
+  const cream = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.72 });
   const dark = new THREE.MeshStandardMaterial({ color: 0x202326, roughness: 0.85 });
   const glass = new THREE.MeshStandardMaterial({ color: 0x253642, roughness: 0.24, metalness: 0.12 });
   const red = new THREE.MeshStandardMaterial({ color: 0xb51e2b, roughness: 0.65 });
@@ -5782,10 +5754,7 @@ function createBelbanDeliveryTruck() {
   part(new THREE.BoxGeometry(1.92,.62,.045), glass, 0,1.76,2.39);
   part(new THREE.BoxGeometry(2.2,.18,.16), dark, 0,.62,2.37);
   part(new THREE.BoxGeometry(2.16,.13,.14), red, 0,.67,-3.24);
-  // Plain unbranded cream cargo panels; company identity appears only in inspection documents.
-  const sidePanelMat = new THREE.MeshStandardMaterial({ color: 0xf7f2df, roughness: 0.76, metalness: 0.04 });
-  const sideL=part(new THREE.PlaneGeometry(2.5,0.86),sidePanelMat,-1.101,1.43,-1.45); sideL.rotation.y=-Math.PI/2;
-  const sideR=part(new THREE.PlaneGeometry(2.5,0.86),sidePanelMat,1.101,1.43,-1.45); sideR.rotation.y=Math.PI/2;
+  // جسم أبيض بلا اسم تجاري ظاهر على الهيكل.
   for(const z of [-2.35,1.85]) for(const x of [-1.05,1.05]) {
     const w=part(new THREE.CylinderGeometry(.39,.39,.22,20),wheelMat,x,.47,z); w.rotation.z=Math.PI/2;
     const h=part(new THREE.CylinderGeometry(.19,.19,.23,18),dark,x,.47,z); h.rotation.z=Math.PI/2;
@@ -5809,7 +5778,7 @@ function applyMinibusProfile(profile, seed) {
   const fare=5+Math.floor(r()*11);
   const destinations=['العبور','السلام','رمسيس','موقف العاشر','بلبيس','المرج','مدينة نصر','الشروق','بنها','الخصوص'];
   const chargedFare=r()<0.25 ? fare+5+Math.floor(r()*11) : fare;
-  profile.vehicle.brand='تويوتا'; profile.vehicle.model='ميكروباص'; profile.vehicle.type='ميكروباص';
+  profile.vehicle.brand='تويوتا'; profile.vehicle.model='ميكروباص'; profile.vehicle.type='ميكروباص'; profile.vehicle.color='أبيض';
   profile.vehicle.usage='نقل ركاب بالأجرة'; profile.vehicle.isMinibus=true;
   profile.vehicle.plate='م ص أ '+String(1000+Math.floor(r()*9000)).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[Number(d)]);
   profile.vehicle.authority='ترخيص نقل ركاب'; profile.vehicle.registrationExpiry='ساري'; profile.vehicle.status='valid'; profile.vehicle.statusAr='سارية';
@@ -5826,7 +5795,7 @@ function applyBelbanProfile(profile, seed) {
   const r=seededRng((Number(seed||1)*32452843)>>>0);
   const products=['أرز بلبن','كنافة بلبن','قشطوطة','رز بلبن بالمكسرات','أم علي','مهلبية','كريم بروليه','منتج موسمي جديد'];
   const secret=r()<0.24;
-  profile.vehicle.brand='بلبن'; profile.vehicle.model='نقل منتجات بلبن'; profile.vehicle.type='سيارة نقل منتجات بلبن'; profile.vehicle.usage='نقل منتجات الشركة'; profile.vehicle.isBelban=true;
+  profile.vehicle.brand='بلبن'; profile.vehicle.model='نقل منتجات بلبن'; profile.vehicle.type='سيارة نقل منتجات بلبن'; profile.vehicle.color='أبيض'; profile.vehicle.usage='نقل منتجات الشركة'; profile.vehicle.isBelban=true;
   profile.vehicle.plate='ن ق ل '+String(1000+Math.floor(r()*9000)).replace(/[0-9]/g,d=>'٠١٢٣٤٥٦٧٨٩'[Number(d)]);
   profile.vehicle.authority='ترخيص نقل بضائع'; profile.vehicle.registrationExpiry='ساري'; profile.vehicle.status='valid'; profile.vehicle.statusAr='سارية';
   profile.company={name:'بلبن',permitNumber:'BL-'+String(10000+Math.floor(r()*89999)),driverName:profile.driver.name,vehicleType:'سيارة نقل منتجات بلبن',issueDate:'ساري',expiryDate:'ساري',workType:'نقل وتوزيع منتجات بلبن',area:'فروع بلبن',issuerName:'إدارة شركة بلبن',issuerRole:'تصاريح الشركة',status:'valid',statusAr:'ساري',valid:true};
@@ -5836,36 +5805,50 @@ function applyBelbanProfile(profile, seed) {
   return profile;
 }
 
+function recolorTrafficBody(root, hex) {
+  if (!root) return;
+  root.traverse(node => {
+    if (!node.isMesh || !node.material) return;
+    const meshName = String(node.name || '').toLowerCase();
+    const mats = Array.isArray(node.material) ? node.material : [node.material];
+    mats.forEach(mat => {
+      const name = String(mat.name || '').toLowerCase();
+      if (/(glass|window|windshield|screen|tire|tyre|wheel|rubber|chrome|metal|rim|light|lamp|grille|interior|seat|dashboard)/i.test(meshName + ' ' + name)) return;
+      if (mat.color && typeof mat.color.setHex === 'function') mat.color.setHex(hex);
+      mat.needsUpdate = true;
+    });
+  });
+}
+
 function spawnTrucks() {
   if (!truckProto) return;
   TRUCK_ROUTES.forEach((route, routeIndex) => {
-    if (trucks.some(v => v.route === route && !v._despawned)) return;
     if (route.model === 'truck') return;
-    if (route.model === 'hiace' && !hiaceProto) return;
-    if (route.model === 'belban' && !belbanProto) return;
     const seed = TrafficDeck.next();
     if (seed === null) return;
     const rng = seededRng(seed * 2654435761);
     const profile = generateProfile('passenger', rng);
     const isMinibus = route.model === 'hiace';
-    const isBelban = route.model === 'belban' && Math.random() < 0.085;
-    if (route.model === 'belban' && !isBelban) return;
+    const isBelban = route.model === 'belban' && Math.random() < 0.18;
     if (isMinibus) applyMinibusProfile(profile, seed);
     if (isBelban) applyBelbanProfile(profile, seed);
     profile.recordId = seed;
     const colorDef = TRUCK_COLORS[routeIndex % TRUCK_COLORS.length];
     const transitKind = 'car';
-    const isHeavyPersonVehicle = route.laneX > 0 && route.dirZ < 0 && Math.random() < 0.0008;
-    const selectedProto = isMinibus ? hiaceProto
-      : isBelban ? belbanProto
+    const isHeavyPersonVehicle = route.laneX > 0 && route.dirZ < 0 && Math.random() < 0.00005;
+    const selectedProto = isMinibus ? (hiaceProto || createEgyptianTransitModel('minibus', 0xd8d8d2))
+      : isBelban ? (belbanProto || createBelbanDeliveryTruck())
       : isHeavyPersonVehicle ? (realCarProtos.length ? realCarProtos[0] : createHeavyPersonLuxurySUV())
       : (realCarProtos.length ? realCarProtos[(seed + routeIndex) % realCarProtos.length] : truckProto);
-    if (!selectedProto) return;
     const model = selectedProto.clone(true);
     const specialScale = isHeavyPersonVehicle ? 2.0 : 1;
     if (isHeavyPersonVehicle) model.scale.multiplyScalar(specialScale);
     model.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
     if (selectedProto === truckProto && !isMinibus && !isBelban) cloneTruckMaterialsForVehicle(model, colorDef.hex);
+    if (isMinibus) { recolorTrafficBody(model, 0xf4f3ed); profile.vehicle.color = 'أبيض'; }
+    else if (isBelban) { recolorTrafficBody(model, 0xf4f3ed); profile.vehicle.color = 'أبيض'; }
+    else if (isHeavyPersonVehicle) { recolorTrafficBody(model, 0xc51f2b); profile.vehicle.color = 'أحمر'; }
+    else { recolorTrafficBody(model, 0xe87519); profile.vehicle.color = 'برتقالي'; }
     const baseModelDims = selectedProto.userData.trafficDimensions || (isMinibus ? {halfWidth:1.18,halfLength:2.95,height:2.6} : isBelban ? {halfWidth:1.18,halfLength:2.95,height:2.45} : { halfWidth: truckSize.halfWidth, halfLength: truckSize.halfLength, height: truckSize.height });
     const modelDims = isHeavyPersonVehicle ? {
       halfWidth: baseModelDims.halfWidth * specialScale,
@@ -5890,8 +5873,8 @@ function spawnTrucks() {
       maxSpeed: isHeavyPersonVehicle ? (310 / 3.6) : TRUCK.maxSpeed * (0.94 + Math.random() * 0.06),
       halfWidth: modelDims.halfWidth, halfLength: modelDims.halfLength,
       gates: [], box: new THREE.Box3(), wheelPivots: [], wheelSpin: 0, paused: false,
-      inspProfile: profile, _clearedGates: new Set(), _mayBreakGate: false,
-      _breakingIntent: Math.random() < 0.005, _brokeGateIndex: -1, _despawned: false,
+      inspProfile: profile, _clearedGates: new Set(),
+      _despawned: false,
       _recordSeed: seed, _isTruck: true, _lastZ: route.spawnZ, _reportedPassed: false, _modelNode: model, _plateGroup: plateGroup, _trafficModelProto: selectedProto,
       _isHeavyPersonVehicle: isHeavyPersonVehicle, _isMinibus: isMinibus, _isBelban: isBelban, _specialPlate: isHeavyPersonVehicle ? plateData.letters + ' ' + plateData.numbers : null, _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0,
     };
@@ -6048,11 +6031,13 @@ function spawnBigTrucks() {
   profile.vehicle.isTransportTruck = true;
   profile.vehicle.type = 'نقل';
   profile.vehicle.model = 'نقل بضائع';
+  profile.vehicle.color = 'أصفر';
   profile.vehicle.usage = 'نقل بضائع';
   profile.driver.job = 'سائق نقل ثقيل';
   if (Array.isArray(profile.body)) profile.body.forEach(part => { if (/لودر/.test(part.part || '')) part.part = part.part.replace(/لودر/g, 'النقل'); });
   if (profile.company) profile.company.vehicleType = 'نقل بضائع';
   const model = bigTruckProto.clone(true);
+  recolorTrafficBody(model, 0xe5b51b);
   model.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
   const group = new THREE.Group();
   group.add(model);
@@ -6068,8 +6053,8 @@ function spawnBigTrucks() {
     maxSpeed: BIG_TRUCK.maxSpeed * (0.94 + Math.random() * 0.06),
     halfWidth: bigTruckSize.halfWidth, halfLength: bigTruckSize.halfLength,
     gates: [], box: new THREE.Box3(), wheelPivots: [], wheelSpin: 0, paused: false,
-    inspProfile: profile, _clearedGates: new Set(), _mayBreakGate: true,
-    _breakingIntent: Math.random() < 0.005, _brokeGateIndex: -1, _despawned: false,
+    inspProfile: profile, _clearedGates: new Set(),
+      _despawned: false,
     _recordSeed: seed, _isBigTruck: true, _lastZ: route.spawnZ, _reportedPassed: false,
     _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0, sound: null,
   };
@@ -6116,86 +6101,6 @@ function isSpawnPointClear(v, spawnZ, arr) {
     if (Math.abs(o.pos.z - spawnZ) < v.halfLength + o.halfLength + 2.0) return false;
   }
   return true;
-}
-
-function checkGateBreak(v, cfg, dt) {
-  if (!v._breakingIntent) return;
-  if (v._brokeGateIndex >= 0) return;
-  if (!v.gates || v.gates.length === 0) return;
-  for (const g of v.gates) {
-    const state = boomBarriers[g.index];
-    if (!state || state.broken) continue;
-    if (state.progress > 0.15) continue;
-    const distAhead = (g.z - v.pos.z) * v.dirZ;
-    if (distAhead > v.halfLength + 0.5) continue;
-    if (distAhead < -v.halfLength) continue;
-    if (v.speed < 12) continue;
-    triggerGateBreak(g.index, v);
-    v._brokeGateIndex = g.index;
-    v._breakingIntent = false;
-    return;
-  }
-}
-
-function triggerGateBreak(index, breakingVehicle) {
-  const state = boomBarriers[index];
-  if (!state || state.broken) return;
-  state.broken = true; state.target = 1; state.progress = 1;
-  try {
-    if (state.barrier.boomMesh) state.barrier.boomMesh.visible = false;
-    if (state.barrier.armSign) state.barrier.armSign.visible = false;
-  } catch(e) {}
-  const gateWorldPos = state.barrier.boomGroup.getWorldPosition(new THREE.Vector3());
-  const boomWorldQuat = state.barrier.boomGroup.getWorldQuaternion(new THREE.Quaternion());
-  const pieces = 4;
-  const pieceLen = BOOM_LENGTH / pieces;
-  const debrisBodies = [];
-  for (let i = 0; i < pieces; i++) {
-    const piece = new THREE.Mesh(new THREE.BoxGeometry(pieceLen - 0.05, 0.15, 0.15), new THREE.MeshStandardMaterial({ map: stripeTex, roughness: 0.7 }));
-    const offset = new THREE.Vector3((i + 0.5) * pieceLen, 0, 0);
-    offset.applyQuaternion(boomWorldQuat);
-    piece.position.copy(gateWorldPos).add(offset);
-    piece.quaternion.copy(boomWorldQuat);
-    piece.castShadow = true;
-    scene.add(piece);
-    debrisBodies.push({
-      mesh: piece, vx: (Math.random() - 0.5) * 4, vy: 2 + Math.random() * 4,
-      vz: (Math.random() - 0.5) * 4, vrx: (Math.random() - 0.5) * 8,
-      vry: (Math.random() - 0.5) * 8, vrz: (Math.random() - 0.5) * 8, settled: false
-    });
-  }
-  state.brokenDebris = debrisBodies;
-  playGateImpactSound();
-  try {
-    const profile = breakingVehicle.inspProfile;
-    if (profile) {
-      const eventId = 'escape-' + Date.now() + '-' + (state.barrier.group.position.x).toFixed(1) + '-' + index;
-      const report = {
-        eventId, id: 'INC-' + Date.now().toString(36).toUpperCase(),
-        timestamp: new Date().toISOString(), gateNumber: index + 1,
-        vehicle: {
-          plate: profile.vehicle.plate, brand: profile.vehicle.brand, model: profile.vehicle.model,
-          color: profile.vehicle.color, type: profile.vehicle.type, chassis: profile.vehicle.chassis,
-          engine: profile.vehicle.engine, registrationExpiry: profile.vehicle.registrationExpiry,
-          authority: profile.vehicle.authority
-        },
-        owner: profile.owner,
-        driver: {
-          name: profile.driver.name, nationalId: profile.driver.nationalId,
-          job: profile.driver.job, address: profile.driver.address, genderAr: profile.driver.genderAr
-        },
-        license: {
-          number: profile.license.number, type: profile.license.type, category: profile.license.category,
-          expiryDate: profile.license.expiryDate, statusAr: profile.license.statusAr
-        },
-        description: 'مركبة عبرت البوابة بسرعة عالية واصطدمت بالحاجز دون توقف. الحاجز مكسور.'
-      };
-      ReportsStore.add(report);
-      updateReportsBadge();
-      pushToast('بلاغ جديد على الموبايل: بوابة اتكسرت!', 'bad');
-    }
-  } catch(e) {}
-  pushToast('البوابة اتكسرت! عربية عبرت بسرعة عالية', 'bad');
 }
 
 function playGateImpactSound() {
@@ -6295,6 +6200,7 @@ function updateTruck(v, dt) {
     if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5) triggerPlayerKnockdown(v.speed);
     targetSpeed = 0;
   }
+  if (v._exiting) targetSpeed = v.maxSpeed;
   if (v.speed < targetSpeed) v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
   else if (v.speed > targetSpeed) {
     const brake = (targetSpeed === 0) ? cfg.hardBrake : cfg.decel;
@@ -6309,10 +6215,14 @@ function updateTruck(v, dt) {
     const maxCorrect = Math.min(Math.abs(laneDiff), dt * 3.2);
     v.pos.x += Math.sign(laneDiff) * maxCorrect;
   }
-  checkGateBreak(v, cfg, dt);
   checkVehiclePassedCheckpoint(v, prevZ);
-  const reachedEnd = (v.dirZ < 0 && v.pos.z < v.route.wrapZ) || (v.dirZ > 0 && v.pos.z > v.route.wrapZ);
-  if (reachedEnd) {
+  const reachedEnd = v._exiting
+    ? ((v.dirZ < 0 && v.pos.z < v._exitZ) || (v.dirZ > 0 && v.pos.z > v._exitZ))
+    : ((v.dirZ < 0 && v.pos.z < v.route.wrapZ) || (v.dirZ > 0 && v.pos.z > v.route.wrapZ));
+  if (reachedEnd && v._exiting) {
+    v._despawned = true;
+    if (v.group) v.group.visible = false;
+  } else if (reachedEnd) {
     if (v._hasTimedReport && v._recordSeed != null) {
       const before = ReportsStore.list.length;
       ReportsStore.list = ReportsStore.list.filter(r => r.targetRecordId !== v._recordSeed);
@@ -6326,8 +6236,6 @@ function updateTruck(v, dt) {
       v.correctionLaneX = v.route.laneX;
       v.speed = 0; v.wheelSpin = 0;
       v._clearedGates.clear();
-      v._breakingIntent = Math.random() < 0.005;
-      v._brokeGateIndex = -1;
       v._reportedPassed = false;
       v._parked = false;
       v._pullingOver = false;
@@ -6341,12 +6249,13 @@ function updateTruck(v, dt) {
       v.inspProfile.recordId = nextSeed;
       v._recordSeed = nextSeed;
     } else {
-      v.pos.z = v.route.wrapZ;
-      v.speed = 0;
-      v._despawned = true;
-      if (v.group) v.group.visible = false;
+      v._exiting = true;
+      v._exitZ = v.route.wrapZ + v.dirZ * 140;
+      v.speed = Math.max(v.speed, v.maxSpeed * 0.72);
+      v._hasTimedReport = false;
     }
   }
+  if (v._exiting) targetSpeed = v.maxSpeed;
   v.group.position.set(v.pos.x, 0, v.pos.z);
   if (v.wheelPivots.length > 0) {
     const deltaSpin = (v.speed * dt);
@@ -6400,6 +6309,7 @@ function updateBigTruck(v, dt) {
     if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5) triggerPlayerKnockdown(v.speed);
     targetSpeed = 0;
   }
+  if (v._exiting) targetSpeed = v.maxSpeed;
   if (v.speed < targetSpeed) v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
   else if (v.speed > targetSpeed) {
     const brake = (targetSpeed === 0) ? cfg.hardBrake : cfg.decel;
@@ -6418,10 +6328,14 @@ function updateBigTruck(v, dt) {
     const maxCorrect = Math.min(Math.abs(laneDiff), dt * 3.2);
     v.pos.x += Math.sign(laneDiff) * maxCorrect;
   }
-  checkGateBreak(v, cfg, dt);
   checkVehiclePassedCheckpoint(v, prevZ);
-  const reachedEnd = (v.dirZ < 0 && v.pos.z < v.route.wrapZ) || (v.dirZ > 0 && v.pos.z > v.route.wrapZ);
-  if (reachedEnd) {
+  const reachedEnd = v._exiting
+    ? ((v.dirZ < 0 && v.pos.z < v._exitZ) || (v.dirZ > 0 && v.pos.z > v._exitZ))
+    : ((v.dirZ < 0 && v.pos.z < v.route.wrapZ) || (v.dirZ > 0 && v.pos.z > v.route.wrapZ));
+  if (reachedEnd && v._exiting) {
+    v._despawned = true;
+    if (v.group) v.group.visible = false;
+  } else if (reachedEnd) {
     if (v._hasTimedReport && v._recordSeed != null) {
       const before = ReportsStore.list.length;
       ReportsStore.list = ReportsStore.list.filter(r => r.targetRecordId !== v._recordSeed);
@@ -6434,8 +6348,6 @@ function updateBigTruck(v, dt) {
       v.correctionLaneX = v.route.laneX;
       v.speed = 0; v.wheelSpin = 0;
       v._clearedGates.clear();
-      v._breakingIntent = Math.random() < 0.005;
-      v._brokeGateIndex = -1;
       v._reportedPassed = false;
       v._parked = false;
       v._pullingOver = false;
@@ -6454,12 +6366,13 @@ function updateBigTruck(v, dt) {
       v.inspProfile.recordId = nextSeed;
       v._recordSeed = nextSeed;
     } else {
-      v.pos.z = v.route.wrapZ;
-      v.speed = 0;
-      v._despawned = true;
-      if (v.group) v.group.visible = false;
+      v._exiting = true;
+      v._exitZ = v.route.wrapZ + v.dirZ * 140;
+      v.speed = Math.max(v.speed, v.maxSpeed * 0.72);
+      v._hasTimedReport = false;
     }
   }
+  if (v._exiting) targetSpeed = v.maxSpeed;
   v.group.position.set(v.pos.x, 0, v.pos.z);
   if (v.wheelPivots.length > 0) {
     const deltaSpin = (v.speed * dt);
@@ -6653,27 +6566,26 @@ function updateBigTruck(v, dt) {
       const root=gltf.scene || (gltf.scenes && gltf.scenes[0]); if(!root) throw new Error('Hiace GLB has no scene');
       root.updateMatrixWorld(true); let box=new THREE.Box3().setFromObject(root); const size=new THREE.Vector3(); box.getSize(size);
       const len=Math.max(size.x,size.z); if(!Number.isFinite(len)||len<0.05) throw new Error('Invalid Hiace dimensions');
-      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.4/len);
+      const proto=new THREE.Group(); proto.add(root); root.rotation.y += size.x>size.z ? Math.PI/2 : 0; root.scale.multiplyScalar(5.45/len);
       proto.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(proto); const center=new THREE.Vector3(); box.getCenter(center);
       root.position.x-=center.x; root.position.z-=center.z; root.position.y-=box.min.y; proto.updateMatrixWorld(true);
       box=new THREE.Box3().setFromObject(proto); box.getSize(size);
       proto.userData.trafficDimensions={halfWidth:Math.max(1.02,size.x/2),halfLength:Math.max(2.65,size.z/2),height:size.y};
       proto.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;if(n.material){const mats=Array.isArray(n.material)?n.material:[n.material];mats.forEach(m=>{if(m.map)m.map.colorSpace=THREE.SRGBColorSpace;});}}});
       hiaceProto=proto;
-      trucks.filter(v=>v._isMinibus && !v._despawned).forEach(v=>{
+      trucks.filter(v=>v._isMinibus).forEach(v=>{
         if(v._modelNode && v._modelNode.parent) v._modelNode.parent.remove(v._modelNode);
-        const model=hiaceProto.clone(true); model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}}); v.group.add(model); v._modelNode=model; v._trafficModelProto=hiaceProto;
+        const model=hiaceProto.clone(true); recolorTrafficBody(model, 0xf4f3ed); model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}}); v.group.add(model); v._modelNode=model; v._trafficModelProto=hiaceProto;
         const d=hiaceProto.userData.trafficDimensions; v.halfWidth=d.halfWidth; v.halfLength=d.halfLength; v.gates=findGatesForLane(v.laneX,v.halfWidth);
         if(v._plateGroup && v._plateGroup.parent) v._plateGroup.parent.remove(v._plateGroup);
         const pg=new THREE.Group(); addEgyptianPrivatePlates(pg,v.halfLength,plateDataFromProfile(v.inspProfile),'#e58b25'); v.group.add(pg); v._plateGroup=pg;
       });
-      spawnTrucks();
       console.info('[El Kamin] Toyota Hiace minibus loaded');
-    } catch(e){console.warn('[El Kamin] Hiace GLB setup failed; no substitute model will be used.',e);}
-  },undefined,err=>console.warn('[El Kamin] Hiace GLB could not load; no substitute model will be used.',err));
+    } catch(e){console.warn('[El Kamin] Hiace setup failed; using local minibus fallback.',e);}
+  },undefined,err=>console.warn('[El Kamin] Hiace GLB could not load; using local minibus fallback.',err));
 })();
 
-// No substitute delivery-truck model is used; a real Belban GLB is required.
+belbanProto = createBelbanDeliveryTruck();
 
 (function loadBigTruckModel() {
   const modelUrls = [
@@ -6891,7 +6803,7 @@ document.addEventListener('keydown', e => {
   if (e.code === 'KeyA') keys.a = true;
   if (e.code === 'KeyS') keys.s = true;
   if (e.code === 'KeyD') keys.d = true;
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { keys.shift = true; driveKeys.shift = true; }
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = true;
   if (!e.repeat) {
     if (e.code === 'Digit2') toggleBoom(1);
     if (e.code === 'Digit3') toggleBoom(2);
@@ -6905,7 +6817,7 @@ document.addEventListener('keyup', e => {
   if (e.code === 'KeyA') keys.a = false;
   if (e.code === 'KeyS') keys.s = false;
   if (e.code === 'KeyD') keys.d = false;
-  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { keys.shift = false; driveKeys.shift = false; }
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') keys.shift = false;
 });
 
 renderer.domElement.addEventListener('click', () => {
@@ -9416,6 +9328,8 @@ function aiAppendMessage(kind, text) {
 function aiShowError(msg) { aiAppendMessage('system', msg); aiSetMicState('error'); }
 
 function aiVoiceStartConversation(vehicle, kind) {
+  // تم تعطيل محادثة الصوت مع السائقين؛ الذكاء الاصطناعي متاح من شات الموبايل فقط.
+  return;
   if (conversationActive) return;
   if (inspectionActive) return;
   if (cinematic.active) return;
@@ -9495,25 +9409,9 @@ function aiVoiceEndConversation() {
   document.getElementById('convCloseBtn')?.addEventListener('click', () => { aiVoiceEndConversation(); });
 })();
 
-document.addEventListener('keydown', (e) => {
-  if (cinematic.active) return;
-  const t = e.target;
-  if (t) {
-    const tag = (t.tagName || '').toUpperCase();
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || t.isContentEditable) return;
-  }
-  if (e.code !== 'KeyT') return;
-  if (e.repeat) return;
-  if (inspectionActive) return;
-  if (conversationActive) { e.preventDefault(); aiVoiceEndConversation(); return; }
-  if (!pendingTarget) return;
-  e.preventDefault();
-  aiVoiceStartConversation(pendingTarget.vehicle, pendingTarget.kind);
-}, true);
-
 window.ElKaminAI = {
-  start: function (vehicle, kind) { aiVoiceStartConversation(vehicle, kind); },
-  end: function () { aiVoiceEndConversation(); },
+  start: function () {},
+  end: function () {},
   isActive: function () { return conversationActive; },
   config: AI_VOICE_CONFIG
 };
@@ -9522,7 +9420,7 @@ window.ElKaminAI = {
    === POLICE CAR SYSTEM — NEW ADDITION                       ===
    Loads player-drivable police car with third-person camera   ===
    ============================================================ */
-const POLICE_CAR_TARGET_LENGTH = 6.85;
+const POLICE_CAR_TARGET_LENGTH = 8.1;
 const POLICE_CAR_YAW_OFFSET = 0;
 const POLICE_CAR_LOOP_THRESHOLD = 450;
 const policeCar = {
@@ -9699,7 +9597,7 @@ function exitPoliceCar() {
   if (!drivingActive) return;
   drivingActive = false;
   CONFIG.collisionRadius = originalCollisionRadius;
-  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = false;
+  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = driveKeys.shift = false;
   const cosH = Math.cos(policeCar.heading);
   const sinH = Math.sin(policeCar.heading);
   const sideDist = policeCar.halfWidth + 1.8;
@@ -9756,11 +9654,9 @@ function exitPoliceCar() {
 }
 
 const DRIVE_CFG = {
-  maxSpeed: 30,
-  reverseMaxSpeed: 9,
-  accel: 44,
-  launchAccel: 44,
-  cruiseAccel: 13,
+  maxSpeed: 150,
+  reverseMaxSpeed: 24,
+  accel: 65,
   brake: 48,
   drag: 2.2,
   steerMax: 0.95,
@@ -9827,12 +9723,9 @@ function updateDrivingPhysics(dt) {
   if (driveKeys.a) steerInput = 1;
   else if (driveKeys.d) steerInput = -1;
 
-  if (throttle > 0) {
-    const launchAcceleration = driveKeys.shift
-      ? (Math.abs(policeCar.speed) < 12 ? DRIVE_CFG.launchAccel * 1.8 : DRIVE_CFG.cruiseAccel * 2.0)
-      : (Math.abs(policeCar.speed) < 9 ? DRIVE_CFG.launchAccel : DRIVE_CFG.cruiseAccel);
-    policeCar.speed += launchAcceleration * dt;
-  } else if (throttle < 0) {
+  const boostActive = driveKeys.shift && throttle > 0;
+  if (throttle > 0) policeCar.speed += DRIVE_CFG.accel * (boostActive ? 2.4 : 1) * dt;
+  else if (throttle < 0) {
     if (policeCar.speed > 0.5) policeCar.speed = Math.max(0, policeCar.speed - DRIVE_CFG.brake * dt);
     else policeCar.speed -= DRIVE_CFG.accel * 0.65 * dt;
   } else {
@@ -9858,8 +9751,7 @@ function updateDrivingPhysics(dt) {
   } else {
     policeCar.skidMarkDistance = 0;
   }
-  const activeMaxSpeed = driveKeys.shift && throttle > 0 ? DRIVE_CFG.maxSpeed * 1.4 : DRIVE_CFG.maxSpeed;
-  policeCar.speed = Math.max(-DRIVE_CFG.reverseMaxSpeed, Math.min(activeMaxSpeed, policeCar.speed));
+  policeCar.speed = Math.max(-DRIVE_CFG.reverseMaxSpeed, Math.min(boostActive ? DRIVE_CFG.maxSpeed * 1.55 : DRIVE_CFG.maxSpeed, policeCar.speed));
 
   const speedFactor = Math.min(1, Math.abs(policeCar.speed) / 8);
   const targetSteer = steerInput * DRIVE_CFG.steerMax * speedFactor;
@@ -9945,6 +9837,7 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (drivingActive) {
+    if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') { driveKeys.shift = true; e.preventDefault(); }
     if (e.code === 'KeyW') { driveKeys.w = true; e.preventDefault(); }
     if (e.code === 'KeyS') { driveKeys.s = true; e.preventDefault(); }
     if (e.code === 'KeyA') { driveKeys.a = true; e.preventDefault(); }
@@ -9961,6 +9854,7 @@ document.addEventListener('keydown', (e) => {
 }, true);
 
 document.addEventListener('keyup', (e) => {
+  if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') driveKeys.shift = false;
   if (e.code === 'KeyW') driveKeys.w = false;
   if (e.code === 'KeyS') driveKeys.s = false;
   if (e.code === 'KeyA') driveKeys.a = false;
@@ -10761,7 +10655,7 @@ function playCarBrakeSound() {
   policeCar.speed = 0;
   policeCar.steer = 0;
   policeCar.turnRate = 0;
-  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = false;
+  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = driveKeys.shift = false;
   if (policeCar.root) {
     policeCar.root.position.set(policeCar.position.x, 0, policeCar.position.z);
     policeCar.root.rotation.y = policeCar.heading;
@@ -10898,8 +10792,6 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.033);
   elapsed += dt;
   skyUniforms.time.value = elapsed;
-  // Keep the sky dome centered on the active camera so distant travel never reveals its dark outer edge.
-  if (skyMesh) skyMesh.position.copy(camera.position);
   if (cinematic.active) updateCinematic();
   if (cinematic.active && !cinematic.switched) {
     sunLight.target.position.set(0, 0, -80);
