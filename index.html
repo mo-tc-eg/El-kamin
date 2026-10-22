@@ -5410,22 +5410,19 @@ const TRUCK_ROUTES = [
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 100, wrapZ: CP.z + 470, model: 'byd' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 400, wrapZ: CP.z - 470, model: 'truck' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 72, wrapZ: CP.z + 470, model: 'truck' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 280, wrapZ: CP.z - 470, model: 'byd' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 280, wrapZ: CP.z + 470, model: 'truck' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 72, wrapZ: CP.z - 470, model: 'truck' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 50, wrapZ: CP.z + 470, model: 'byd' },
-    { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 320, wrapZ: CP.z - 470, model: 'byd' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 400, wrapZ: CP.z + 470, model: 'truck' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 200, wrapZ: CP.z - 470, model: 'belban' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 280, wrapZ: CP.z - 470, model: 'hiace' },
+  { laneX: -3.7,  dirZ: 1,  spawnZ: CP.z - 280, wrapZ: CP.z + 470, model: 'hiace' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 72, wrapZ: CP.z - 470, model: 'hiace' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 50, wrapZ: CP.z + 470, model: 'hiace' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 400, wrapZ: CP.z + 470, model: 'hiace' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 220, wrapZ: CP.z + 470, model: 'hiace' },
-  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 50, wrapZ: CP.z - 470, model: 'byd' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 350, wrapZ: CP.z + 470, model: 'truck' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 50, wrapZ: CP.z - 470, model: 'hiace' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 350, wrapZ: CP.z + 470, model: 'hiace' },
   // Extra passenger cars spread along both directions of the road.
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 125, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 265, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 385, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z + 115, wrapZ: CP.z + 470, model: 'byd' },
-  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z + 255, wrapZ: CP.z + 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z + 375, wrapZ: CP.z + 470, model: 'byd' },
 ];
 
@@ -5829,7 +5826,7 @@ function spawnTrucks() {
     const rng = seededRng(seed * 2654435761);
     const profile = generateProfile('passenger', rng);
     const isMinibus = route.model === 'hiace';
-    const isBelban = route.model === 'belban' && Math.random() < 0.18;
+    const isBelban = route.model === 'belban' && Math.random() < 0.42;
     if (isMinibus) applyMinibusProfile(profile, seed);
     if (isBelban) applyBelbanProfile(profile, seed);
     profile.recordId = seed;
@@ -6196,11 +6193,12 @@ function updateTruck(v, dt) {
   const playerDx = Math.abs(v.pos.x - playerPos.x);
   const playerAhead = (playerPos.z - v.pos.z) * v.dirZ;
   const playerStopGap = v.halfLength + CONFIG.collisionRadius + 1.15;
-  if (playerDx < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAhead > 0 && playerAhead < playerStopGap + Math.max(0, v.speed * 0.6)) {
-    if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5) triggerPlayerKnockdown(v.speed);
+  const blockedByPlayer = playerDx < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAhead > 0 && playerAhead < playerStopGap + Math.max(0, v.speed * 0.6);
+  if (blockedByPlayer) {
+    if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5 && !drivingActive) triggerPlayerKnockdown(v.speed);
     targetSpeed = 0;
   }
-  if (v._exiting) targetSpeed = v.maxSpeed;
+  if (v._exiting && !blockedByPlayer) targetSpeed = v.maxSpeed;
   if (v.speed < targetSpeed) v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
   else if (v.speed > targetSpeed) {
     const brake = (targetSpeed === 0) ? cfg.hardBrake : cfg.decel;
@@ -6305,11 +6303,12 @@ function updateBigTruck(v, dt) {
   const playerDx = Math.abs(v.pos.x - playerPos.x);
   const playerAhead = (playerPos.z - v.pos.z) * v.dirZ;
   const playerStopGap = v.halfLength + CONFIG.collisionRadius + 1.15;
-  if (playerDx < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAhead > 0 && playerAhead < playerStopGap + Math.max(0, v.speed * 0.6)) {
-    if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5) triggerPlayerKnockdown(v.speed);
+  const blockedByPlayer = playerDx < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAhead > 0 && playerAhead < playerStopGap + Math.max(0, v.speed * 0.6);
+  if (blockedByPlayer) {
+    if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5 && !drivingActive) triggerPlayerKnockdown(v.speed);
     targetSpeed = 0;
   }
-  if (v._exiting) targetSpeed = v.maxSpeed;
+  if (v._exiting && !blockedByPlayer) targetSpeed = v.maxSpeed;
   if (v.speed < targetSpeed) v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
   else if (v.speed > targetSpeed) {
     const brake = (targetSpeed === 0) ? cfg.hardBrake : cfg.decel;
@@ -6566,7 +6565,7 @@ function updateBigTruck(v, dt) {
       const root=gltf.scene || (gltf.scenes && gltf.scenes[0]); if(!root) throw new Error('Hiace GLB has no scene');
       root.updateMatrixWorld(true); let box=new THREE.Box3().setFromObject(root); const size=new THREE.Vector3(); box.getSize(size);
       const len=Math.max(size.x,size.z); if(!Number.isFinite(len)||len<0.05) throw new Error('Invalid Hiace dimensions');
-      const proto=new THREE.Group(); proto.add(root); root.rotation.y += size.x>size.z ? Math.PI/2 : 0; root.scale.multiplyScalar(5.45/len);
+      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.0/len);
       proto.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(proto); const center=new THREE.Vector3(); box.getCenter(center);
       root.position.x-=center.x; root.position.z-=center.z; root.position.y-=box.min.y; proto.updateMatrixWorld(true);
       box=new THREE.Box3().setFromObject(proto); box.getSize(size);
@@ -7810,7 +7809,8 @@ function generateProfile(kind, rng) {
   } else {
     const licenseStatusRoll = _r();
     let licStatus = 'valid';
-    if (licenseStatusRoll < 0.70) licStatus = 'valid';
+    if (licenseStatusRoll < 0.055) licStatus = 'missing';
+    else if (licenseStatusRoll < 0.70) licStatus = 'valid';
     else if (licenseStatusRoll < 0.85) licStatus = 'expired';
     else if (licenseStatusRoll < 0.95) licStatus = 'wrong_category';
     else licStatus = 'restricted';
@@ -7820,13 +7820,15 @@ function generateProfile(kind, rng) {
     const issueDate = _addDays(now, -_ri(800, 3200));
     const expiryDate = licStatus === 'expired' ? _addDays(now, -_ri(30, 500)) : _addDays(now, _ri(300, 2200));
     profile.license = {
-      number: `${_ri(100000, 999999)}-${_ri(10, 99)}`, type: 'رخصة قيادة خاصة', category,
-      issueDate: _fmtD(issueDate), expiryDate: _fmtD(expiryDate),
+      number: licStatus === 'missing' ? 'غير موجودة' : `${_ri(100000, 999999)}-${_ri(10, 99)}`, type: 'رخصة قيادة خاصة', category,
+      issueDate: licStatus === 'missing' ? '—' : _fmtD(issueDate), expiryDate: licStatus === 'missing' ? '—' : _fmtD(expiryDate),
       authority: `إدارة مرور ${govName}`,
-      restrictions: licStatus === 'restricted' ? 'يقتصر على القيادة نهارًا / نظارات طبية' : 'لا يوجد',
+      restrictions: licStatus === 'missing' ? 'السائق لا يحمل رخصة القيادة معه.' : licStatus === 'restricted' ? 'يقتصر على القيادة نهارًا / نظارات طبية' : 'لا يوجد',
       status: licStatus,
-      statusAr: licStatus === 'valid' ? 'سارية' : licStatus === 'expired' ? 'منتهية' : licStatus === 'wrong_category' ? 'فئة غير مطابقة' : 'سارية بقيود',
-      valid: licStatus === 'valid' || licStatus === 'restricted'
+      statusAr: licStatus === 'missing' ? 'لا يحمل الرخصة' : licStatus === 'valid' ? 'سارية' : licStatus === 'expired' ? 'منتهية' : licStatus === 'wrong_category' ? 'فئة غير مطابقة' : 'سارية بقيود',
+      valid: licStatus === 'valid' || licStatus === 'restricted',
+      missingExplanation: licStatus === 'missing' ? _pk(['والله يا باشا نسيتها في المطبخ وأنا نازل مستعجل.', 'معلش يا فندم، الرخصة في البيت على الترابيزة.', 'يا باشا كنت مغير المحفظة ونسيت أحط الرخصة فيها.', 'والنبي يا باشا نسيتها في المطبخ، بس أنا معايا البطاقة.']) : null,
+      withdrawn: false
     };
   }
   if (kind === 'loader') {
@@ -7973,8 +7975,9 @@ function generateProfile(kind, rng) {
     bodyFindings.push({ ...p, status, note, id: 'bd_' + i });
   });
   profile.body = bodyFindings;
-  profile.drugTest = _ch(0.07) ? 'positive' : 'negative';
+  profile.drugTest = _ch(0.12) ? 'positive' : 'negative';
   const violations = [];
+  if (profile.license.status === 'missing') violations.push({ key: 'lic_missing', evidence: 'السائق لم يقدم رخصة القيادة أثناء التفتيش.' });
   if (profile.license.status === 'expired') violations.push({ key: 'lic_expired', evidence: `تاريخ انتهاء الرخصة: ${profile.license.expiryDate}` });
   if (profile.license.status === 'wrong_category' && kind === 'passenger') violations.push({ key: 'lic_category', evidence: `فئة الرخصة: ${profile.license.category}` });
   if (profile.vehicle.status === 'expired') violations.push({ key: 'reg_expired', evidence: `تاريخ انتهاء الترخيص: ${profile.vehicle.registrationExpiry}` });
@@ -7990,7 +7993,7 @@ function generateProfile(kind, rng) {
     'passenger_count', 'suspicious_goods', 'fake_delivery', 'no_company_mark',
     'noisy_vehicle', 'blocked_view', 'duplicate_receipt', 'speeding', 'wrong_parking',
     'signal_ignore', 'no_document', 'safety_violation'];
-  const profileHasViolation = _ch(0.5);
+  const profileHasViolation = profile.license.status === 'missing' || _ch(0.5);
   if (!profileHasViolation) {
     violations.length = 0;
     profile.license.status = 'valid';
@@ -8002,7 +8005,6 @@ function generateProfile(kind, rng) {
     profile.trunk.forEach(it => { if (it.status === 'red' || it.status === 'yellow') it.status = 'green'; });
     profile.personal.forEach(it => { if (it.status === 'red' || it.status === 'yellow') it.status = 'green'; });
     profile.body.forEach(part => { part.status = 'green'; part.note = 'سليم ومطابق للفحص.'; });
-    profile.drugTest = 'negative';
     if (profile.company) {
       profile.company.status = 'valid';
       profile.company.statusAr = 'ساري';
@@ -8226,7 +8228,9 @@ function showInspectionMenu() {
     if(mb.overcharge) html += menuBtn('minibusFareViolation','gavel','مخالفة أجرة زائدة','تحصيل أجرة أعلى من التعريفة','danger');
   }
   html += menuBtn('docNatId', 'badge', 'بطاقة الرقم القومي', 'بيانات السائق الأساسية', 'gold');
-  html += menuBtn('docLicense', 'credit_card', 'رخصة القيادة', p.kind === 'loader' ? 'رخصة قيادة مهنية / معدات' : 'رخصة قيادة خاصة', 'gold');
+  html += menuBtn('docLicense', 'credit_card', 'رخصة القيادة', p.license.status === 'missing' ? 'السائق لا يحمل الرخصة' : p.kind === 'loader' ? 'رخصة قيادة مهنية / معدات' : 'رخصة قيادة خاصة', 'gold');
+  if (p.license.status !== 'missing' && !p.license.withdrawn) html += menuBtn('withdrawLicense', 'block', 'سحب رخصة القيادة', 'سحب الرخصة وتشغيل صوت إيقاف قصير', 'danger');
+  else if (p.license.withdrawn) html += menuBtn('withdrawLicense', 'block', 'تم سحب الرخصة', 'تم تسجيل سحب الرخصة بالفعل', '');
   const regTitle = p.kind === 'loader' ? 'بيانات المركبة' : 'رخصة العربية';
   const regSub = p.kind === 'loader' ? (p.vehicle && p.vehicle.isTransportTruck ? 'مستند مركبة النقل' : 'مستند المعدة الثقيلة / اللودر') : 'رخصة تسيير المركبة';
   html += menuBtn('docReg', 'directions_car', regTitle, regSub, 'gold');
@@ -8300,6 +8304,7 @@ function handleAction(action) {
     case 'minibusFareViolation': issueMinibusFareViolation(); break;
     case 'docNatId': renderNatIdScreen(); break;
     case 'docLicense': renderLicenseScreen(); break;
+    case 'withdrawLicense': withdrawDriverLicense(); break;
     case 'docReg': renderRegScreen(); break;
     case 'docPermit': renderPermitScreen(); break;
     case 'docPolice': renderPoliceScreen(); break;
@@ -8369,11 +8374,39 @@ function renderNatIdScreen() {
   attachBackButton();
 }
 
+function withdrawDriverLicense() {
+  const p = inspectionProfile;
+  if (!p || !p.license || p.license.status === 'missing') {
+    pushToast('السائق لا يحمل رخصة علشان تتسحب', 'warn');
+    renderInspectionMenu();
+    return;
+  }
+  if (p.license.withdrawn) { pushToast('الرخصة اتسحبت بالفعل', 'warn'); renderInspectionMenu(); return; }
+  p.license.withdrawn = true;
+  p.license.statusAr = 'تم سحبها';
+  try {
+    const audio = new Audio(new URL('stop.mp3', window.location.href).href);
+    audio.preload = 'auto'; audio.volume = 0.85;
+    const stopAtThreeSeconds = () => { try { if (audio.currentTime >= 3) { audio.pause(); audio.currentTime = 0; } } catch(e) {} };
+    audio.addEventListener('timeupdate', stopAtThreeSeconds);
+    audio.addEventListener('loadedmetadata', () => { if (Number.isFinite(audio.duration) && audio.duration > 3) audio.addEventListener('timeupdate', stopAtThreeSeconds); });
+    const playPromise = audio.play(); if (playPromise && playPromise.catch) playPromise.catch(() => {});
+    window.setTimeout(() => { try { audio.pause(); audio.currentTime = 0; } catch(e) {} }, 3000);
+  } catch(e) {}
+  pushToast('تم سحب رخصة القيادة', 'ok');
+  renderInspectionMenu();
+}
+
 function renderLicenseScreen() {
   const p = inspectionProfile;
   const l = p.license;
   const body = document.getElementById('inspBody');
   if (!body) return;
+  if (l.status === 'missing') {
+    body.innerHTML = `${renderBackHeader('رخصة القيادة', 'credit_card')}<div class="insp-note danger" style="font-size:16px;line-height:1.9"><b>السائق لا يحمل رخصة القيادة</b><br>السائق: ${_esc(p.driver.name)}<br><b>رد السائق:</b> «${_esc(l.missingExplanation || 'نسيتها في البيت يا باشا.')}»</div>`;
+    attachBackButton();
+    return;
+  }
   body.innerHTML = `${renderBackHeader('رخصة القيادة', 'credit_card')}
     <div class="doc-card license">
       <div class="doc-head">
@@ -8708,7 +8741,7 @@ function openManualViolationPicker() {
   const body = document.getElementById('inspBody');
   if (!body) return;
   const keys = Object.keys(VIOLATION_DEFS);
-  let html = `${renderBackHeader('تحرير مخالفة يدوية', 'edit')}<div class="insp-list" id="manualViolList">`;
+  let html = `${renderBackHeader('تحرير مخالفة يدوية', 'edit')}<div class="insp-note info" style="margin-bottom:10px">اختار المخالفة وحدد عدد النسخ اللي عايز تحررها.</div><label for="manualFineCopies" style="display:block;margin:8px 0;font-weight:800">عدد نسخ الغرامة</label><input id="manualFineCopies" type="number" min="1" max="99" value="1" inputmode="numeric" style="width:100%;padding:12px;border-radius:10px;border:1px solid #b89b52;background:var(--panel,#fff);color:inherit;margin-bottom:12px"><div class="insp-list" id="manualViolList">`;
   keys.forEach(k => {
     const def = VIOLATION_DEFS[k];
     html += `<button type="button" class="insp-item" data-manual-key="${k}">
@@ -8727,12 +8760,15 @@ function openManualViolationPicker() {
     btn.addEventListener('click', () => {
       const key = btn.getAttribute('data-manual-key');
       const def = VIOLATION_DEFS[key];
-      const manualVio = {
-        id: 'manual_' + key + '_' + Date.now(), key, name: def.name, fine: def.fine,
-        reason: def.reason, evidence: 'تحرير يدوي من الضابط.',
+      const qtyInput = document.getElementById('manualFineCopies');
+      const qty = Math.max(1, Math.min(99, Math.floor(Number(qtyInput && qtyInput.value) || 1)));
+      const stamp = Date.now();
+      const manualVios = Array.from({length: qty}, (_, i) => ({
+        id: 'manual_' + key + '_' + stamp + '_' + i, key, name: def.name, fine: def.fine,
+        reason: def.reason, evidence: `تحرير يدوي من الضابط — نسخة ${i + 1} من ${qty}.`,
         issued: false, cleared: false, inspected: true, manual: true
-      };
-      openViolationTicket([manualVio]);
+      }));
+      openViolationTicket(manualVios);
     });
   });
 }
@@ -9654,11 +9690,11 @@ function exitPoliceCar() {
 }
 
 const DRIVE_CFG = {
-  maxSpeed: 150,
-  reverseMaxSpeed: 24,
-  accel: 65,
-  brake: 48,
-  drag: 2.2,
+  maxSpeed: 48,
+  reverseMaxSpeed: 10,
+  accel: 22,
+  brake: 34,
+  drag: 4.2,
   steerMax: 0.95,
   steerSpeed: 7.0,
   steerReturn: 6.5,
