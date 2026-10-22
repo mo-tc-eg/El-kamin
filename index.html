@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -467,6 +465,27 @@ body.game-started #crosshair {
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 #interactPrompt.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== Police car prompt (new) ===== */
+#carPrompt {
+  position: fixed;
+  bottom: 42%;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 6100;
+  pointer-events: none;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+#carPrompt.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ===== end police car prompt ===== */
+
 .interact-key {
   width: 54px; height: 54px;
   border-radius: 12px;
@@ -2132,7 +2151,7 @@ body.game-started #topControls { opacity: 1; }
 </head>
 <body>
 <div id="loading">LOADING CHECKPOINT…</div>
-<div id="info">WASD to move · Shift to sprint · Mouse to look · Click to lock cursor · 1-4 to toggle gates · G to inspect · B phone · F repair gate · P pull over · R release · T talk</div>
+<div id="info">WASD to move · Shift to sprint · Mouse to look · Click to lock cursor · 1-4 to toggle gates · G to inspect · B phone · F repair gate · P pull over · R release · T talk · E enter/exit police car · Q horn · Space handbrake</div>
 <div id="crosshair"></div>
 
 <div id="topControls">
@@ -2144,6 +2163,12 @@ body.game-started #topControls { opacity: 1; }
 <div id="interactPrompt">
   <div class="interact-key">G</div>
   <div class="interact-label">دوس يا باشا G للتفتيش</div>
+</div>
+
+<!-- Police car prompt -->
+<div id="carPrompt">
+  <div class="interact-key">E</div>
+  <div class="interact-label">اركب عربية الشرطة</div>
 </div>
 
 <div class="toast-stack" id="toastStack"></div>
@@ -4258,7 +4283,6 @@ function createBuildingDoor(options = {}) {
   doorLeaf.position.set(0, DOOR_H / 2, 0);
   doorLeaf.castShadow = true; doorLeaf.receiveShadow = true;
   root.add(doorLeaf);
-  // Paper notice attached to the middle of the checkpoint booth door.
   const noticePaperMat = new THREE.MeshStandardMaterial({ color: 0xf4f0e6, roughness: 0.92, metalness: 0.0 });
   const noticePaper = new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.40), noticePaperMat);
   noticePaper.position.set(-0.08, 1.72, DOOR_D / 2 + 0.012);
@@ -4730,7 +4754,6 @@ function createBuilding(x, z, w, h, d, rotY = 0) {
     frame.scale.z = 0.25;
     group.add(frame);
   }
-  // Desert houses intentionally have no doors.
   const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.62, 0.95, 12), tankMat);
   tank.position.set(w * 0.25, h + 0.66, -d * 0.18);
   tank.castShadow = true;
@@ -4966,6 +4989,8 @@ const SAND_LOADER_ROUTES = [
   { laneX: -3.7, dirZ: 1, spawnZ: CP.z - 330, wrapZ: CP.z + 470, dirt: 0.55 },
   { laneX: 3.7, dirZ: -1, spawnZ: CP.z + 260, wrapZ: CP.z - 470, dirt: 0.32 },
   { laneX: -3.7, dirZ: 1, spawnZ: CP.z - 150, wrapZ: CP.z + 470, dirt: 0.42 },
+    { laneX: 3.7, dirZ: -1, spawnZ: CP.z + 380, wrapZ: CP.z - 470, dirt: 0.25 },
+  { laneX: -3.7, dirZ: 1, spawnZ: CP.z - 250, wrapZ: CP.z + 470, dirt: 0.48 },
 ];
 
 const _tmpBoxA = new THREE.Box3();
@@ -5391,6 +5416,12 @@ const TRUCK_ROUTES = [
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 280, wrapZ: CP.z + 470, model: 'truck' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 72, wrapZ: CP.z - 470, model: 'truck' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 50, wrapZ: CP.z + 470, model: 'byd' },
+    { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 320, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 400, wrapZ: CP.z + 470, model: 'truck' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 200, wrapZ: CP.z - 470, model: 'truck' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 220, wrapZ: CP.z + 470, model: 'byd' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 50, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 350, wrapZ: CP.z + 470, model: 'truck' },
 ];
 
 const trucks = [];
@@ -5650,7 +5681,6 @@ function createHeavyPersonLuxurySUV() {
   const light = new THREE.MeshStandardMaterial({ color: 0xf4f4ef, emissive: 0xe8f0ff, emissiveIntensity: 1.3, roughness: 0.12 });
   const red = new THREE.MeshStandardMaterial({ color: 0x8e0808, emissive: 0x390000, emissiveIntensity: 0.6 });
   function part(geo, mat, x, y, z) { const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m; }
-  // Oversized, bespoke executive SUV silhouette; front faces +Z to match traffic models.
   part(new THREE.BoxGeometry(3.12, 1.18, 7.65), paint, 0, 1.18, 0);
   part(new THREE.BoxGeometry(2.82, 0.86, 3.55), paint, 0, 2.0, -0.72);
   part(new THREE.BoxGeometry(2.58, 0.68, 2.85), glass, 0, 2.06, -0.68);
@@ -5670,7 +5700,6 @@ function createHeavyPersonLuxurySUV() {
     const hub = part(new THREE.CylinderGeometry(0.13, 0.13, 0.405, 16), trim, x, 0.62, z);
     hub.rotation.z = Math.PI / 2;
   }
-  // Distinctive roof rails and discreet grille details.
   for (const x of [-1.12, 1.12]) part(new THREE.BoxGeometry(0.07, 0.09, 2.45), chrome, x, 2.53, -0.82);
   for (let i=0;i<5;i++) part(new THREE.BoxGeometry(0.27,0.035,0.035), chrome, -0.54+i*0.27, 1.23, 3.93);
   g.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
@@ -5715,7 +5744,6 @@ function spawnTrucks() {
     profile.recordId = seed;
     const colorDef = TRUCK_COLORS[routeIndex % TRUCK_COLORS.length];
     const transitKind = 'car';
-    // The special BMW is deliberately extremely rare and only spawns in the lane approaching the checkpoint.
     const isHeavyPersonVehicle = route.laneX > 0 && route.dirZ < 0 && Math.random() < 0.003;
     const selectedProto = isHeavyPersonVehicle
       ? (realCarProtos.length ? realCarProtos[0] : createHeavyPersonLuxurySUV())
@@ -5870,8 +5898,6 @@ function addBigTruckRearDecal(group, imageUrl) {
   });
   const decal = new THREE.Mesh(geometry, material);
   decal.name = 'UniqueBigTruckRearDecal';
-  // Place the decal on the actual rear face of the truck cargo box (local -Z),
-  // facing outward from the rear rather than toward the cab/front.
   decal.position.set(0, 2.30, -bigTruckSize.halfLength - 0.025);
   decal.rotation.y = Math.PI;
   decal.renderOrder = 5;
@@ -5917,7 +5943,6 @@ function spawnBigTrucks() {
   model.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
   const group = new THREE.Group();
   group.add(model);
-  // Each supplied image is assigned to one truck only; the fifth truck stays plain.
   addBigTruckRearDecal(group, BIG_TRUCK_REAR_DECAL_URLS[truckIndex] || null);
   const plateData = plateDataFromProfile(profile);
   addEgyptianPrivatePlates(group, bigTruckSize.halfLength, plateData, '#c9282d', undefined, 1.10);
@@ -6111,6 +6136,14 @@ function updateDebris(dt) {
   }
 }
 
+function vehicleBlockedByPoliceCar(v) {
+  if (!policeCar.loaded || !policeCar.root) return false;
+  const dx = Math.abs(v.pos.x - policeCar.position.x);
+  const dz = (policeCar.position.z - v.pos.z) * v.dirZ;
+  const stopGap = v.halfLength + policeCar.halfLength + 1.5;
+  return dx < v.halfWidth + policeCar.halfWidth + 0.3 && dz > 0 && dz < stopGap + Math.max(0, v.speed * 0.6);
+}
+
 function updateTruck(v, dt) {
   if (v.paused || v._despawned) { v.speed = 0; makeVehicleBox(v.pos.x, v.pos.z, v.halfWidth, v.halfLength, v.box); return; }
   const cfg = TRUCK;
@@ -6141,6 +6174,7 @@ function updateTruck(v, dt) {
   targetSpeed = applyVehicleFollowing(v, sandLoaders, cfg, targetSpeed);
   targetSpeed = applyVehicleFollowing(v, trucks, cfg, targetSpeed);
   targetSpeed = applyVehicleFollowing(v, bigTrucks, cfg, targetSpeed);
+    if (vehicleBlockedByPoliceCar(v)) targetSpeed = 0;
   const playerDx = Math.abs(v.pos.x - playerPos.x);
   const playerAhead = (playerPos.z - v.pos.z) * v.dirZ;
   const playerStopGap = v.halfLength + CONFIG.collisionRadius + 1.15;
@@ -6421,7 +6455,6 @@ function updateBigTruck(v, dt) {
   function applyLoadedTemplate(template) {
     realCarProtos.push(template);
     modelCount++;
-    // Replace already-spawned traffic too, so the new models appear immediately.
     const existing = trucks.filter(v => v && v.group && v._modelNode);
     existing.forEach((v, i) => {
       const proto = realCarProtos[(i + modelCount - 1) % realCarProtos.length];
@@ -6498,7 +6531,6 @@ function updateBigTruck(v, dt) {
 })();
 
 (function loadBigTruckModel() {
-  // Realistic CC0 flatbed lorry GLB; use the previous GLB as a secondary fallback.
   const modelUrls = [
     'https://cdn.3dassets.dev/assets/38713/v1/model.glb',
     'https://raw.githubusercontent.com/Ahnuf-Karim-Chowdhury/computerGraphics3js/main/public/models/truck.glb'
@@ -6720,7 +6752,7 @@ document.addEventListener('keydown', e => {
     if (e.code === 'Digit3') toggleBoom(2);
     if (e.code === 'KeyF') tryRepairNearestGate();
     if (e.code === 'KeyP') tryPullOverNearestVehicle();
-    if (e.code === 'KeyR') tryReleaseEscortedVehicle();
+       if (e.code === 'KeyR' && !drivingActive) tryReleaseEscortedVehicle();
   }
 });
 document.addEventListener('keyup', e => {
@@ -6735,6 +6767,7 @@ renderer.domElement.addEventListener('click', () => {
   if (cinematic.active) return;
   if (inspectionActive) return;
   if (conversationActive) return;
+  if (drivingActive) return;
   if (document.getElementById('settingsUI')?.classList.contains('open')) return;
   controls.lock();
   try {
@@ -6837,6 +6870,7 @@ function updatePlayer(dt) {
 }
 
 function triggerPlayerKnockdown(impactSpeed) {
+  if (drivingActive) return;
   if (playerKnockedDown || playerRecovering || impactCooldown > 0 || impactSpeed < 7.5) return;
   playerKnockedDown = true; knockdownTime = 0; impactCooldown = 4;
   knockdownStartY = controls.getObject().position.y;
@@ -7171,10 +7205,6 @@ const MilitarySoldiers = {
     x: ROAD.halfWidth + 5, y: towerFloorY, z: CP.z + 25,
     rotY: -Math.PI / 2, role: 'tower',
     scanRange: 0.75, scanSpeed: 0.48, scanOffset: 2.3,
-  });
-  this.spawn('patrol', {
-    x: -(ROAD.halfWidth + 1.2), y: CONFIG.sidewalkWalkHeight, z: CP.z + 12,
-    rotY: Math.PI / 2, role: 'patrol',
   });
   this.spawn('chairOfficer', {
     x: 17.2, y: CONFIG.sidewalkWalkHeight, z: CP.z + 13,
@@ -7986,7 +8016,6 @@ function applyTransportCargoManifest(profile, rng) {
     profile.trunk = [{ name: cargo.name, status: 'green', note: `${cargo.note} خط السير: من ${cargo.origin} إلى ${cargo.destination}.`, qty: cargo.qty, id: 'cargo_main' }];
     if (r() < 0.28) profile.trunk.push({ name: 'مستند شحن وفاتورة حمولة', status: 'green', note: `مستند الشحنة من ${cargo.origin} إلى ${cargo.destination}.`, qty: 1, id: 'cargo_docs' });
   }
-  // Remove any old generated cargo finding because the original generic loader contents were replaced.
   profile.violations = (profile.violations || []).filter(v => v.key !== 'cargo_prohibited');
   profile.violations.forEach((v, i) => { v.id = 'vio_' + i; });
   return profile;
@@ -9317,6 +9346,410 @@ window.ElKaminAI = {
   config: AI_VOICE_CONFIG
 };
 
+/* ============================================================
+   === POLICE CAR SYSTEM — NEW ADDITION                       ===
+   Loads player-drivable police car with third-person camera   ===
+   ============================================================ */
+const POLICE_CAR_TARGET_LENGTH = 9.5;
+const POLICE_CAR_YAW_OFFSET = 0;
+const POLICE_CAR_LOOP_THRESHOLD = 450;
+const policeCar = {
+  root: null,
+  model: null,
+  loaded: false,
+  position: new THREE.Vector3(10, 0, -73),
+  heading: Math.PI,
+  speed: 0,
+  steer: 0,
+  turnRate: 0,
+  halfWidth: 1.2,
+  halfLength: 2.9,
+  box: new THREE.Box3(),
+  soundVehicle: { group: null },
+  trafficVehicle: null,
+  idleTime: 0,
+};
+
+let drivingActive = false;
+let originalCollisionRadius = CONFIG.collisionRadius;
+const driveKeys = { w: false, a: false, s: false, d: false, space: false };
+let policeHornLoaded = false;
+function createPolicePlateTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 640;
+  canvas.height = 200;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#f4f3ed';
+  ctx.fillRect(0, 0, 640, 200);
+  ctx.fillStyle = '#1a3560';
+  ctx.fillRect(0, 0, 640, 68);
+  ctx.fillStyle = '#ffffff';
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.font = 'bold 36px Arial, sans-serif';
+  ctx.fillText('Police', 24, 36);
+  ctx.textAlign = 'right';
+  ctx.font = 'bold 38px Tahoma, Arial, sans-serif';
+  ctx.fillText('الشرطة', 616, 36);
+  ctx.fillStyle = '#111820';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 74px Tahoma, Arial, sans-serif';
+  ctx.fillText('ل ه س', 175, 140);
+  ctx.fillText('٣ ي ١٢', 465, 140);
+  ctx.fillStyle = '#111820';
+  ctx.fillRect(320, 84, 4, 100);
+  ctx.strokeStyle = '#25282b';
+  ctx.lineWidth = 5;
+  ctx.strokeRect(2.5, 2.5, 635, 195);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return tex;
+}
+(function loadPoliceCar() {
+  const loader = new GLTFLoader();
+  const url = HF_MODEL_BASE + 'calgary_police_ford_explorer.glb';
+  loader.load(url, (gltf) => {
+    try {
+      const root = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+      if (!root) { console.warn('[El Kamin] Police car GLB has no scene'); return; }
+      root.traverse((node) => {
+        if (!node.isMesh) return;
+        node.castShadow = true;
+        node.receiveShadow = true;
+        node.frustumCulled = false;
+        if (node.material) {
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          mats.forEach((m) => {
+            if (!m) return;
+            if (m.map) m.map.colorSpace = THREE.SRGBColorSpace;
+            if (m.emissiveMap) m.emissiveMap.colorSpace = THREE.SRGBColorSpace;
+            if ('roughness' in m && m.roughness > 0.95) m.roughness = 0.95;
+            if ('envMapIntensity' in m) m.envMapIntensity = 1.2;
+            m.needsUpdate = true;
+          });
+        }
+      });
+      root.updateMatrixWorld(true);
+      let box = new THREE.Box3().setFromObject(root);
+      const size = new THREE.Vector3(); box.getSize(size);
+      const horizLen = Math.max(size.x, size.z) || 1;
+      const scale = POLICE_CAR_TARGET_LENGTH / horizLen;
+      root.scale.setScalar(scale);
+      if (size.x > size.z * 1.05) root.rotation.y = -Math.PI / 2;
+      root.rotation.y += POLICE_CAR_YAW_OFFSET;
+      root.updateMatrixWorld(true);
+      box.setFromObject(root);
+      const center = new THREE.Vector3(); box.getCenter(center);
+      root.position.x -= center.x;
+      root.position.z -= center.z;
+      root.position.y -= box.min.y;
+      root.updateMatrixWorld(true);
+      const container = new THREE.Group();
+      container.add(root);
+      container.position.set(policeCar.position.x, 0, policeCar.position.z);
+      container.rotation.y = policeCar.heading;
+      scene.add(container);
+      container.updateMatrixWorld(true);
+      const finalBox = new THREE.Box3().setFromObject(container);
+      const finalSize = new THREE.Vector3(); finalBox.getSize(finalSize);
+      policeCar.halfWidth = Math.max(0.9, finalSize.x / 2);
+      policeCar.halfLength = Math.max(2.1, finalSize.z / 2);
+      policeCar.root = container;
+      policeCar.model = root;
+      policeCar.soundVehicle.group = container;
+      policeCar.loaded = true;
+            root.traverse((node) => {
+        if (!node.isMesh) return;
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((m) => {
+          if (!m) return;
+          const nameCheck = ((m.name || '') + ' ' + (node.name || '')).toLowerCase();
+          if (/glass|window|windscreen|windshield/i.test(nameCheck)) {
+            m.transparent = true;
+            m.opacity = Math.max(m.opacity || 0.5, 0.55);
+            m.roughness = Math.max(0.05, Math.min(m.roughness || 0.1, 0.15));
+            m.metalness = 0.05;
+            m.envMapIntensity = 2.0;
+            m.needsUpdate = true;
+          }
+        });
+      });
+      const carLight = new THREE.PointLight(0xfff0d0, 2.2, 22, 2);
+      carLight.position.set(0, 5, 0);
+      container.add(carLight);
+           const plateTex = createPolicePlateTexture();
+      const plateMat = new THREE.MeshStandardMaterial({ map: plateTex, roughness: 0.45, metalness: 0.1, side: THREE.DoubleSide, toneMapped: false });
+      const pw = 0.46, ph = pw * 0.3125;
+      const fPlate = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), plateMat);
+      fPlate.position.set(0, 0.58, policeCar.halfLength + 0.014);
+      fPlate.renderOrder = 5;
+      container.add(fPlate);
+      const rPlate = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), plateMat);
+      rPlate.position.set(0, 0.68, -policeCar.halfLength - 0.014);
+      rPlate.rotation.y = Math.PI;
+      rPlate.renderOrder = 5;
+      container.add(rPlate);
+      makeVehicleBox(policeCar.position.x, policeCar.position.z, policeCar.halfWidth, policeCar.halfLength, policeCar.box);
+      console.info('[El Kamin] Police car loaded:', finalSize.x.toFixed(2) + 'x' + finalSize.z.toFixed(2));
+    } catch (e) {
+      console.warn('[El Kamin] Police car setup failed:', e);
+    }
+  }, undefined, (err) => {
+    console.warn('[El Kamin] Police car failed to load:', err);
+  });
+})();
+
+function nearPoliceCar() {
+  if (!policeCar.loaded) return false;
+  const dx = policeCar.position.x - playerPos.x;
+  const dz = policeCar.position.z - playerPos.z;
+  return Math.hypot(dx, dz) < Math.max(4.6, policeCar.halfLength + 2);
+}
+
+function enterPoliceCar() {
+  if (!policeCar.loaded || !policeCar.root || drivingActive) return;
+  drivingActive = true;
+  originalCollisionRadius = CONFIG.collisionRadius;
+  CONFIG.collisionRadius = policeCar.halfWidth;
+  try { if (controls.isLocked) controls.unlock(); } catch (e) {}
+  const promptEl = document.getElementById('carPrompt');
+  if (promptEl) promptEl.classList.remove('show');
+  const inspPrompt = document.getElementById('interactPrompt');
+  if (inspPrompt) inspPrompt.classList.remove('show');
+  updateDrivingCamera(1.0);
+  pushToast('اتفضل — W/S للحركة، A/D للتوجيه، Space فرامل يد، Q كلاكس، E للخروج', 'ok');
+}
+function exitPoliceCar() {
+  if (!drivingActive) return;
+  drivingActive = false;
+  CONFIG.collisionRadius = originalCollisionRadius;
+  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = false;
+  const cosH = Math.cos(policeCar.heading);
+  const sinH = Math.sin(policeCar.heading);
+  const sideDist = policeCar.halfWidth + 1.8;
+  const backDist = policeCar.halfLength + 1.8;
+  const offsets = [
+    { x: cosH * sideDist, z: -sinH * sideDist },
+    { x: -cosH * sideDist, z: sinH * sideDist },
+    { x: sinH * backDist, z: cosH * backDist },
+    { x: -sinH * backDist, z: -cosH * backDist },
+    { x: cosH * sideDist + sinH * backDist, z: -sinH * sideDist + cosH * backDist },
+    { x: -cosH * sideDist + sinH * backDist, z: sinH * sideDist + cosH * backDist },
+    { x: cosH * sideDist - sinH * backDist, z: -sinH * sideDist - cosH * backDist },
+    { x: -cosH * sideDist - sinH * backDist, z: sinH * sideDist - cosH * backDist },
+  ];
+  let placed = false;
+  const r = CONFIG.collisionRadius;
+  for (const off of offsets) {
+    const testX = policeCar.position.x + off.x;
+    const testZ = policeCar.position.z + off.z;
+    const testBox = new THREE.Box3(
+      new THREE.Vector3(testX - r, 0.1, testZ - r),
+      new THREE.Vector3(testX + r, 2.8, testZ + r)
+    );
+    let blocked = false;
+    for (let i = 0; i < colliders.length; i++) {
+      if (colliders[i].intersectsBox(testBox)) { blocked = true; break; }
+    }
+    if (!blocked) {
+      for (let i = 0; i < dynamicColliders.length; i++) {
+        if (dynamicColliders[i] === policeCar.box) continue;
+        if (dynamicColliders[i].intersectsBox(testBox)) { blocked = true; break; }
+      }
+    }
+    if (!blocked) {
+      playerPos.set(testX, CONFIG.playerHeight, testZ);
+      playerVel.set(0, 0, 0);
+      currentGroundY = groundHeightAt(testX);
+      placed = true;
+      break;
+    }
+  }
+  if (!placed) {
+    const fx = policeCar.position.x + cosH * (policeCar.halfWidth + 1.4);
+    const fz = policeCar.position.z - sinH * (policeCar.halfWidth + 1.4);
+    playerPos.set(fx, CONFIG.playerHeight, fz);
+    playerVel.set(0, 0, 0);
+    currentGroundY = groundHeightAt(fx);
+  }
+  keys.w = keys.a = keys.s = keys.d = keys.shift = false;
+  controls.getObject().position.set(playerPos.x, currentGroundY + CONFIG.playerHeight, playerPos.z);
+  try { controls.lock(); } catch (e) {}
+}
+
+const DRIVE_CFG = {
+  maxSpeed: 90,
+  reverseMaxSpeed: 18,
+  accel: 25,
+  brake: 40,
+  drag: 4.0,
+  steerMax: 0.62,
+  steerSpeed: 6.0,
+  steerReturn: 8.0,
+  handbrakeFriction: 60,
+  turnSpeedFactor: 1.8,
+};
+
+function checkPoliceCarCollision(x, z) {
+  if (!policeCar.loaded) return false;
+  const testBox = new THREE.Box3();
+  makeVehicleBox(x, z, policeCar.halfWidth, policeCar.halfLength, testBox);
+  for (let i = 0; i < colliders.length; i++) if (colliders[i].intersectsBox(testBox)) return true;
+  for (let i = 0; i < boomBarriers.length; i++) {
+    const s = boomBarriers[i];
+    if (!s || s.broken) continue;
+    if (s.progress > 0.5) continue;
+    const span = gateWorldSpan(s.barrier);
+    const gateZ = s.barrier.group.position.z;
+    if (Math.abs(z - gateZ) < policeCar.halfLength + 0.4) {
+      if (x + policeCar.halfWidth > span.x0 - 0.3 && x - policeCar.halfWidth < span.x1 + 0.3) return true;
+    }
+  }
+  const allV = [...sandLoaders, ...trucks, ...bigTrucks];
+  for (const v of allV) {
+    if (!v || v._despawned) continue;
+    if (Math.abs(v.pos.x - x) > policeCar.halfWidth + v.halfWidth + 0.3) continue;
+    if (Math.abs(v.pos.z - z) > policeCar.halfLength + v.halfLength + 0.3) continue;
+    const overlapX = (policeCar.halfWidth + v.halfWidth) - Math.abs(v.pos.x - x);
+    const overlapZ = (policeCar.halfLength + v.halfLength) - Math.abs(v.pos.z - z);
+    if (overlapX > 0.15 && overlapZ > 0.15) return true;
+  }
+  return false;
+}
+
+function updateDrivingPhysics(dt) {
+  if (!policeCar.loaded || !drivingActive) return;
+  let throttle = 0;
+  if (driveKeys.w) throttle = 1;
+  else if (driveKeys.s) throttle = -1;
+  let steerInput = 0;
+  if (driveKeys.a) steerInput = 1;
+  else if (driveKeys.d) steerInput = -1;
+
+  if (throttle > 0) policeCar.speed += DRIVE_CFG.accel * dt;
+  else if (throttle < 0) {
+    if (policeCar.speed > 0.5) policeCar.speed = Math.max(0, policeCar.speed - DRIVE_CFG.brake * dt);
+    else policeCar.speed -= DRIVE_CFG.accel * 0.65 * dt;
+  } else {
+    if (policeCar.speed > 0) policeCar.speed = Math.max(0, policeCar.speed - DRIVE_CFG.drag * dt);
+    else if (policeCar.speed < 0) policeCar.speed = Math.min(0, policeCar.speed + DRIVE_CFG.drag * dt);
+  }
+  if (driveKeys.space) policeCar.speed = Math.max(0, policeCar.speed - DRIVE_CFG.handbrakeFriction * dt);
+  policeCar.speed = Math.max(-DRIVE_CFG.reverseMaxSpeed, Math.min(DRIVE_CFG.maxSpeed, policeCar.speed));
+
+  const speedFactor = Math.min(1, Math.abs(policeCar.speed) / 8);
+  const targetSteer = steerInput * DRIVE_CFG.steerMax * speedFactor;
+  const steerAccel = steerInput !== 0 ? DRIVE_CFG.steerSpeed : DRIVE_CFG.steerReturn;
+  policeCar.steer += (targetSteer - policeCar.steer) * Math.min(1, steerAccel * dt);
+
+  if (Math.abs(policeCar.speed) > 0.1) {
+    const speedRatio = Math.min(1, Math.abs(policeCar.speed) / DRIVE_CFG.maxSpeed);
+      const targetTurnRate = policeCar.steer * DRIVE_CFG.turnSpeedFactor * (0.3 + speedRatio * 0.7) * Math.sign(policeCar.speed);
+    policeCar.turnRate += (targetTurnRate - policeCar.turnRate) * Math.min(1, 9 * dt);
+    policeCar.heading += policeCar.turnRate * dt;
+  }
+
+  const dx = Math.sin(policeCar.heading) * policeCar.speed * dt;
+  const dz = Math.cos(policeCar.heading) * policeCar.speed * dt;
+  const testX = policeCar.position.x + dx;
+  if (!checkPoliceCarCollision(testX, policeCar.position.z)) policeCar.position.x = testX;
+  else policeCar.speed *= 0.4;
+  const testZ = policeCar.position.z + dz;
+  if (!checkPoliceCarCollision(policeCar.position.x, testZ)) policeCar.position.z = testZ;
+  else policeCar.speed *= 0.4;
+
+  let wrapped = false;
+  if (policeCar.position.z > ROAD.centerZ + POLICE_CAR_LOOP_THRESHOLD) {
+    policeCar.position.z -= POLICE_CAR_LOOP_THRESHOLD * 2;
+    wrapped = true;
+  } else if (policeCar.position.z < ROAD.centerZ - POLICE_CAR_LOOP_THRESHOLD) {
+    policeCar.position.z += POLICE_CAR_LOOP_THRESHOLD * 2;
+    wrapped = true;
+  }
+  
+
+  policeCar.root.position.set(policeCar.position.x, 0, policeCar.position.z);
+  policeCar.root.rotation.y = policeCar.heading;
+  makeVehicleBox(policeCar.position.x, policeCar.position.z, policeCar.halfWidth, policeCar.halfLength, policeCar.box);
+  playerPos.set(policeCar.position.x, CONFIG.playerHeight, policeCar.position.z);
+     updateDrivingCamera(dt, wrapped);
+}function updateDrivingCamera(dt, snap) {
+  if (!policeCar.loaded) return;
+  const backDistance = Math.max(6.5, policeCar.halfLength * 1.9);
+  const heightDistance = Math.max(3.0, policeCar.halfLength * 0.85);
+  const lookAhead = policeCar.halfLength * 0.5;
+  const sinH = Math.sin(policeCar.heading);
+  const cosH = Math.cos(policeCar.heading);
+  const desiredX = policeCar.position.x - sinH * backDistance;
+  const desiredZ = policeCar.position.z - cosH * backDistance;
+  const desiredY = heightDistance;
+  if (snap) {
+    camera.position.x = desiredX;
+    camera.position.y = desiredY;
+    camera.position.z = desiredZ;
+  } else {
+    const blend = 1 - Math.exp(-14 * Math.min(dt, 0.2));
+    camera.position.x += (desiredX - camera.position.x) * blend;
+    camera.position.y += (desiredY - camera.position.y) * blend;
+    camera.position.z += (desiredZ - camera.position.z) * blend;
+  }
+  const lookX = policeCar.position.x + sinH * lookAhead;
+  const lookY = 1.4;
+  const lookZ = policeCar.position.z + cosH * lookAhead;
+  camera.lookAt(lookX, lookY, lookZ);
+}
+function playPoliceHorn() {
+  if (!policeCar.loaded || !policeCar.soundVehicle.group) return;
+  try { elkPlayVehicleSound(policeCar.soundVehicle, 'horn', elkHornBuffer, 1.0, 150); }
+  catch (e) {}
+}
+
+function updateCarPrompt() {
+  const promptEl = document.getElementById('carPrompt');
+  if (!promptEl) return;
+  if (!policeCar.loaded || drivingActive || inspectionActive || conversationActive || cinematic.active) {
+    promptEl.classList.remove('show');
+    return;
+  }
+  if (nearPoliceCar()) promptEl.classList.add('show');
+  else promptEl.classList.remove('show');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (cinematic.active) return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if (e.code === 'KeyE' && !e.repeat) {
+       if (e.code === 'Space') { if (!e.repeat && Math.abs(policeCar.speed) > 2) playCarBrakeSound(); driveKeys.space = true; e.preventDefault(); }
+    if (e.code === 'KeyQ' && !e.repeat) { playPoliceHorn(); e.preventDefault(); }
+    if (e.code === 'KeyH' && !e.repeat) { togglePoliceSiren(); e.preventDefault(); }
+    if (e.code === 'KeyR' && !e.repeat) { returnToCheckpoint(); e.preventDefault(); }
+    else if (nearPoliceCar()) { e.preventDefault(); enterPoliceCar(); }
+    return;
+  }
+  if (drivingActive) {
+    if (e.code === 'KeyW') { driveKeys.w = true; e.preventDefault(); }
+    if (e.code === 'KeyS') { driveKeys.s = true; e.preventDefault(); }
+    if (e.code === 'KeyA') { driveKeys.a = true; e.preventDefault(); }
+    if (e.code === 'KeyD') { driveKeys.d = true; e.preventDefault(); }
+    if (e.code === 'Space') { driveKeys.space = true; e.preventDefault(); }
+    if (e.code === 'KeyQ' && !e.repeat) { playPoliceHorn(); e.preventDefault(); }
+  }
+}, true);
+
+document.addEventListener('keyup', (e) => {
+  if (e.code === 'KeyW') driveKeys.w = false;
+  if (e.code === 'KeyS') driveKeys.s = false;
+  if (e.code === 'KeyA') driveKeys.a = false;
+  if (e.code === 'KeyD') driveKeys.d = false;
+  if (e.code === 'Space') driveKeys.space = false;
+}, true);
+
+/* ============================================================
+   === END POLICE CAR SYSTEM                                 ===
+   ============================================================ */
+
 const elkPhoneState = { open:false, view:'home', contact:null, busy:false, unread:0, chats:{moataz:[], commander:[]} };
 const elkContacts = {
   moataz:{name:'Moataz Basha',arabic:'معتز باشا',initial:'م',role:'ضابط الكمين'},
@@ -9811,7 +10244,6 @@ function updateReportsBadge() {
 document.getElementById('elkMessageApp')?.addEventListener('click', () => { elkPhoneView('messages'); elkRenderContacts(); });
 document.getElementById('elkReportsApp')?.addEventListener('click', () => { elkPhoneView('reports'); elkRenderReportsList(); });
 document.getElementById('elkNotesApp')?.addEventListener('click', () => { elkPhoneView('notes'); elkRenderNotesList(); });
-// Player feedback and support app. Sends only after the user submits the form.
 const supportForm = document.getElementById('elkSupportForm');
 const supportRating = document.getElementById('elkSupportRatingValue');
 const supportRatingText = document.getElementById('elkSupportRatingText');
@@ -9990,6 +10422,9 @@ const elkVehicleSoundNodes = new WeakMap();
 const elkFallbackAudio = new WeakMap();
 let elkHornBuffer = null;
 let elkStopBuffer = null;
+let elkSirenBuffer = null;
+let elkBrakeBuffer = null;
+let policeSirenSound = null;
 let elkAudioUnlocked = false;
 const elkVehicleAudioLoader = new THREE.AudioLoader();
 function elkUnlockVehicleAudio() {
@@ -10003,9 +10438,11 @@ function elkLoadVehicleAudio(file, setter) {
   const url = new URL(file, window.location.href).href;
   elkVehicleAudioLoader.load(url, buffer => { setter(buffer); }, undefined, () => {});
 }
-elkLoadVehicleAudio('car-horn.mp3', buffer => { elkHornBuffer = buffer; });
+elkLoadVehicleAudio('car-horn.mp3', buffer => { elkHornBuffer = buffer; policeHornLoaded = true; });
 elkLoadVehicleAudio('stop.mp3', buffer => { elkStopBuffer = buffer; });
-function elkPlayVehicleSound(v, kind, buffer, volume = 0.8, maxDistance = 95) {
+elkLoadVehicleAudio('police-siren-sound.mp3', buffer => { elkSirenBuffer = buffer; });
+elkLoadVehicleAudio('car-brake.mp3', buffer => { elkBrakeBuffer = buffer; });
+function elkPlayVehicleSound(v, kind, buffer, volume = 0.8, maxDistance = 95, loop = false)  {
   try {
     if (!v || !v.group) return false;
     if (!elkAudioUnlocked) elkUnlockVehicleAudio();
@@ -10043,7 +10480,7 @@ function elkPlayVehicleSound(v, kind, buffer, volume = 0.8, maxDistance = 95) {
     if (!sound) {
       sound = new THREE.PositionalAudio(audioListener);
       sound.setBuffer(buffer);
-      sound.setLoop(false);
+           sound.setLoop(loop);
       sound.setRefDistance(7);
       sound.setRolloffFactor(1.15);
       sound.setMaxDistance(maxDistance);
@@ -10083,9 +10520,34 @@ function updateContextualVehicleHorns(dt) {
     if (inFront && st.cooldown <= 0 && st.roll < 0.22) { elkPlayShortHorn(v); st.cooldown = 12; st.roll = Math.random(); }
   }
 }
-
-
-
+function togglePoliceSiren() {
+  if (!policeCar.loaded || !policeCar.soundVehicle.group) return;
+  if (policeSirenSound && policeSirenSound.isPlaying) {
+    try { policeSirenSound.stop(); } catch(e) {}
+    policeSirenSound = null;
+    return;
+  }
+  policeSirenSound = elkPlayVehicleSound(policeCar.soundVehicle, 'siren', elkSirenBuffer, 1.0, 200, true);
+}
+function playCarBrakeSound() {
+  if (!policeCar.loaded || !policeCar.soundVehicle.group) return;
+  elkPlayVehicleSound(policeCar.soundVehicle, 'brake', elkBrakeBuffer, 0.9, 100);
+}function returnToCheckpoint() {
+  if (!policeCar.loaded || !drivingActive) return;
+  policeCar.position.set(8, 0, CP.z + 30);
+  policeCar.heading = Math.PI;
+  policeCar.speed = 0;
+  policeCar.steer = 0;
+  policeCar.turnRate = 0;
+  driveKeys.w = driveKeys.a = driveKeys.s = driveKeys.d = driveKeys.space = false;
+  if (policeCar.root) {
+    policeCar.root.position.set(policeCar.position.x, 0, policeCar.position.z);
+    policeCar.root.rotation.y = policeCar.heading;
+  }
+  makeVehicleBox(policeCar.position.x, policeCar.position.z, policeCar.halfWidth, policeCar.halfLength, policeCar.box);
+  playerPos.set(policeCar.position.x, CONFIG.playerHeight, policeCar.position.z);
+  updateDrivingCamera(0.016, true);
+}
 function smootherstep(t) {
   t = Math.max(0, Math.min(1, t));
   return t * t * t * (t * (t * 6 - 15) + 10);
@@ -10273,17 +10735,26 @@ function animate() {
     }
   });
   updateSandLoaders(dt);
+  if (policeCar.loaded) {
+    makeVehicleBox(policeCar.position.x, policeCar.position.z, policeCar.halfWidth, policeCar.halfLength, policeCar.box);
+    dynamicColliders.push(policeCar.box);
+  }
   updatePullOverVehicles(dt);
   updateContextualVehicleHorns(dt);
   try { MilitarySoldiers.update(dt, elapsed); } catch (e) {}
   if (!cinematic.active) {
-    updatePlayerVehicleImpact(dt);
-    updatePlayer(dt);
+    if (drivingActive) {
+      updateDrivingPhysics(dt);
+    } else {
+      updatePlayerVehicleImpact(dt);
+      updatePlayer(dt);
+    }
     promptUpdateAccumulator += dt;
     if (promptUpdateAccumulator >= PROMPT_UPDATE_INTERVAL) {
       promptUpdateAccumulator = 0;
       try { updateRepairPrompt(); } catch (e) {}
       try { updateInspectionPrompt(); } catch (e) {}
+      try { updateCarPrompt(); } catch (e) {}
     }
   }
   renderer.render(scene, camera);
@@ -10498,6 +10969,9 @@ window.ElKamin = {
   AI_VOICE_CONFIG,
   cinematic,
   boomBarriers,
+  policeCar,
+  enterPoliceCar, exitPoliceCar, nearPoliceCar,
+  isDriving() { return drivingActive; },
   repairGate(index) {
     if (index < 0 || index >= boomBarriers.length) return;
     const s = boomBarriers[index];
