@@ -3021,7 +3021,7 @@ sidewalkHeight: 0.35,
 sidewalkWalkHeight: 0.39,
 checkpointZ: -80,
 checkpointWidth: 8,
-playerHeight: 2.3,
+playerHeight: 2.55,
 playerSpeed: 7,
 sprintMultiplier: 2.2,
 collisionRadius: 0.45,
@@ -5447,6 +5447,9 @@ const TRUCK_ROUTES = [
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 390, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 175, wrapZ: CP.z + 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 450, wrapZ: CP.z + 470, model: 'byd' },
+  // A small increase in private-car traffic, spaced away from existing spawn points.
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 315, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 285, wrapZ: CP.z + 470, model: 'byd' },
   { laneX: 3.7, dirZ: -1, spawnZ: CP.z + 455, wrapZ: CP.z - 470, model: 'ambulance' },
 ];
 
@@ -5874,6 +5877,7 @@ function spawnTrucks() {
   if (!truckProto) return;
   TRUCK_ROUTES.forEach((route, routeIndex) => {
     if (route.model === 'truck') return;
+    if (route.model === 'ambulance' && Math.random() > 0.34) return;
     const seed = TrafficDeck.next();
     if (seed === null) return;
     const rng = seededRng(seed * 2654435761);
@@ -5936,7 +5940,7 @@ function spawnTrucks() {
       inspProfile: profile, _clearedGates: new Set(),
       _despawned: false,
       _recordSeed: seed, _isTruck: true, _lastZ: route.spawnZ, _reportedPassed: false, _modelNode: model, _plateGroup: plateGroup, _trafficModelProto: selectedProto,
-      _isHeavyPersonVehicle: isHeavyPersonVehicle, _isMinibus: isMinibus, _isBelban: isBelban, _isAmbulance: isAmbulance, _ambulanceHornTimer: 0, _ambulanceSirenStarted: false, _specialPlate: isHeavyPersonVehicle ? plateData.letters + ' ' + plateData.numbers : null, _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0,
+      _isHeavyPersonVehicle: isHeavyPersonVehicle, _isMinibus: isMinibus, _isBelban: isBelban, _isAmbulance: isAmbulance, _ambulanceHornTimer: 0, _ambulanceSirenStarted: false, _ambulanceRecordingPlayed: false, _ambulanceRecordingStoppedAtGate: false, _specialPlate: isHeavyPersonVehicle ? plateData.letters + ' ' + plateData.numbers : null, _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0,
     };
     vehicle.gates = findGatesForLane(vehicle.laneX, vehicle.halfWidth);
     model.traverse((node) => { if (node.name && node.name.startsWith('WHEEL_PIVOT_')) vehicle.wheelPivots.push(node); });
@@ -6256,8 +6260,12 @@ function updateTruck(v, dt) {
   } else {
     v._ambulanceHornTimer = Math.max(0, (v._ambulanceHornTimer || 0) - dt);
     if (!v._ambulanceSirenStarted && elkSirenBuffer && typeof elkPlayVehicleSound === 'function') {
-      const siren = elkPlayVehicleSound(v, 'siren', elkSirenBuffer, 0.8, 240, true);
+      const siren = elkPlayVehicleSound(v, 'siren', elkSirenBuffer, 0.85, 300, true);
       if (siren) v._ambulanceSirenStarted = true;
+    }
+    if (!v._ambulanceRecordingPlayed && !v._ambulanceRecordingStoppedAtGate && elkAmbulanceRecordingBuffer && typeof elkPlayVehicleSound === 'function') {
+      const recording = elkPlayVehicleSound(v, 'ambulance-recording', elkAmbulanceRecordingBuffer, 0.22, 105, false);
+      if (recording) v._ambulanceRecordingPlayed = true;
     }
     const aheadCars = trucks.filter(o => o !== v && !o._despawned && Math.abs(o.pos.z - v.pos.z) < v.halfLength + o.halfLength + 13 && (o.pos.z - v.pos.z) * v.dirZ > 0 && Math.abs(o.pos.x - v.pos.x) < v.halfWidth + o.halfWidth + 1.2);
     const playerDxAmb = Math.abs(v.pos.x - playerPos.x);
@@ -6311,10 +6319,19 @@ function updateTruck(v, dt) {
     }
   }
   checkVehiclePassedCheckpoint(v, prevZ);
+  if (v._isAmbulance && !v._ambulanceRecordingStoppedAtGate && ((v.dirZ < 0 && prevZ > CP.z && v.pos.z <= CP.z) || (v.dirZ > 0 && prevZ < CP.z && v.pos.z >= CP.z))) {
+    elkStopVehicleSound(v, 'ambulance-recording');
+    v._ambulanceRecordingStoppedAtGate = true;
+  }
   const reachedEnd = v._exiting
     ? ((v.dirZ < 0 && v.pos.z < v._exitZ) || (v.dirZ > 0 && v.pos.z > v._exitZ))
     : ((v.dirZ < 0 && v.pos.z < v.route.wrapZ) || (v.dirZ > 0 && v.pos.z > v.route.wrapZ));
-  if (reachedEnd && v._exiting) {
+  if (reachedEnd && v._isAmbulance) {
+    if (typeof elkStopVehicleSound === 'function') elkStopVehicleSound(v, 'siren');
+    v._ambulanceSirenStarted = false;
+    v._despawned = true;
+    if (v.group) v.group.visible = false;
+  } else if (reachedEnd && v._exiting) {
     v._despawned = true;
     if (v.group) v.group.visible = false;
   } else if (reachedEnd) {
@@ -6352,7 +6369,8 @@ function updateTruck(v, dt) {
     }
   }
   if (v._exiting) targetSpeed = v.maxSpeed;
-  v.group.position.set(v.pos.x, 0, v.pos.z);
+  v.pos.x = THREE.MathUtils.clamp(v.pos.x, -ROAD.halfWidth + Math.min(v.halfWidth || 1.2, 2.0), ROAD.halfWidth - Math.min(v.halfWidth || 1.2, 2.0));
+  v.group.position.set(v.pos.x, 0.02, v.pos.z);
   if (v.wheelPivots.length > 0) {
     const deltaSpin = (v.speed * dt);
     v.wheelSpin += deltaSpin;
@@ -6544,15 +6562,16 @@ function updateBigTruck(v, dt) {
     const horizontalLength = Math.max(size.x, size.z);
     if (!Number.isFinite(horizontalLength) || horizontalLength < 0.05) throw new Error('Invalid GLB dimensions');
     const template = new THREE.Group(); template.add(root);
-    root.rotation.y += (size.x > size.z ? Math.PI / 2 : 0) + Math.PI;
-    root.scale.multiplyScalar((meta.ambulance ? 5.25 : 7.2) / horizontalLength);
+    root.rotation.y += (size.x > size.z ? Math.PI / 2 : 0) + (meta.ambulance || meta.model === '800 AC' ? 0 : Math.PI);
+    const targetLength = meta.ambulance ? 8.6 : meta.model === '800 AC' ? 13.5 : meta.model === 'XL6' ? 9.2 : (meta.model === 'Accent 2013' || meta.model === 'Kona N-Line') ? 7.25 : meta.model === 'Ciaz 2021' ? 7.35 : 8.1;
+    root.scale.multiplyScalar(targetLength / horizontalLength);
     template.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(template);
     const center = new THREE.Vector3(); box.getCenter(center);
     root.position.x -= center.x; root.position.z -= center.z; root.position.y -= box.min.y;
     template.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(template); box.getSize(size);
     template.userData.trafficDimensions = {
-      halfWidth: Math.max(meta.ambulance ? 1.02 : 1.05, Math.min(meta.ambulance ? 1.45 : 1.75, size.x / 2)),
-      halfLength: Math.max(meta.ambulance ? 2.7 : 2.65, Math.min(meta.ambulance ? 3.25 : 3.65, size.z / 2)), height: size.y
+      halfWidth: Math.max(meta.ambulance ? 1.35 : 1.15, Math.min(meta.ambulance ? 1.9 : 2.05, size.x / 2)),
+      halfLength: Math.max(meta.ambulance ? 3.5 : 2.9, Math.min(meta.ambulance ? 4.5 : (meta.model === '800 AC' ? 4.6 : 4.2), size.z / 2)), height: size.y
     };
     template.userData.vehicleMeta = { brand: meta.brand, model: meta.model, ambulance: !!meta.ambulance };
     template.traverse(node => {
@@ -6592,7 +6611,8 @@ function updateBigTruck(v, dt) {
         const root = gltf.scene || (gltf.scenes && gltf.scenes[0]); if (!root) throw new Error('GLB contains no scene');
         const proto = prepareTemplate(root, meta); realCarProtos.push(proto);
         const regular = trucks.filter(v => v && v.group && v._modelNode && !v._isMinibus && !v._isBelban && !v._isAmbulance && !v._isHeavyPersonVehicle);
-        regular.forEach((v, i) => attachTemplateToVehicle(v, realCarProtos[i % realCarProtos.length], false));
+        const weightedProtos = realCarProtos.flatMap(p => Array(p.userData.vehicleMeta && p.userData.vehicleMeta.model === 'XL6' ? 3 : 1).fill(p));
+        regular.forEach((v, i) => attachTemplateToVehicle(v, weightedProtos[i % weightedProtos.length], false));
         console.info('[El Kamin] Added private traffic model:', meta.model);
       } catch (e) { console.warn('[El Kamin] Model setup failed:', meta.file, e); }
     }, undefined, err => console.warn('[El Kamin] Could not load requested model:', meta.file, err));
@@ -6620,7 +6640,7 @@ function updateBigTruck(v, dt) {
       const root=gltf.scene || (gltf.scenes && gltf.scenes[0]); if(!root) throw new Error('Hiace GLB has no scene');
       root.updateMatrixWorld(true); let box=new THREE.Box3().setFromObject(root); const size=new THREE.Vector3(); box.getSize(size);
       const len=Math.max(size.x,size.z); if(!Number.isFinite(len)||len<0.05) throw new Error('Invalid Hiace dimensions');
-      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.35/len);
+      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.8/len);
       proto.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(proto); const center=new THREE.Vector3(); box.getCenter(center);
       root.position.x-=center.x; root.position.z-=center.z; root.position.y-=box.min.y; proto.updateMatrixWorld(true);
       box=new THREE.Box3().setFromObject(proto); box.getSize(size);
@@ -10651,6 +10671,7 @@ const elkFallbackAudio = new WeakMap();
 let elkHornBuffer = null;
 let elkStopBuffer = null;
 let elkSirenBuffer = null;
+let elkAmbulanceRecordingBuffer = null;
 let elkBrakeBuffer = null;
 let policeSirenSound = null;
 let elkAudioUnlocked = false;
@@ -10669,6 +10690,7 @@ function elkLoadVehicleAudio(file, setter) {
 elkLoadVehicleAudio('car-horn.mp3', buffer => { elkHornBuffer = buffer; policeHornLoaded = true; });
 elkLoadVehicleAudio('stop.mp3', buffer => { elkStopBuffer = buffer; });
 elkLoadVehicleAudio('police-siren-sound.mp3', buffer => { elkSirenBuffer = buffer; });
+elkLoadVehicleAudio('Recording.mp3', buffer => { elkAmbulanceRecordingBuffer = buffer; });
 elkLoadVehicleAudio('car-brake.mp3', buffer => { elkBrakeBuffer = buffer; });
 function elkPlayVehicleSound(v, kind, buffer, volume = 0.8, maxDistance = 95, loop = false)  {
   try {
@@ -10726,6 +10748,13 @@ function elkPlayVehicleSound(v, kind, buffer, volume = 0.8, maxDistance = 95, lo
     return sound;
   } catch (e) { return false; }
 }
+function elkStopVehicleSound(v, kind) {
+  try {
+    const nodes = v && elkVehicleSoundNodes.get(v);
+    const sound = nodes && nodes[kind];
+    if (sound && sound.isPlaying) sound.stop();
+  } catch(e) {}
+}
 function elkPlayShortHorn(v) { return elkPlayVehicleSound(v, 'horn', elkHornBuffer, 0.9, 110); }
 function elkPlayStopSound(v) {
   const sound = elkPlayVehicleSound(v, 'stop', elkStopBuffer, 0.85, 75);
@@ -10742,10 +10771,10 @@ function updateContextualVehicleHorns(dt) {
     const slow = Math.abs(Number(v.speed)||0) < 1.3;
     if (nearBarrier && slow && dist < 32) {
       st.wait += dt;
-      if (st.wait > 5.5 && !st.done && st.cooldown <= 0 && st.roll < 0.48) { elkPlayShortHorn(v); st.done = true; st.cooldown = 16; }
+      if (st.wait > 7.0 && !st.done && st.cooldown <= 0 && st.roll < 0.24) { elkPlayShortHorn(v); st.done = true; st.cooldown = 22; }
     } else if (dist > 38 || !nearBarrier) { st.wait = 0; if (!nearBarrier) st.done = false; }
     const inFront = dist < 4.2 && Math.abs(Number(v.speed)||0) > 2.5 && Math.abs(v.pos.x-playerPos.x) < 2.5;
-    if (inFront && st.cooldown <= 0 && st.roll < 0.22) { elkPlayShortHorn(v); st.cooldown = 12; st.roll = Math.random(); }
+    if (inFront && st.cooldown <= 0 && st.roll < 0.10) { elkPlayShortHorn(v); st.cooldown = 18; st.roll = Math.random(); }
   }
 }
 function togglePoliceSiren() {
