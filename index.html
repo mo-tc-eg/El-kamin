@@ -3032,9 +3032,9 @@ spawnYaw: 0.55,
 spawnPitch: -0.07,
 };
 
-const VEHICLE_FOLLOW_GAP_M   = 7.0;
+const VEHICLE_FOLLOW_GAP_M   = 4.8;
 const VEHICLE_FOLLOW_PROBE_M = 20.0;
-const HARD_MIN_BUMPER_GAP_M  = 1.0;
+const HARD_MIN_BUMPER_GAP_M  = 0.75;
 const VEHICLE_SLOW_RAMP_SECONDS = 1.35;
 const VEHICLE_SLOW_RAMP_CAP_MS  = 78 / 3.6;
 
@@ -5290,7 +5290,7 @@ function clampToAvoidOverlap(v, prevZ, proposedZ) {
     if (o === v || o._despawned) continue;
     if (Math.abs(o.pos.x - v.pos.x) > v.halfWidth + o.halfWidth + 0.2) continue;
     const minSep = v.halfLength + o.halfLength + HARD_MIN_BUMPER_GAP_M;
-    const dz = (o.pos.z - proposedZ) * v.dirZ;
+    const dz = (o.pos.z - clampedZ) * v.dirZ;
     if (dz > 0 && dz < minSep) {
       const targetZ = o.pos.z - v.dirZ * minSep;
       if (v.dirZ < 0) {
@@ -5299,6 +5299,18 @@ function clampToAvoidOverlap(v, prevZ, proposedZ) {
       } else {
         if (prevZ < targetZ) clampedZ = Math.min(clampedZ, targetZ);
         else clampedZ = Math.min(clampedZ, prevZ);
+      }
+    }
+  }
+  if (typeof policeCar !== 'undefined' && policeCar.loaded && policeCar.root) {
+    const dx = Math.abs(policeCar.position.x - v.pos.x);
+    if (dx <= v.halfWidth + policeCar.halfWidth + 0.2) {
+      const minSep = v.halfLength + policeCar.halfLength + 0.45;
+      const dz = (policeCar.position.z - clampedZ) * v.dirZ;
+      if (dz > 0 && dz < minSep) {
+        const targetZ = policeCar.position.z - v.dirZ * minSep;
+        if (v.dirZ < 0) clampedZ = Math.max(prevZ > targetZ ? targetZ : prevZ, clampedZ);
+        else clampedZ = Math.min(prevZ < targetZ ? targetZ : prevZ, clampedZ);
       }
     }
   }
@@ -5319,7 +5331,8 @@ function updateSandLoader(v, dt) {
     const limit = cfg.slowZoneSpeed + (v.maxSpeed - cfg.slowZoneSpeed) * t;
     targetSpeed = Math.min(targetSpeed, limit);
   }
-  targetSpeed = applyGateLogic(v, cfg, targetSpeed);
+  if (!v._isAmbulance) targetSpeed = applyGateLogic(v, cfg, targetSpeed);
+  else targetSpeed = v.maxSpeed;
   makeVehicleBox(v.pos.x, v.pos.z, v.halfWidth, v.halfLength, _tmpBoxA);
   const currentlyStuck = boxHitsStatic(_tmpBoxA);
   if (!currentlyStuck) {
@@ -5418,12 +5431,23 @@ const TRUCK_ROUTES = [
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 220, wrapZ: CP.z + 470, model: 'hiace' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 50, wrapZ: CP.z - 470, model: 'hiace' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 350, wrapZ: CP.z + 470, model: 'hiace' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 335, wrapZ: CP.z - 470, model: 'hiace' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 135, wrapZ: CP.z + 470, model: 'hiace' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 185, wrapZ: CP.z - 470, model: 'hiace' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 315, wrapZ: CP.z + 470, model: 'hiace' },
   // Extra passenger cars spread along both directions of the road.
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 125, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 265, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: 3.7,  dirZ: -1, spawnZ: CP.z - 385, wrapZ: CP.z - 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z + 115, wrapZ: CP.z + 470, model: 'byd' },
   { laneX: -3.7, dirZ: 1,  spawnZ: CP.z + 375, wrapZ: CP.z + 470, model: 'byd' },
+  // Additional private-car routes so all loaded models appear more often, distributed across both directions.
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 110, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 245, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: 3.7,  dirZ: -1, spawnZ: CP.z + 390, wrapZ: CP.z - 470, model: 'byd' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 175, wrapZ: CP.z + 470, model: 'byd' },
+  { laneX: -3.7, dirZ: 1,  spawnZ: CP.z - 450, wrapZ: CP.z + 470, model: 'byd' },
+  { laneX: 3.7, dirZ: -1, spawnZ: CP.z + 455, wrapZ: CP.z - 470, model: 'ambulance' },
 ];
 
 const trucks = [];
@@ -5432,7 +5456,9 @@ let truckProto = null;
 let bigTruckProto = null;
 const realCarProtos = [];
 let realCarModelLoadStarted = false;
+let realCarPickCursor = 0;
 let hiaceProto = null;
+let ambulanceProto = null;
 let belbanProto = null;
 const truckSize = { halfWidth: 1.0, halfLength: 2.4, height: 1.8 };
 const bigTruckSize = { halfWidth: 1.4, halfLength: 6.0, height: 3.5 };
@@ -5817,6 +5843,33 @@ function recolorTrafficBody(root, hex) {
   });
 }
 
+function applyAmbulanceProfile(profile, seed) {
+  const r = seededRng((Number(seed || 1) * 49979687) >>> 0);
+  const cases = [
+    { state: 'مستقر', note: 'المريض واعي وحالته مستقرة ويحتاج نقل للمستشفى للمتابعة.' },
+    { state: 'يحتاج متابعة عاجلة', note: 'المريض واعي ويحتاج تقييم طبي سريع فور الوصول.' },
+    { state: 'حرجة', note: 'الحالة حرجة حسب إفادة طاقم الإسعاف، ويلزم استكمال الطريق دون تأخير.' },
+    { state: 'طارئة', note: 'بلاغ طارئ، وطاقم الإسعاف يتابع العلامات الحيوية أثناء النقل.' }
+  ];
+  const c = cases[Math.floor(r() * cases.length)];
+  profile.vehicle.brand = 'مرسيدس'; profile.vehicle.model = 'Vito إسعاف';
+  profile.vehicle.type = 'سيارة إسعاف'; profile.vehicle.color = 'أبيض وأحمر';
+  profile.vehicle.usage = 'نقل حالات طبية طارئة'; profile.vehicle.isAmbulance = true;
+  profile.vehicle.plate = 'إ س ع ' + String(1000 + Math.floor(r() * 9000)).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)]);
+  profile.vehicle.authority = 'هيئة الإسعاف المصرية'; profile.vehicle.registrationExpiry = 'ساري';
+  profile.vehicle.status = 'valid'; profile.vehicle.statusAr = 'سارية';
+  profile.ambulance = { authority: 'هيئة الإسعاف المصرية', crew: 2 + Math.floor(r() * 2), caseState: c.state, patientNote: c.note,
+    destination: ['مستشفى السلام العام', 'مستشفى عين شمس التخصصي', 'مستشفى الدمرداش', 'مستشفى شبرا العام'][Math.floor(r() * 4)],
+    dispatchCode: 'EMS-' + String(10000 + Math.floor(r() * 89999)) };
+  profile.driver.job = 'مسعف / قائد سيارة إسعاف';
+  profile.owner = { name: 'هيئة الإسعاف المصرية', isDriver: false, relation: 'جهة العمل' };
+  profile.company = { name: 'هيئة الإسعاف المصرية', permitNumber: profile.ambulance.dispatchCode, driverName: profile.driver.name,
+    vehicleType: 'سيارة إسعاف مرسيدس Vito', issueDate: 'ساري', expiryDate: 'ساري', workType: 'نقل الحالات الطارئة',
+    area: 'طريق مصر — الإسكندرية الصحراوي', issuerName: 'هيئة الإسعاف المصرية', issuerRole: 'تشغيل سيارات الإسعاف', status: 'valid', statusAr: 'ساري', valid: true };
+  profile.violations = profile.violations || [];
+  return profile;
+}
+
 function spawnTrucks() {
   if (!truckProto) return;
   TRUCK_ROUTES.forEach((route, routeIndex) => {
@@ -5827,25 +5880,35 @@ function spawnTrucks() {
     const profile = generateProfile('passenger', rng);
     const isMinibus = route.model === 'hiace';
     const isBelban = route.model === 'belban' && Math.random() < 0.42;
+    const isAmbulance = route.model === 'ambulance';
     if (isMinibus) applyMinibusProfile(profile, seed);
     if (isBelban) applyBelbanProfile(profile, seed);
+    if (isAmbulance) applyAmbulanceProfile(profile, seed);
     profile.recordId = seed;
     const colorDef = TRUCK_COLORS[routeIndex % TRUCK_COLORS.length];
     const transitKind = 'car';
     const isHeavyPersonVehicle = route.laneX > 0 && route.dirZ < 0 && Math.random() < 0.00005;
     const selectedProto = isMinibus ? (hiaceProto || createEgyptianTransitModel('minibus', 0xd8d8d2))
       : isBelban ? (belbanProto || createBelbanDeliveryTruck())
+      : isAmbulance ? (ambulanceProto || (realCarProtos.length ? realCarProtos[(seed + routeIndex) % realCarProtos.length] : truckProto))
       : isHeavyPersonVehicle ? (realCarProtos.length ? realCarProtos[0] : createHeavyPersonLuxurySUV())
-      : (realCarProtos.length ? realCarProtos[(seed + routeIndex) % realCarProtos.length] : truckProto);
+      : (realCarProtos.length ? realCarProtos[realCarPickCursor++ % realCarProtos.length] : truckProto);
+    if (!isAmbulance && !isMinibus && !isBelban && selectedProto.userData && selectedProto.userData.vehicleMeta) {
+      profile.vehicle.brand = selectedProto.userData.vehicleMeta.brand;
+      profile.vehicle.model = selectedProto.userData.vehicleMeta.model;
+      profile.vehicle.type = 'سيارة ملاكي'; profile.vehicle.usage = 'استعمال خاص';
+      profile.vehicle.isMinibus = false;
+    }
     const model = selectedProto.clone(true);
     const specialScale = isHeavyPersonVehicle ? 2.0 : 1;
     if (isHeavyPersonVehicle) model.scale.multiplyScalar(specialScale);
     model.traverse((c) => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-    if (selectedProto === truckProto && !isMinibus && !isBelban) cloneTruckMaterialsForVehicle(model, colorDef.hex);
+    if (selectedProto === truckProto && !isMinibus && !isBelban && !isAmbulance) cloneTruckMaterialsForVehicle(model, colorDef.hex);
     if (isMinibus) { recolorTrafficBody(model, 0xf4f3ed); profile.vehicle.color = 'أبيض'; }
     else if (isBelban) { recolorTrafficBody(model, 0xf4f3ed); profile.vehicle.color = 'أبيض'; }
+    else if (isAmbulance) { profile.vehicle.color = 'أبيض وأحمر'; }
     else if (isHeavyPersonVehicle) { recolorTrafficBody(model, 0xc51f2b); profile.vehicle.color = 'أحمر'; }
-    else { recolorTrafficBody(model, 0xe87519); profile.vehicle.color = 'برتقالي'; }
+    else { profile.vehicle.color = 'حسب لون الموديل'; }
     const baseModelDims = selectedProto.userData.trafficDimensions || (isMinibus ? {halfWidth:1.18,halfLength:2.95,height:2.6} : isBelban ? {halfWidth:1.18,halfLength:2.95,height:2.45} : { halfWidth: truckSize.halfWidth, halfLength: truckSize.halfLength, height: truckSize.height });
     const modelDims = isHeavyPersonVehicle ? {
       halfWidth: baseModelDims.halfWidth * specialScale,
@@ -5856,9 +5919,9 @@ function spawnTrucks() {
     group.add(model);
     if (isHeavyPersonVehicle) applyHeavyPersonProfile(profile, seed);
     const plateData = isHeavyPersonVehicle ? { letters: 'م هـ م', numbers: String(1000 + (seed * 37) % 9000).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)]) } : plateDataFromProfile(profile);
-    const plateColor = isHeavyPersonVehicle ? '#202020' : isMinibus ? '#e58b25' : isBelban ? '#c9232d' : '#159bd2';
+    const plateColor = isAmbulance ? '#aeb4bb' : isHeavyPersonVehicle ? '#202020' : isMinibus ? '#e87519' : isBelban ? '#159bd2' : '#159bd2';
     const plateGroup = new THREE.Group();
-    addEgyptianPrivatePlates(plateGroup, modelDims.halfLength, plateData, plateColor, isHeavyPersonVehicle ? '#f2cf35' : undefined);
+    addEgyptianPrivatePlates(plateGroup, modelDims.halfLength, plateData, plateColor, isHeavyPersonVehicle ? '#f2cf35' : undefined, isMinibus ? 0.92 : undefined);
     if (isHeavyPersonVehicle) plateGroup.scale.setScalar(1.28);
     group.add(plateGroup);
     group.rotation.y = (route.dirZ > 0) ? 0 : Math.PI;
@@ -5867,13 +5930,13 @@ function spawnTrucks() {
     const vehicle = {
       group, route, laneX: route.laneX, correctionLaneX: route.laneX, dirZ: route.dirZ,
       colorName: colorDef.name, vehicleKind: transitKind, pos: new THREE.Vector3(route.laneX, 0, route.spawnZ), speed: 0,
-      maxSpeed: isHeavyPersonVehicle ? (310 / 3.6) : TRUCK.maxSpeed * (0.94 + Math.random() * 0.06),
+      maxSpeed: isAmbulance ? (220 / 3.6) : isHeavyPersonVehicle ? (310 / 3.6) : TRUCK.maxSpeed * (0.94 + Math.random() * 0.06),
       halfWidth: modelDims.halfWidth, halfLength: modelDims.halfLength,
       gates: [], box: new THREE.Box3(), wheelPivots: [], wheelSpin: 0, paused: false,
       inspProfile: profile, _clearedGates: new Set(),
       _despawned: false,
       _recordSeed: seed, _isTruck: true, _lastZ: route.spawnZ, _reportedPassed: false, _modelNode: model, _plateGroup: plateGroup, _trafficModelProto: selectedProto,
-      _isHeavyPersonVehicle: isHeavyPersonVehicle, _isMinibus: isMinibus, _isBelban: isBelban, _specialPlate: isHeavyPersonVehicle ? plateData.letters + ' ' + plateData.numbers : null, _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0,
+      _isHeavyPersonVehicle: isHeavyPersonVehicle, _isMinibus: isMinibus, _isBelban: isBelban, _isAmbulance: isAmbulance, _ambulanceHornTimer: 0, _ambulanceSirenStarted: false, _specialPlate: isHeavyPersonVehicle ? plateData.letters + ' ' + plateData.numbers : null, _wasWanted: false, inspectionCleared: false, _hasTimedReport: false, _slowRampTimer: 0,
     };
     vehicle.gates = findGatesForLane(vehicle.laneX, vehicle.halfWidth);
     model.traverse((node) => { if (node.name && node.name.startsWith('WHEEL_PIVOT_')) vehicle.wheelPivots.push(node); });
@@ -6186,10 +6249,33 @@ function updateTruck(v, dt) {
       targetSpeed = Math.min(targetSpeed, allowed);
     }
   }
-  targetSpeed = applyVehicleFollowing(v, sandLoaders, cfg, targetSpeed);
-  targetSpeed = applyVehicleFollowing(v, trucks, cfg, targetSpeed);
-  targetSpeed = applyVehicleFollowing(v, bigTrucks, cfg, targetSpeed);
-    if (vehicleBlockedByPoliceCar(v)) targetSpeed = 0;
+  if (!v._isAmbulance) {
+    targetSpeed = applyVehicleFollowing(v, sandLoaders, cfg, targetSpeed);
+    targetSpeed = applyVehicleFollowing(v, trucks, cfg, targetSpeed);
+    targetSpeed = applyVehicleFollowing(v, bigTrucks, cfg, targetSpeed);
+  } else {
+    v._ambulanceHornTimer = Math.max(0, (v._ambulanceHornTimer || 0) - dt);
+    if (!v._ambulanceSirenStarted && elkSirenBuffer && typeof elkPlayVehicleSound === 'function') {
+      const siren = elkPlayVehicleSound(v, 'siren', elkSirenBuffer, 0.8, 240, true);
+      if (siren) v._ambulanceSirenStarted = true;
+    }
+    const aheadCars = trucks.filter(o => o !== v && !o._despawned && Math.abs(o.pos.z - v.pos.z) < v.halfLength + o.halfLength + 13 && (o.pos.z - v.pos.z) * v.dirZ > 0 && Math.abs(o.pos.x - v.pos.x) < v.halfWidth + o.halfWidth + 1.2);
+    const playerDxAmb = Math.abs(v.pos.x - playerPos.x);
+    const playerAheadAmb = (playerPos.z - v.pos.z) * v.dirZ;
+    const blockedByPlayerAmb = playerDxAmb < v.halfWidth + CONFIG.collisionRadius + 0.25 && playerAheadAmb > 0 && playerAheadAmb < v.halfLength + CONFIG.collisionRadius + 14;
+    if (aheadCars.length || blockedByPlayerAmb) {
+      const outward = v.route.laneX >= 0 ? 1 : -1;
+      const candidateX = v.route.laneX + outward * 1.65;
+      makeVehicleBox(candidateX, v.pos.z + v.dirZ * (v.halfLength + 2.5), v.halfWidth, v.halfLength, _tmpBoxA);
+      const occupied = trucks.some(o => o !== v && !o._despawned && Math.abs(o.pos.x - candidateX) < v.halfWidth + o.halfWidth + 0.3 && Math.abs(o.pos.z - v.pos.z) < v.halfLength + o.halfLength + 7);
+      if (!occupied && !boxHitsStatic(_tmpBoxA)) v.correctionLaneX = candidateX;
+      else targetSpeed = Math.min(targetSpeed, 11);
+      if (v._ambulanceHornTimer <= 0 && typeof elkPlayShortHorn === 'function') { elkPlayShortHorn(v); v._ambulanceHornTimer = 1.8; }
+    } else {
+      v.correctionLaneX = v.route.laneX;
+    }
+  }
+  if (vehicleBlockedByPoliceCar(v)) targetSpeed = 0;
   const playerDx = Math.abs(v.pos.x - playerPos.x);
   const playerAhead = (playerPos.z - v.pos.z) * v.dirZ;
   const playerStopGap = v.halfLength + CONFIG.collisionRadius + 1.15;
@@ -6198,7 +6284,7 @@ function updateTruck(v, dt) {
     if (playerAhead <= playerStopGap + 0.15 && v.speed > 7.5 && !drivingActive) triggerPlayerKnockdown(v.speed);
     targetSpeed = 0;
   }
-  if (v._exiting && !blockedByPlayer) targetSpeed = v.maxSpeed;
+  if (v._exiting && !blockedByPlayer && !vehicleBlockedByPoliceCar(v)) targetSpeed = v.maxSpeed;
   if (v.speed < targetSpeed) v.speed = Math.min(targetSpeed, v.speed + cfg.accel * dt);
   else if (v.speed > targetSpeed) {
     const brake = (targetSpeed === 0) ? cfg.hardBrake : cfg.decel;
@@ -6208,10 +6294,21 @@ function updateTruck(v, dt) {
   const prevZ = v.pos.z;
   const proposedZ = v.pos.z + v.dirZ * v.speed * dt;
   v.pos.z = clampToAvoidOverlap(v, prevZ, proposedZ);
-  if (v.speed > 0.5 && Math.abs(v.pos.x - v.correctionLaneX) > 0.2) {
+  const prevX = v.pos.x;
+  if ((v.speed > 0.5 || v._isAmbulance) && Math.abs(v.pos.x - v.correctionLaneX) > 0.2) {
     const laneDiff = v.correctionLaneX - v.pos.x;
     const maxCorrect = Math.min(Math.abs(laneDiff), dt * 3.2);
     v.pos.x += Math.sign(laneDiff) * maxCorrect;
+  }
+  if (policeCar.loaded && policeCar.root &&
+      Math.abs(v.pos.z - policeCar.position.z) < v.halfLength + policeCar.halfLength + 0.2 &&
+      Math.abs(v.pos.x - policeCar.position.x) < v.halfWidth + policeCar.halfWidth + 0.2) {
+    if (Math.abs(prevX - policeCar.position.x) >= v.halfWidth + policeCar.halfWidth + 0.2) {
+      v.pos.x = prevX;
+    } else {
+      v.pos.z = prevZ;
+      v.speed = 0;
+    }
   }
   checkVehiclePassedCheckpoint(v, prevZ);
   const reachedEnd = v._exiting
@@ -6243,6 +6340,7 @@ function updateTruck(v, dt) {
       v.inspProfile = generateProfile('passenger', rng2);
       if (v._isMinibus) applyMinibusProfile(v.inspProfile, nextSeed);
       if (v._isBelban) applyBelbanProfile(v.inspProfile, nextSeed);
+      if (v._isAmbulance) applyAmbulanceProfile(v.inspProfile, nextSeed);
       if (v._isHeavyPersonVehicle) { applyHeavyPersonProfile(v.inspProfile, nextSeed); v.inspProfile.vehicle.plate = v._specialPlate || v.inspProfile.vehicle.plate; }
       v.inspProfile.recordId = nextSeed;
       v._recordSeed = nextSeed;
@@ -6430,131 +6528,88 @@ function updateBigTruck(v, dt) {
   if (realCarModelLoadStarted) return;
   realCarModelLoadStarted = true;
   const loader = new GLTFLoader();
-  const manifestUrl = 'https://3dassets.dev/api/v1/packs/road-car-showroom-lineup';
-  const fallbackUrls = [
-    'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CarConcept/glTF-Binary/CarConcept.glb'
+  const models = [
+    { file: '2021_suzuki_ciaz.glb', brand: 'سوزوكي', model: 'Ciaz 2021' },
+    { file: 'hyundai_accent_2013.glb', brand: 'هيونداي', model: 'Accent 2013' },
+    { file: 'hyundai_kona_n-line.glb', brand: 'هيونداي', model: 'Kona N-Line' },
+    { file: 'maruti_800_ac.glb', brand: 'ماروتي', model: '800 AC' },
+    { file: 'maruti_suzuki_xl6.glb', brand: 'ماروتي سوزوكي', model: 'XL6' },
+    { file: 'mercedes_vito_ambulanta.glb', brand: 'مرسيدس', model: 'Vito إسعاف', ambulance: true }
   ];
-  const loadedUrls = new Set();
-  let modelCount = 0;
-  let fallbackStarted = false;
-  const maxModels = 5;
-
-  function prepareCarTemplate(source) {
+  function prepareTemplate(source, meta) {
     const root = source;
     root.updateMatrixWorld(true);
     let box = new THREE.Box3().setFromObject(root);
     const size = new THREE.Vector3(); box.getSize(size);
     const horizontalLength = Math.max(size.x, size.z);
-    if (!Number.isFinite(horizontalLength) || horizontalLength < 0.05) throw new Error('Invalid car model bounds');
-    const template = new THREE.Group();
-    template.add(root);
-    const yaw = size.x > size.z ? Math.PI / 2 : 0;
-    root.rotation.y += yaw;
-    root.scale.multiplyScalar(4.8 / horizontalLength);
-    template.updateMatrixWorld(true);
-    box = new THREE.Box3().setFromObject(template);
+    if (!Number.isFinite(horizontalLength) || horizontalLength < 0.05) throw new Error('Invalid GLB dimensions');
+    const template = new THREE.Group(); template.add(root);
+    root.rotation.y += (size.x > size.z ? Math.PI / 2 : 0) + Math.PI;
+    root.scale.multiplyScalar((meta.ambulance ? 5.25 : 7.2) / horizontalLength);
+    template.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(template);
     const center = new THREE.Vector3(); box.getCenter(center);
-    root.position.x -= center.x;
-    root.position.z -= center.z;
-    root.position.y -= box.min.y;
-    template.updateMatrixWorld(true);
-    box = new THREE.Box3().setFromObject(template);
-    const finalSize = new THREE.Vector3(); box.getSize(finalSize);
+    root.position.x -= center.x; root.position.z -= center.z; root.position.y -= box.min.y;
+    template.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(template); box.getSize(size);
     template.userData.trafficDimensions = {
-      halfWidth: Math.max(0.88, Math.min(1.25, finalSize.x / 2)),
-      halfLength: Math.max(2.15, Math.min(2.65, finalSize.z / 2)),
-      height: finalSize.y
+      halfWidth: Math.max(meta.ambulance ? 1.02 : 1.05, Math.min(meta.ambulance ? 1.45 : 1.75, size.x / 2)),
+      halfLength: Math.max(meta.ambulance ? 2.7 : 2.65, Math.min(meta.ambulance ? 3.25 : 3.65, size.z / 2)), height: size.y
     };
-    template.traverse((node) => {
+    template.userData.vehicleMeta = { brand: meta.brand, model: meta.model, ambulance: !!meta.ambulance };
+    template.traverse(node => {
       if (!node.isMesh) return;
       node.castShadow = true; node.receiveShadow = true;
-      if (node.material) {
-        const mats = Array.isArray(node.material) ? node.material : [node.material];
-        mats.forEach(mat => {
-          if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
-          mat.needsUpdate = true;
-        });
-      }
+      if (node.material) { const mats = Array.isArray(node.material) ? node.material : [node.material]; mats.forEach(mat => { if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace; mat.needsUpdate = true; }); }
     });
     return template;
   }
-
-  function applyLoadedTemplate(template) {
-    realCarProtos.push(template);
-    modelCount++;
-    const existing = trucks.filter(v => v && v.group && v._modelNode);
-    existing.forEach((v, i) => {
-      const proto = realCarProtos[(i + modelCount - 1) % realCarProtos.length];
-      if (v._modelNode && v._modelNode.parent) v._modelNode.parent.remove(v._modelNode);
-      const nextModel = proto.clone(true);
-      nextModel.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
-      v.group.add(nextModel);
-      v._modelNode = nextModel;
-      v._trafficModelProto = proto;
-      const dims = proto.userData.trafficDimensions;
-      v.halfWidth = dims.halfWidth;
-      v.halfLength = dims.halfLength;
-      v.gates = findGatesForLane(v.laneX, v.halfWidth);
-      if (v._plateGroup && v._plateGroup.parent) v._plateGroup.parent.remove(v._plateGroup);
-      const plateGroup = new THREE.Group();
-      addEgyptianPrivatePlates(plateGroup, v.halfLength, plateDataFromProfile(v.inspProfile), '#159bd2');
-      v.group.add(plateGroup);
-      v._plateGroup = plateGroup;
-    });
-    console.info('[El Kamin] Realistic traffic car model loaded:', modelCount);
+  function attachTemplateToVehicle(v, proto, ambulance = false) {
+    if (!v || !v.group || !proto) return;
+    if (v._modelNode && v._modelNode.parent) v._modelNode.parent.remove(v._modelNode);
+    const model = proto.clone(true);
+    if (!ambulance) {
+      const palette = [0xf4f3ed, 0x273b55, 0x777b80, 0x9a292c, 0x252525, 0xddd4be];
+      recolorTrafficBody(model, palette[(v._recordSeed || 1) % palette.length]);
+    }
+    model.traverse(n => { if (n.isMesh) { n.castShadow = true; n.receiveShadow = true; } });
+    v.group.add(model); v._modelNode = model; v._trafficModelProto = proto;
+    const d = proto.userData.trafficDimensions;
+    v.halfWidth = d.halfWidth; v.halfLength = d.halfLength; v.gates = findGatesForLane(v.laneX, v.halfWidth);
+    if (v._plateGroup && v._plateGroup.parent) v._plateGroup.parent.remove(v._plateGroup);
+    const pg = new THREE.Group();
+    addEgyptianPrivatePlates(pg, v.halfLength, plateDataFromProfile(v.inspProfile), ambulance ? '#aeb4bb' : v._isMinibus ? '#e87519' : '#159bd2', undefined, v._isMinibus ? 0.92 : undefined);
+    v.group.add(pg); v._plateGroup = pg;
+    const meta = proto.userData.vehicleMeta;
+    if (meta && v.inspProfile && v.inspProfile.vehicle && !ambulance && !v._isMinibus && !v._isBelban) {
+      v.inspProfile.vehicle.brand = meta.brand; v.inspProfile.vehicle.model = meta.model;
+      v.inspProfile.vehicle.type = 'سيارة ملاكي'; v.inspProfile.vehicle.usage = 'استعمال خاص';
+      v.inspProfile.vehicle.isMinibus = false;
+    }
   }
-
-  function loadOne(url) {
-    if (!url || loadedUrls.has(url) || modelCount >= maxModels) return;
-    loadedUrls.add(url);
+  models.filter(m => !m.ambulance).forEach(meta => {
+    const url = 'https://huggingface.co/MoTc/El-Kamin/resolve/main/' + meta.file;
     loader.load(url, gltf => {
       try {
-        const root = gltf.scene || (gltf.scenes && gltf.scenes[0]);
-        if (!root) throw new Error('GLB contains no scene');
-        applyLoadedTemplate(prepareCarTemplate(root));
-      } catch (e) { console.warn('[El Kamin] Traffic car model setup failed:', url, e); }
-    }, undefined, err => {
-      console.warn('[El Kamin] Traffic car model failed to load; keeping working traffic fallback:', url, err);
-      if (modelCount === 0 && !fallbackStarted) {
-        fallbackStarted = true;
-        fallbackUrls.forEach(loadOne);
-      }
-    });
-  }
-
-  function findCarEntries(data) {
-    const out = [];
-    const seen = new Set();
-    const carWords = /(city car|hatchback|sedan|saloon|suv|pickup|estate car|road car|compact car|family car|classic car|modern car|coupe|wagon)/i;
-    function walk(value, depth, inheritedName = '') {
-      if (!value || depth > 12) return;
-      if (Array.isArray(value)) { value.forEach(v => walk(v, depth + 1, inheritedName)); return; }
-      if (typeof value !== 'object') return;
-      const ownName = String(value.name || value.title || value.label || value.slug || value.modelName || value.model_name || '');
-      const name = ownName || inheritedName;
-      let url = value.url || value.modelUrl || value.model_url || value.downloadUrl || value.download_url || value.glb || value.href || value.path || value.fileUrl || value.file_url;
-      if (typeof url === 'string' && /\.glb(?:\?|$)/i.test(url)) {
-        if (!/^https?:\/\//i.test(url)) url = 'https://cdn.3dassets.dev' + (url.startsWith('/') ? '' : '/') + url;
-        const key = url + '|' + name;
-        if (!seen.has(key) && carWords.test(name)) { seen.add(key); out.push({name, url}); }
-      }
-      Object.values(value).forEach(v => walk(v, depth + 1, name));
-    }
-    walk(data, 0);
-    return out;
-  }
-
-  fetch(manifestUrl, { mode: 'cors', cache: 'force-cache' }).then(r => {
-    if (!r.ok) throw new Error('Car manifest HTTP ' + r.status);
-    return r.json();
-  }).then(data => {
-    const entries = findCarEntries(data);
-    if (!entries.length) throw new Error('No individual road-car GLBs found in manifest');
-    entries.slice(0, maxModels).forEach(entry => loadOne(entry.url));
-  }).catch(err => {
-    console.warn('[El Kamin] Car pack manifest unavailable; loading verified GLB fallback.', err);
-    fallbackUrls.forEach(loadOne);
+        const root = gltf.scene || (gltf.scenes && gltf.scenes[0]); if (!root) throw new Error('GLB contains no scene');
+        const proto = prepareTemplate(root, meta); realCarProtos.push(proto);
+        const regular = trucks.filter(v => v && v.group && v._modelNode && !v._isMinibus && !v._isBelban && !v._isAmbulance && !v._isHeavyPersonVehicle);
+        regular.forEach((v, i) => attachTemplateToVehicle(v, realCarProtos[i % realCarProtos.length], false));
+        console.info('[El Kamin] Added private traffic model:', meta.model);
+      } catch (e) { console.warn('[El Kamin] Model setup failed:', meta.file, e); }
+    }, undefined, err => console.warn('[El Kamin] Could not load requested model:', meta.file, err));
   });
+  const ambMeta = models.find(m => m.ambulance);
+  loader.load('https://huggingface.co/MoTc/El-Kamin/resolve/main/' + ambMeta.file, gltf => {
+    try {
+      const root = gltf.scene || (gltf.scenes && gltf.scenes[0]); if (!root) throw new Error('Ambulance GLB contains no scene');
+      ambulanceProto = prepareTemplate(root, ambMeta);
+      trucks.filter(v => v && v._isAmbulance).forEach(v => {
+        applyAmbulanceProfile(v.inspProfile, v._recordSeed);
+        attachTemplateToVehicle(v, ambulanceProto, true);
+        v.maxSpeed = 220 / 3.6;
+      });
+      console.info('[El Kamin] Mercedes Vito ambulance model loaded');
+    } catch (e) { console.warn('[El Kamin] Ambulance model setup failed:', e); }
+  }, undefined, err => console.warn('[El Kamin] Could not load requested ambulance model:', err));
 })();
 
 (function loadHiaceMinibusModel() {
@@ -6565,7 +6620,7 @@ function updateBigTruck(v, dt) {
       const root=gltf.scene || (gltf.scenes && gltf.scenes[0]); if(!root) throw new Error('Hiace GLB has no scene');
       root.updateMatrixWorld(true); let box=new THREE.Box3().setFromObject(root); const size=new THREE.Vector3(); box.getSize(size);
       const len=Math.max(size.x,size.z); if(!Number.isFinite(len)||len<0.05) throw new Error('Invalid Hiace dimensions');
-      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.0/len);
+      const proto=new THREE.Group(); proto.add(root); root.rotation.y += (size.x>size.z ? Math.PI/2 : 0) + Math.PI; root.scale.multiplyScalar(7.35/len);
       proto.updateMatrixWorld(true); box=new THREE.Box3().setFromObject(proto); const center=new THREE.Vector3(); box.getCenter(center);
       root.position.x-=center.x; root.position.z-=center.z; root.position.y-=box.min.y; proto.updateMatrixWorld(true);
       box=new THREE.Box3().setFromObject(proto); box.getSize(size);
@@ -6577,7 +6632,7 @@ function updateBigTruck(v, dt) {
         const model=hiaceProto.clone(true); recolorTrafficBody(model, 0xf4f3ed); model.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}}); v.group.add(model); v._modelNode=model; v._trafficModelProto=hiaceProto;
         const d=hiaceProto.userData.trafficDimensions; v.halfWidth=d.halfWidth; v.halfLength=d.halfLength; v.gates=findGatesForLane(v.laneX,v.halfWidth);
         if(v._plateGroup && v._plateGroup.parent) v._plateGroup.parent.remove(v._plateGroup);
-        const pg=new THREE.Group(); addEgyptianPrivatePlates(pg,v.halfLength,plateDataFromProfile(v.inspProfile),'#e58b25'); v.group.add(pg); v._plateGroup=pg;
+        const pg=new THREE.Group(); addEgyptianPrivatePlates(pg,v.halfLength,plateDataFromProfile(v.inspProfile),'#159bd2'); v.group.add(pg); v._plateGroup=pg;
       });
       console.info('[El Kamin] Toyota Hiace minibus loaded');
     } catch(e){console.warn('[El Kamin] Hiace setup failed; using local minibus fallback.',e);}
@@ -7123,7 +7178,7 @@ function updatePullOver(v, dt) {
 }
 
 const SOLDIER_GLB_URL = 'https://huggingface.co/MoTc/El-Kamin/resolve/main/standing_police_officer.glb';
-const SWAT_TARGET_HEIGHT = 2.61;
+const SWAT_TARGET_HEIGHT = 2.42;
 const SWAT_FALLBACK_COLOR = 0x4a4438;
 const SWAT_SKIN_COLOR = 0xb98662;
 
@@ -8216,20 +8271,29 @@ function showInspectionMenu() {
   if (!p) return;
   const titleEl = document.getElementById('inspTitle');
   const subEl = document.getElementById('inspSubtitle');
-  if (titleEl) titleEl.textContent = p.vehicle && p.vehicle.isMinibus ? 'تفتيش ميكروباص نقل ركاب' : p.vehicle && p.vehicle.isBelban ? 'تفتيش سيارة توزيع بلبن' : p.vehicle && p.vehicle.type === 'سيارة شخصية مهمة' ? 'تفتيش عربية شخصية مهمة' : p.kind === 'loader' ? (p.vehicle && p.vehicle.isTransportTruck ? 'تفتيش نقل' : 'تفتيش لودر / معدة ثقيلة') : 'تفتيش عربية ملاكي';
+  if (titleEl) titleEl.textContent = p.vehicle && p.vehicle.isAmbulance ? 'تفتيش خاص — هيئة الإسعاف' : p.vehicle && p.vehicle.isMinibus ? 'تفتيش ميكروباص نقل ركاب' : p.vehicle && p.vehicle.isBelban ? 'تفتيش سيارة توزيع بلبن' : p.vehicle && p.vehicle.type === 'سيارة شخصية مهمة' ? 'تفتيش عربية شخصية مهمة' : p.kind === 'loader' ? (p.vehicle && p.vehicle.isTransportTruck ? 'تفتيش نقل' : 'تفتيش لودر / معدة ثقيلة') : 'تفتيش عربية ملاكي';
   if (subEl) subEl.textContent = `${p.driver.name} — ${p.vehicle.plate}`;
   const body = document.getElementById('inspBody');
   if (!body) return;
   let html = '<div class="insp-menu">';
+  if (p.vehicle && p.vehicle.isAmbulance && p.ambulance) {
+    html += `<div class="insp-note info" style="grid-column:1/-1"><b>هيئة الإسعاف المصرية — تفتيش طارئ</b><br>كود البلاغ: ${_esc(p.ambulance.dispatchCode)}<br>أفراد الطاقم: ${p.ambulance.crew}<br>حالة المريض: ${_esc(p.ambulance.caseState)}<br>الوجهة: ${_esc(p.ambulance.destination)}<br>${_esc(p.ambulance.patientNote)}<br><b>الأولوية:</b> السماح باستكمال المهمة دون إجبار السيارة على الوقوف بجانب الطريق.</div>`;
+    html += menuBtn('ambulanceAuthority','medical_services','فحص هيئة الإسعاف','التحقق من هوية الطاقم وكود البلاغ','gold');
+    html += menuBtn('ambulancePatient','monitor_heart','حالة المريض','ملخص الحالة والوجهة الطبية','');
+    html += menuBtn('docReg','directions_car','بيانات سيارة الإسعاف','رخصة تسيير المركبة','gold');
+    html += menuBtn('end','task_alt','إنهاء التفتيش','السماح للإسعاف باستكمال طريقه فورًا','success go-green');
+    body.innerHTML = html + '</div>';
+    bindMenuEvents();
+    return;
+  }
   if (p.vehicle && p.vehicle.isMinibus) {
     const mb=p.minibus;
     html += `<div class="insp-note info" style="grid-column:1/-1"><b>ميكروباص أجرة</b><br>عدد الركاب: ${mb.count} من 16<br>الأجرة للفرد: ${mb.chargedFare} ج.م<br>إجمالي الأجرة: ${mb.totalFare} ج.م<br>التعريفة المحددة للفرد: ${mb.fare} ج.م<br>رايح على: ${_esc(mb.destination)}</div>`;
-    html += menuBtn('inspectPassengers','groups','بطاقات الركاب','عرض كل راكب باسمه وبيانات بطاقته','gold');
     if(mb.overcharge) html += menuBtn('minibusFareViolation','gavel','مخالفة أجرة زائدة','تحصيل أجرة أعلى من التعريفة','danger');
   }
   html += menuBtn('docNatId', 'badge', 'بطاقة الرقم القومي', 'بيانات السائق الأساسية', 'gold');
   html += menuBtn('docLicense', 'credit_card', 'رخصة القيادة', p.license.status === 'missing' ? 'السائق لا يحمل الرخصة' : p.kind === 'loader' ? 'رخصة قيادة مهنية / معدات' : 'رخصة قيادة خاصة', 'gold');
-  if (p.license.status !== 'missing' && !p.license.withdrawn) html += menuBtn('withdrawLicense', 'block', 'سحب رخصة القيادة', 'سحب الرخصة وتشغيل صوت إيقاف قصير', 'danger');
+  if (p.license.status !== 'missing' && !p.license.withdrawn) html += menuBtn('withdrawLicense', 'block', 'سحب رخصة القيادة', 'متاح لكل أنواع العربيات عند وجود رخصة مع السائق', 'danger');
   else if (p.license.withdrawn) html += menuBtn('withdrawLicense', 'block', 'تم سحب الرخصة', 'تم تسجيل سحب الرخصة بالفعل', '');
   const regTitle = p.kind === 'loader' ? 'بيانات المركبة' : 'رخصة العربية';
   const regSub = p.kind === 'loader' ? (p.vehicle && p.vehicle.isTransportTruck ? 'مستند مركبة النقل' : 'مستند المعدة الثقيلة / اللودر') : 'رخصة تسيير المركبة';
@@ -8247,7 +8311,7 @@ function showInspectionMenu() {
   html += menuBtn('issueViolation', 'gavel', 'تحرير مخالفة', 'إصدار تذكرة رسمية', 'danger');
   if (!p.bribe.taken && !p.released) html += menuBtn('bribe', 'local_cafe', 'شاي بالياسمين', 'عرض غير رسمي للنظر في المخالفات', 'gold');
   else if (p.bribe.taken) html += menuBtn('bribe', 'local_cafe', 'شاي بالياسمين', 'تم الاتفاق بالفعل', '');
-  html += menuBtn('pullOver', 'local_parking', 'اركن على جنب', 'تحويل المركبة إلى منطقة تفتيش آمنة', '');
+  if (!(p.vehicle && p.vehicle.isAmbulance)) html += menuBtn('pullOver', 'local_parking', 'اركن على جنب', 'تحويل المركبة إلى منطقة تفتيش آمنة', '');
   const parkedNow = !!(inspectionVehicle && inspectionVehicle._parked);
   html += menuBtn('end', 'task_alt', parkedNow ? 'يلا يا بني اتحرك!' : 'إنهاء التفتيش', parkedNow ? 'السماح للعربية بالتحرك وعودة العسكري لمكانه' : 'إنهاء الجلسة الحالية', parkedNow ? 'success go-green' : 'success');
   html += '</div>';
@@ -8277,16 +8341,6 @@ function bindMenuEvents() {
   });
 }
 
-function renderMinibusPassengers() {
-  const p=inspectionProfile, body=document.getElementById('inspBody'); if(!p||!p.minibus||!body)return;
-  let html=renderBackHeader('بطاقات ركاب الميكروباص','groups');
-  html+=`<div class="insp-note info">عدد الركاب: ${p.minibus.count} من 16 — الوجهة: ${_esc(p.minibus.destination)}</div><div class="insp-menu">`;
-  p.minibus.passengers.forEach((x,i)=>{
-    html+=`<div class="insp-note" style="margin:0"><b>الراكب ${i+1}: ${_esc(x.name)}</b><br>النوع: ${_esc(x.genderAr)}<br>السن: ${x.age} سنة<br>${x.hasId?`رقم البطاقة: ${_esc(x.nationalId)}`:'<span style="color:#e8b34a">لا يحمل بطاقة — طفل أقل من 16 سنة</span>'}</div>`;
-  });
-  html+='</div>'; body.innerHTML=html; attachBackButton();
-}
-
 function issueMinibusFareViolation() {
   const p=inspectionProfile; if(!p||!p.minibus)return;
   const existing=p.violations.find(v=>v.key==='minibus_overcharge');
@@ -8300,8 +8354,9 @@ function handleAction(action) {
   const p = inspectionProfile;
   if (!p) return;
   switch (action) {
-    case 'inspectPassengers': renderMinibusPassengers(); break;
     case 'minibusFareViolation': issueMinibusFareViolation(); break;
+    case 'ambulanceAuthority': renderAmbulanceAuthorityScreen(); break;
+    case 'ambulancePatient': renderAmbulancePatientScreen(); break;
     case 'docNatId': renderNatIdScreen(); break;
     case 'docLicense': renderLicenseScreen(); break;
     case 'withdrawLicense': withdrawDriverLicense(); break;
@@ -8326,6 +8381,19 @@ function handleAction(action) {
 function handlePullOver() {
   if (!inspectionVehicle) return;
   performPullOver(inspectionVehicle);
+}
+
+function renderAmbulanceAuthorityScreen() {
+  const p = inspectionProfile; if (!p || !p.ambulance) return;
+  const body = document.getElementById('inspBody'); if (!body) return;
+  body.innerHTML = renderBackHeader('بيانات هيئة الإسعاف', 'medical_services') + `<div class="insp-document"><div class="insp-note info"><b>هيئة الإسعاف المصرية</b><br>كود التكليف: ${_esc(p.ambulance.dispatchCode)}<br>اسم قائد السيارة: ${_esc(p.driver.name)}<br>الصفة: ${_esc(p.driver.job || 'مسعف / قائد سيارة إسعاف')}<br>عدد أفراد الطاقم: ${p.ambulance.crew}<br>الوجهة المسجلة: ${_esc(p.ambulance.destination)}<br>حالة المستند: ساري</div><button class="insp-action primary" data-back="1">رجوع للتفتيش</button></div>`;
+  attachBackButton();
+}
+function renderAmbulancePatientScreen() {
+  const p = inspectionProfile; if (!p || !p.ambulance) return;
+  const body = document.getElementById('inspBody'); if (!body) return;
+  body.innerHTML = renderBackHeader('حالة المريض', 'monitor_heart') + `<div class="insp-document"><div class="insp-note info"><b>ملخص طاقم الإسعاف</b><br>الحالة: ${_esc(p.ambulance.caseState)}<br>ملاحظات: ${_esc(p.ambulance.patientNote)}<br>الوجهة الطبية: ${_esc(p.ambulance.destination)}<br><small>لأغراض المحاكاة داخل اللعبة فقط.</small></div><button class="insp-action primary" data-back="1">رجوع للتفتيش</button></div>`;
+  attachBackButton();
 }
 
 function renderBackHeader(title, icon) {
@@ -8560,7 +8628,7 @@ function renderTrunkScreen() {
   let list = '';
   if (isTransportTruck && p.cargoManifest) {
     const cm = p.cargoManifest;
-    list += `<div class="insp-note ${cm.empty ? 'info' : 'success'}" style="margin-bottom:12px;padding:14px"><b>بيان الحمولة:</b> ${_esc(cm.name)}<br><b>الكمية:</b> ${_esc(cm.qty)}<br><b>نقطة التحميل:</b> ${_esc(cm.origin)}<br><b>الوجهة:</b> ${_esc(cm.destination)}<br>${cm.empty ? `<b>المهمة التالية:</b> المركبة متجهة لتحميل ${_esc(cm.nextCargo)} في ${_esc(cm.destination)}.` : _esc(cm.note)}</div>`;
+    list += `<div class="insp-note cargo-manifest" dir="rtl" style="display:block;box-sizing:border-box;width:100%;margin:0 0 14px;padding:16px;background:#172536;border:1px solid #7196b8;border-radius:12px;color:#fff;text-align:right;font-size:16px;line-height:2;white-space:normal;overflow-wrap:anywhere"><div style="display:block;color:#fff"><b>بيان الحمولة:</b> ${_esc(cm.name)}</div><div style="display:block;color:#fff"><b>الكمية:</b> ${_esc(cm.qty)}</div><div style="display:block;color:#fff"><b>نقطة التحميل:</b> ${_esc(cm.origin)}</div><div style="display:block;color:#fff"><b>الوجهة:</b> ${_esc(cm.destination)}</div><div style="display:block;color:#f2d9a0;margin-top:5px">${cm.empty ? `<b>المهمة التالية:</b> المركبة متجهة لتحميل ${_esc(cm.nextCargo)} في ${_esc(cm.destination)}.` : _esc(cm.note)}</div></div>`;
   }
   if (!p.trunk.length && !(isTransportTruck && p.cargoManifest && p.cargoManifest.empty)) {
     list += `<div class="insp-note info" style="text-align:center;padding:18px"><span class="material-symbols-rounded" style="font-size:28px;display:block;margin-bottom:8px">check_circle</span>${isTransportTruck ? `النقل فارغ حاليًا ومتجه إلى ${_esc(p.cargoManifest && p.cargoManifest.destination || 'وجهة التحميل')} لتحميل ${_esc(p.cargoManifest && p.cargoManifest.nextCargo || 'بضاعة')}.` : 'لم يتم العثور على محتويات إضافية.'}</div>`;
@@ -9456,7 +9524,7 @@ window.ElKaminAI = {
    === POLICE CAR SYSTEM — NEW ADDITION                       ===
    Loads player-drivable police car with third-person camera   ===
    ============================================================ */
-const POLICE_CAR_TARGET_LENGTH = 8.1;
+const POLICE_CAR_TARGET_LENGTH = 7.05;
 const POLICE_CAR_YAW_OFFSET = 0;
 const POLICE_CAR_LOOP_THRESHOLD = 450;
 const policeCar = {
@@ -9684,6 +9752,13 @@ function exitPoliceCar() {
   }
   keys.w = keys.a = keys.s = keys.d = keys.shift = false;
   controls.getObject().position.set(playerPos.x, currentGroundY + CONFIG.playerHeight, playerPos.z);
+  // Restore a usable on-foot view facing the same direction as the police car.
+  controls.getObject().rotation.y = policeCar.heading + Math.PI;
+  camera.rotation.order = 'YXZ';
+  camera.rotation.x = 0;
+  camera.rotation.y = 0;
+  camera.rotation.z = 0;
+  playerVel.set(0, 0, 0);
   try { controls.lock(); } catch (e) {}
   pendingTarget = null;
   try { updateInspectionPrompt(); } catch (e) {}
@@ -9730,16 +9805,16 @@ function checkPoliceCarCollision(x, z) {
 }
 
 const policeSkidMarks = [];
-const policeSkidMarkGeometry = new THREE.PlaneGeometry(0.23, 0.82);
+const policeSkidMarkGeometry = new THREE.PlaneGeometry(0.31, 0.82);
 policeSkidMarkGeometry.rotateX(-Math.PI / 2);
 const policeSkidMarkMaterial = new THREE.MeshBasicMaterial({
-  color: 0x171717, transparent: true, opacity: 0.68, depthWrite: false,
+  color: 0x111111, transparent: true, opacity: 0.82, depthWrite: false,
   polygonOffset: true, polygonOffsetFactor: -2, side: THREE.DoubleSide
 });
 function addPoliceSkidMark(x, z, heading, segmentLength) {
   const mark = new THREE.Mesh(policeSkidMarkGeometry, policeSkidMarkMaterial);
   mark.scale.y = Math.max(0.2, segmentLength) / 0.82;
-  mark.position.set(x, 0.034, z);
+  mark.position.set(x, 0.045, z);
   mark.rotation.y = heading;
   mark.renderOrder = 3;
   scene.add(mark);
@@ -9773,10 +9848,10 @@ function updateDrivingPhysics(dt) {
     const brakeStep = DRIVE_CFG.handbrakeFriction * dt;
     if (policeCar.speed > 0) policeCar.speed = Math.max(0, policeCar.speed - brakeStep);
     else if (policeCar.speed < 0) policeCar.speed = Math.min(0, policeCar.speed + brakeStep);
-    if (Math.abs(speedBeforeHandbrake) > 18) {
+    if (Math.abs(speedBeforeHandbrake) > 5) {
       const sinH = Math.sin(policeCar.heading);
       const cosH = Math.cos(policeCar.heading);
-      const segmentLength = Math.max(0.2, Math.abs(speedBeforeHandbrake) * dt);
+      const segmentLength = Math.max(0.34, Math.abs(speedBeforeHandbrake) * dt * 1.25);
       const rearTrackOffset = Math.max(0, policeCar.halfLength * 0.62 + segmentLength * 0.5 - 0.24);
       const rearX = policeCar.position.x - sinH * rearTrackOffset;
       const rearZ = policeCar.position.z - cosH * rearTrackOffset;
@@ -9827,9 +9902,9 @@ function updateDrivingPhysics(dt) {
      updateDrivingCamera(dt, wrapped);
 }function updateDrivingCamera(dt, snap) {
   if (!policeCar.loaded) return;
-  const backDistance = Math.max(6.5, policeCar.halfLength * 1.9);
-  const heightDistance = Math.max(3.0, policeCar.halfLength * 0.85);
-  const lookAhead = policeCar.halfLength * 0.5;
+  const backDistance = Math.max(5.8, policeCar.halfLength * 1.62);
+  const heightDistance = Math.max(2.7, policeCar.halfLength * 0.68);
+  const lookAhead = policeCar.halfLength * 0.42;
   const sinH = Math.sin(policeCar.heading);
   const cosH = Math.cos(policeCar.heading);
   const desiredX = policeCar.position.x - sinH * backDistance;
@@ -9867,8 +9942,9 @@ document.addEventListener('keydown', (e) => {
 
   if (e.code === 'KeyE' && !e.repeat) {
     e.preventDefault();
-    if (drivingActive) exitPoliceCar();
-    else if (nearPoliceCar()) enterPoliceCar();
+    e.stopImmediatePropagation();
+    if (drivingActive) { exitPoliceCar(); return; }
+    if (nearPoliceCar()) enterPoliceCar();
     return;
   }
 
