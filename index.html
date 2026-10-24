@@ -3021,7 +3021,7 @@ sidewalkHeight: 0.35,
 sidewalkWalkHeight: 0.39,
 checkpointZ: -80,
 checkpointWidth: 8,
-playerHeight: 2.55,
+playerHeight: 2.42,
 playerSpeed: 7,
 sprintMultiplier: 2.2,
 collisionRadius: 0.45,
@@ -4861,12 +4861,28 @@ function createElectricalBox(x, z, rotY = 0, showDoorImage = false) {
   door.position.set(0, 0.88, 0.292);
   door.castShadow = true; door.receiveShadow = true;
   group.add(door);
+  const doorHandleMetal = new THREE.MeshStandardMaterial({ color: 0x777d80, roughness: 0.28, metalness: 0.96 });
+  const handleMount = new THREE.Mesh(new THREE.BoxGeometry(0.055, 0.095, 0.018), darkMetal);
+  handleMount.position.set(0.365, 0.91, 0.319);
+  handleMount.castShadow = true; handleMount.receiveShadow = true;
+  group.add(handleMount);
+  const handlePull = new THREE.Mesh(new THREE.BoxGeometry(0.025, 0.075, 0.032), doorHandleMetal);
+  handlePull.position.set(0.365, 0.91, 0.337);
+  handlePull.castShadow = true; handlePull.receiveShadow = true;
+  group.add(handlePull);
+  const handleTopPin = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.012, 10), doorHandleMetal);
+  handleTopPin.rotation.x = Math.PI / 2;
+  handleTopPin.position.set(0.365, 0.944, 0.357);
+  group.add(handleTopPin);
+  const handleBottomPin = handleTopPin.clone();
+  handleBottomPin.position.y = 0.876;
+  group.add(handleBottomPin);
   if (showDoorImage) {
     const doorImageUrl = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQr0Ff8pf81qVQHK9oCPYYElt_yo7_0qVQX54AskNHnjXBg_2zmkanmD_U&s=10';
     new THREE.TextureLoader().load(doorImageUrl, texture => {
       texture.colorSpace = THREE.SRGBColorSpace;
       const imageMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.9, metalness: 0.0, side: THREE.DoubleSide });
-      const image = new THREE.Mesh(new THREE.PlaneGeometry(0.32, 0.32), imageMat);
+      const image = new THREE.Mesh(new THREE.PlaneGeometry(0.40, 0.40), imageMat);
       image.position.set(0, 0.91, 0.318);
       image.renderOrder = 3;
       image.castShadow = false;
@@ -4882,9 +4898,9 @@ function createElectricalBox(x, z, rotY = 0, showDoorImage = false) {
 }
 
 createElectricalBox(-(ROAD.halfWidth + 4), CP.z + 18, Math.PI / 2, true);
-createElectricalBox(ROAD.halfWidth + 4, CP.z + 18, 0);
-createElectricalBox(-(ROAD.halfWidth + 4), CP.z - 30, 0);
-createElectricalBox(ROAD.halfWidth + 4, CP.z - 30, 0);
+createElectricalBox(ROAD.halfWidth + 4, CP.z + 18, 0, true);
+createElectricalBox(-(ROAD.halfWidth + 4), CP.z - 30, 0, true);
+createElectricalBox(ROAD.halfWidth + 4, CP.z - 30, 0, true);
 
 function createRadioTower(x, z) {
   const group = new THREE.Group();
@@ -5620,23 +5636,58 @@ function createEgyptianPrivatePlateTexture(plateData, upperStripColor, backgroun
   const canvas = document.createElement('canvas');
   canvas.width = 640; canvas.height = 200;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = backgroundColor || '#f4f3ed'; ctx.fillRect(0, 0, 640, 200);
+  const plateBase = ctx.createLinearGradient(0, 0, 0, 200);
+  plateBase.addColorStop(0, backgroundColor || '#f4f3ed');
+  plateBase.addColorStop(0.48, '#e8e8e3');
+  plateBase.addColorStop(1, '#c9cbc8');
+  ctx.fillStyle = plateBase; ctx.fillRect(0, 0, 640, 200);
   ctx.fillStyle = upperStripColor || '#159bd2'; ctx.fillRect(4, 4, 632, 65);
+  // Subtle metal grain and naturally varying wear; keep plate text/layout unchanged.
+  for (let i = 0; i < 115; i++) {
+    const x = 8 + Math.random() * 624, y = 8 + Math.random() * 184;
+    ctx.strokeStyle = Math.random() < 0.56 ? 'rgba(255,255,255,0.20)' : 'rgba(65,68,67,0.10)';
+    ctx.lineWidth = 0.4 + Math.random() * 1.1;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 2 + Math.random() * 16, y + (Math.random() - 0.5) * 2.5); ctx.stroke();
+  }
+  if (Math.random() < 0.58) {
+    for (let i = 0; i < 8 + Math.floor(Math.random() * 14); i++) {
+      const x = Math.random() * 640, y = 72 + Math.random() * 124;
+      ctx.strokeStyle = Math.random() < 0.5 ? 'rgba(77,64,48,0.14)' : 'rgba(45,48,48,0.10)';
+      ctx.lineWidth = 1 + Math.random() * 2.1;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 3 + Math.random() * 20, y + (Math.random() - 0.5) * 5); ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(92,75,56,0.08)';
+    for (let i = 0; i < 7; i++) {
+      ctx.beginPath(); ctx.ellipse(Math.random() * 640, 75 + Math.random() * 120, 2 + Math.random() * 10, 1 + Math.random() * 4, Math.random() * 2, 0, Math.PI * 2); ctx.fill();
+    }
+  }
   ctx.fillStyle = '#111820';
   ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
   ctx.font = '900 36px Arial Black, Arial, sans-serif';
-  ctx.fillText('EGYPT', 24, 36);
+  ctx.fillText('EGYPT', 42, 36);
   ctx.textAlign = 'right';
   ctx.font = '900 38px Arial Black, Tahoma, Arial, sans-serif';
-  ctx.fillText('مصر', 615, 36);
+  ctx.fillText('مصر', 590, 36);
   ctx.fillStyle = '#202020'; ctx.fillRect(4, 70, 632, 2);
   ctx.fillStyle = '#191919'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
   ctx.font = '900 66px Arial Black, Arial, Tahoma, sans-serif';
   ctx.fillText(String(plateData.numbers).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[Number(d)]), 205, 133, 260);
   ctx.font = '900 66px Arial Black, Tahoma, Arial, sans-serif';
   ctx.fillText(plateData.letters, 465, 133, 230);
+  if (Math.random() < 0.11) {
+    const fadeOnLetters = Math.random() < 0.5;
+    const fx = fadeOnLetters ? 430 + Math.random() * 160 : 105 + Math.random() * 185;
+    const fy = 104 + Math.random() * 48;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-atop';
+    ctx.fillStyle = 'rgba(205,204,194,0.68)';
+    ctx.beginPath();
+    ctx.ellipse(fx, fy, 4 + Math.random() * 5, 8 + Math.random() * 7, (Math.random() - 0.5) * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
   ctx.fillStyle = '#000000'; ctx.fillRect(324, 78, 6, 111);
-  ctx.strokeStyle = '#25282b'; ctx.lineWidth = 5; ctx.strokeRect(2.5, 2.5, 635, 195);
+  if (Math.random() < 0.16) { ctx.strokeStyle = '#25282b'; ctx.lineWidth = 5; ctx.strokeRect(2.5, 2.5, 635, 195); }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
@@ -5649,7 +5700,7 @@ function addEgyptianPrivatePlates(group, halfLength, plateData, upperStripColor,
   const PLATE_ASPECT = 0.37;
   const plateWidth = PLATE_WIDTH;
   const plateHeight = plateWidth * PLATE_ASPECT;
-  const plateMaterial = new THREE.MeshStandardMaterial({ map: plateTexture, roughness: 0.55, metalness: 0.04, side: THREE.DoubleSide });
+  const plateMaterial = new THREE.MeshStandardMaterial({ map: plateTexture, roughness: 0.43, metalness: 0.62, side: THREE.DoubleSide });
   const frontY = 0.62, rearY = Number.isFinite(rearYOverride) ? rearYOverride : 0.72;
   const frontZ = Math.max(1.8, halfLength - 0.045);
   const mount = new THREE.Mesh(new THREE.BoxGeometry(plateWidth + 0.018, plateHeight + 0.018, 0.012), new THREE.MeshStandardMaterial({ color: 0x303033, roughness: 0.78, metalness: 0.03 }));
@@ -6563,7 +6614,7 @@ function updateBigTruck(v, dt) {
     if (!Number.isFinite(horizontalLength) || horizontalLength < 0.05) throw new Error('Invalid GLB dimensions');
     const template = new THREE.Group(); template.add(root);
     root.rotation.y += (size.x > size.z ? Math.PI / 2 : 0) + (meta.ambulance || meta.model === '800 AC' ? 0 : Math.PI);
-    const targetLength = meta.ambulance ? 8.6 : meta.model === '800 AC' ? 13.5 : meta.model === 'XL6' ? 9.2 : (meta.model === 'Accent 2013' || meta.model === 'Kona N-Line') ? 7.25 : meta.model === 'Ciaz 2021' ? 7.35 : 8.1;
+    const targetLength = meta.ambulance ? 9.6 : meta.model === '800 AC' ? 13.5 : meta.model === 'XL6' ? 9.2 : (meta.model === 'Accent 2013' || meta.model === 'Kona N-Line') ? 7.25 : meta.model === 'Ciaz 2021' ? 7.35 : 8.1;
     root.scale.multiplyScalar(targetLength / horizontalLength);
     template.updateMatrixWorld(true); box = new THREE.Box3().setFromObject(template);
     const center = new THREE.Vector3(); box.getCenter(center);
@@ -7198,7 +7249,7 @@ function updatePullOver(v, dt) {
 }
 
 const SOLDIER_GLB_URL = 'https://huggingface.co/MoTc/El-Kamin/resolve/main/standing_police_officer.glb';
-const SWAT_TARGET_HEIGHT = 2.42;
+const SWAT_TARGET_HEIGHT = 3.08;
 const SWAT_FALLBACK_COLOR = 0x4a4438;
 const SWAT_SKIN_COLOR = 0xb98662;
 
